@@ -1,0 +1,12 @@
+{
+  "guest": ["read_public", "ask_limited"],
+  "free": ["read_public", "ask", "follow", "report", "save"],
+  "premium": ["free:*", "advanced_analysis", "future_radar", "scheduled_reports"],
+  "pro": ["premium:*", "research_tools", "exports", "advanced_filters"],
+  "business": ["pro:*", "business_radar", "business_workspace"],
+  "institution": ["business:*", "team_workspace", "admin_own_org", "api"],
+  "advertiser": ["advertiser_center", "campaigns", "billing_ads", "campaign_analytics"],
+  "moderator": ["review_queue", "content_moderation", "appeals"],
+  "finance": ["billing_read", "reconciliation", "refunds", "finance_reports"],
+  "admin": ["*"]
+}
