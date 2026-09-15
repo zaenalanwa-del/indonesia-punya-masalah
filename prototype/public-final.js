@@ -1,113 +1,182 @@
 (()=>{
 'use strict';
 
-const PUBLIC_LABELS={
-  intelligence:'Wawasan',
-  monitoring:'Pantau Perubahan',
-  future:'Kemungkinan',
-  solutions:'Solusi',
-  'Problem Engine':'Masalah Indonesia',
-  'Data Ocean':'Data Indonesia',
-  'Acquisition':'Pengumpulan Data',
-  'Validation':'Verifikasi Data',
-  'Knowledge Graph':'Hubungan Informasi',
-  'Pattern Engine':'Pola & Hubungan',
-  'Pattern AI':'Pola & Hubungan',
-  'Causal Engine':'Penyebab',
-  'Causal Analysis':'Penyebab & Hubungan',
-  'Trend / Signal AI':'Perubahan & Sinyal',
-  'Trend & Signal':'Perubahan & Sinyal',
-  'Future Radar':'Kemungkinan',
-  'Forecast Engine':'Perkiraan',
-  'Forecast':'Perkiraan',
-  'Scenario Simulator':'Perbandingan Skenario',
-  'Solution AI':'Solusi & Aksi',
-  'Accuracy Engine':'Evaluasi',
-  'AI Brain':'Sistem Pembelajaran',
-  'Control Center':'Pengelolaan',
-  'Sources':'Sumber Data',
-  'Datasets':'Kumpulan Data',
-  'Observations':'Indikator',
-  'API Registry':'Layanan Data',
-  'Konfigurasi Data':'Pengaturan Data',
-  'Data Flow':'Alur Informasi',
-  'Data Trust':'Kepercayaan Data',
-  'SYSTEM':'Informasi'
+const FORBIDDEN = [
+  'api registry','konfigurasi data','data flow','control center','problem engine','data ocean',
+  'acquisition','validation','knowledge graph','pattern engine','pattern ai','causal engine',
+  'causal analysis','trend / signal ai','trend & signal','future radar','forecast engine',
+  'scenario simulator','solution ai','accuracy engine','ai brain','system diagnostics'
+];
+const INTERNAL_HEADERS = /^(api registry|konfigurasi data|data flow|control center|problem engine|data ocean|acquisition|validation|knowledge graph|pattern engine|pattern ai|causal engine|causal analysis|trend \/ signal ai|trend & signal|future radar|forecast engine|scenario simulator|solution ai|accuracy engine|ai brain|system diagnostics)$/i;
+const LABELS={
+  intelligence:'Wawasan',monitoring:'Pantau Perubahan',future:'Kemungkinan',solutions:'Solusi',report:'Suara Warga'
 };
+const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
 
-function textReplace(root){
-  if(!root)return;
-  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-  const nodes=[];
-  while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(n=>{
-    let s=n.nodeValue;
-    Object.entries(PUBLIC_LABELS).forEach(([from,to])=>{s=s.split(from).join(to)});
-    n.nodeValue=s;
-  });
+const MENUS=[
+  {view:'home',label:'Beranda'},
+  {label:'Jelajahi Indonesia',children:[
+    {view:'map',label:'Peta Indonesia'},
+    {view:'regions',label:'Wilayah',children:[
+      {view:'regions',label:'Provinsi'},
+      {view:'regions',label:'Kabupaten / Kota'},
+      {view:'regions',label:'Kecamatan'},
+      {view:'regions',label:'Desa / Kelurahan'},
+      {view:'regions',label:'Dusun'}
+    ]}
+  ]},
+  {label:'Masalah',children:[
+    {view:'problems',label:'Terkini'},
+    {view:'problems',label:'Berdasarkan Wilayah',children:[
+      {view:'regions',label:'Provinsi'}, {view:'regions',label:'Kabupaten / Kota'}, {view:'regions',label:'Kecamatan'}, {view:'regions',label:'Desa / Kelurahan'}
+    ]},
+    {view:'problems',label:'Berdasarkan Kategori',children:[
+      {view:'problems',label:'Ekonomi'}, {view:'problems',label:'Sosial'}, {view:'problems',label:'Kesehatan'}, {view:'problems',label:'Infrastruktur'}, {view:'problems',label:'Pendidikan'}, {view:'problems',label:'Lingkungan'}
+    ]},
+    {view:'problems',label:'Mendesak'},
+    {view:'problems',label:'Belum Terselesaikan'}
+  ]},
+  {label:'Data & Statistik',children:[
+    {view:'data',label:'Nasional'},
+    {view:'data',label:'Provinsi',children:[{view:'data',label:'Perbandingan Provinsi'},{view:'data',label:'Indikator Provinsi'}]},
+    {view:'data',label:'Kabupaten / Kota',children:[{view:'data',label:'Perbandingan Daerah'},{view:'data',label:'Indikator Daerah'}]},
+    {view:'data',label:'Kecamatan'},
+    {view:'data',label:'Desa / Kelurahan'},
+    {view:'data',label:'Indikator'},
+    {view:'data',label:'Perbandingan'}
+  ]},
+  {label:'Suara Warga',children:[
+    {view:'report',label:'Laporkan Masalah'},
+    {view:'report',label:'Cerita Warga'},
+    {view:'report',label:'Keluhan'},
+    {view:'report',label:'Usulan'},
+    {view:'report',label:'Polling'},
+    {view:'report',label:'Diskusi'}
+  ]},
+  {label:'Pantau Perubahan',children:[
+    {view:'monitoring',label:'Masalah Baru'}, {view:'monitoring',label:'Meningkat'}, {view:'monitoring',label:'Menurun'}, {view:'monitoring',label:'Ramai Dibicarakan'}, {view:'monitoring',label:'Peringatan'}
+  ]},
+  {label:'Wawasan',children:[
+    {view:'intelligence',label:'Pola'}, {view:'intelligence',label:'Penyebab'}, {view:'intelligence',label:'Tren'}, {view:'intelligence',label:'Hubungan'}, {view:'intelligence',label:'Ringkasan Wilayah'}
+  ]},
+  {label:'Kemungkinan',children:[
+    {view:'future',label:'Perkiraan'}, {view:'future',label:'Perbandingan'}, {view:'future',label:'Skenario'}
+  ]},
+  {label:'Solusi',children:[
+    {view:'solutions',label:'Solusi Warga'}, {view:'solutions',label:'Solusi Pemerintah'}, {view:'solutions',label:'Praktik Baik'}, {view:'solutions',label:'Evaluasi Hasil'}
+  ]},
+  {label:'Lainnya',children:[
+    {view:'more',label:'Tentang'}, {view:'more',label:'Cara Kerja'}, {view:'more',label:'Kebijakan'}, {view:'account',label:'Akun'}
+  ]}
+];
+
+function injectStyle(){
+  if($('public-architecture-style'))return;
+  const s=document.createElement('style');s.id='public-architecture-style';s.textContent=`
+    .main-nav.public-tree{display:flex;align-items:stretch;gap:2px}
+    .public-menu{position:relative;display:flex;align-items:center}
+    .public-menu>button{border:0;background:transparent;padding:12px 10px;border-radius:10px;font:600 13px/1 Inter,system-ui,sans-serif;color:#24324a;cursor:pointer;white-space:nowrap}
+    .public-menu>button:hover,.public-menu.open>button{background:#f3f6fa;color:#11233f}
+    .public-menu.home-item>button.active{background:#edf2f8}
+    .public-submenu{position:absolute;top:calc(100% + 7px);left:0;min-width:225px;background:#fff;border:1px solid #e6ebf1;border-radius:14px;box-shadow:0 18px 50px rgba(16,34,58,.13);padding:7px;display:none;z-index:5000}
+    .public-menu.open>.public-submenu,.public-subitem:hover>.public-submenu{display:block}
+    .public-subitem{position:relative}
+    .public-subitem>a,.public-subitem>button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;border:0;background:transparent;text-decoration:none;color:#26354d;font:500 13px/1.25 Inter,system-ui,sans-serif;text-align:left;padding:10px 11px;border-radius:9px;cursor:pointer}
+    .public-subitem>a:hover,.public-subitem>button:hover{background:#f4f7fa}
+    .public-submenu .public-submenu{top:-7px;left:calc(100% + 6px)}
+    .public-arrow{font-size:15px;opacity:.55}
+    .public-clean{display:none!important}
+    .public-data-page .suite-panel{border-radius:16px}
+    .public-kpi-note{color:#718096;font-size:12px}
+    @media (max-width:1100px){.public-menu>button{padding:10px 7px;font-size:12px}.public-submenu{min-width:210px}}
+    @media (max-width:820px){.main-nav.public-tree{display:none}.main-nav.public-tree.mobile-open{display:flex;position:absolute;top:70px;left:12px;right:12px;flex-direction:column;align-items:stretch;background:#fff;border:1px solid #e5eaf0;border-radius:14px;padding:8px;box-shadow:0 18px 45px rgba(16,34,58,.15);z-index:5000;max-height:75vh;overflow:auto}.public-menu{display:block}.public-menu>button{width:100%;text-align:left}.public-menu>.public-submenu,.public-subitem>.public-submenu{position:static;display:none;box-shadow:none;border:0;border-top:1px solid #eef1f4;border-radius:0;margin:3px 0 0;padding-left:8px}.public-menu.open>.public-submenu,.public-subitem.mobile-open>.public-submenu{display:block}.public-subitem:hover>.public-submenu{display:none}}
+  `;document.head.appendChild(s);
 }
 
-function removeInternalPanels(root){
-  root.querySelectorAll('.suite-panel,.card').forEach(el=>{
-    const h=el.querySelector('h3,h2,.cardhead b,.suite-panel-head h3');
-    if(!h)return;
-    const t=(h.textContent||'').trim().toLowerCase();
-    if(['api registry','konfigurasi data'].some(x=>t===x||t.includes(x))){el.remove();}
-  });
+function wireTree(){
+  const nav=$('mainNav'); if(!nav)return;
+  nav.classList.add('public-tree');
+  nav.innerHTML='';
+  const build=(items,depth=0)=>{const wrap=document.createElement('div');wrap.className='public-submenu';items.forEach(item=>{const row=document.createElement('div');row.className='public-subitem';const b=document.createElement('button');b.type='button';b.textContent=item.label;if(item.children){const a=document.createElement('span');a.className='public-arrow';a.textContent='›';b.appendChild(a);b.addEventListener('click',e=>{e.stopPropagation();row.parentElement.querySelectorAll(':scope>.public-subitem.mobile-open').forEach(x=>{if(x!==row)x.classList.remove('mobile-open')});row.classList.toggle('mobile-open')});row.appendChild(b);row.appendChild(build(item.children,depth+1));}else{b.addEventListener('click',e=>{e.stopPropagation();closeMenus();window.render?.(item.view);});row.appendChild(b);}wrap.appendChild(row)});return wrap};
+  MENUS.forEach((item,i)=>{const m=document.createElement('div');m.className='public-menu'+(!item.children?' home-item':'');const b=document.createElement('button');b.type='button';b.textContent=item.label;if(item.children){const a=document.createElement('span');a.className='public-arrow';a.textContent='⌄';b.appendChild(a);b.addEventListener('click',e=>{e.stopPropagation();const was=m.classList.contains('open');document.querySelectorAll('.public-menu.open').forEach(x=>x.classList.remove('open'));m.classList.toggle('open',!was)});m.appendChild(b);m.appendChild(build(item.children));}else{b.addEventListener('click',()=>{closeMenus();window.render?.('home')});m.appendChild(b)}nav.appendChild(m)});
+  document.addEventListener('click',closeMenus,{passive:true});
+  function closeMenus(){document.querySelectorAll('.public-menu.open').forEach(x=>x.classList.remove('open'));document.querySelectorAll('.public-subitem.mobile-open').forEach(x=>x.classList.remove('mobile-open'))}
 }
 
-function cleanPublic(){
-  const home=document.getElementById('home');
-  document.getElementById('public-expansion')?.remove();
-  document.getElementById('public-features')?.classList.add('public-clean-layout');
-  document.querySelectorAll('[data-view="control"]').forEach(x=>x.remove());
-  document.getElementById('control')?.classList.remove('active');
-
-  document.querySelectorAll('.nav-link[data-view]').forEach(a=>{
-    const k=a.dataset.view;
-    if(PUBLIC_LABELS[k])a.textContent=PUBLIC_LABELS[k];
-    if(k==='control')a.remove();
-  });
-  document.querySelectorAll('.footer-links [data-view="intelligence"]').forEach(a=>a.textContent='Wawasan');
-
-  if(home){
-    home.querySelectorAll('.feature-items button').forEach(btn=>{
-      const view=btn.dataset.view;
-      const title=btn.querySelector('b');
-      if(!title)return;
-      if(view==='intelligence')title.textContent='Wawasan & Kemungkinan';
-      if(view==='monitoring')title.textContent='Pantau Perubahan';
-    });
-  }
-
-  const active=document.querySelector('.view.active:not(#control)');
-  if(active){
-    textReplace(active);
-    removeInternalPanels(active);
-  }
-  try{window.lucide?.createIcons()}catch{}
-}
-
-function install(){
-  cleanPublic();
-  const original=window.render;
-  if(typeof original!=='function')return;
-  if(original.__publicWrapped)return;
-  async function publicRender(view,arg){
-    if(view==='control')view='home';
-    const result=original(view,arg);
-    try{await result}catch(e){throw e}finally{
-      setTimeout(cleanPublic,0);
-      setTimeout(cleanPublic,180);
-      setTimeout(cleanPublic,700);
+function removeTechnicalNodes(root=document){
+  root.querySelectorAll('h1,h2,h3,h4,h5,h6,.suite-kicker,.suite-desc,.card,.suite-panel,.suite-status,.pipeline,.pill,.trust-meter').forEach(el=>{
+    const text=(el.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+    if(!text)return;
+    if(INTERNAL_HEADERS.test(text) || FORBIDDEN.some(k=>text===k || text.includes(k))){
+      if(el.closest('#home') || el.closest('#public-features') || el.closest('.footer'))return;
+      if(el.classList.contains('card')||el.classList.contains('suite-panel'))el.remove();
     }
-    return result;
-  }
-  publicRender.__publicWrapped=true;
-  window.render=publicRender;
+  });
+  root.querySelectorAll('[data-view="control"]').forEach(x=>x.remove());
 }
 
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-setTimeout(cleanPublic,300);
-setTimeout(cleanPublic,1000);
+function replaceTechnicalText(root=document){
+  const repl={
+    'Data Trust':'Kualitas Data','Sources':'Sumber Data','Datasets':'Kumpulan Data','Observations':'Indikator',
+    'registry BIG':'Sumber BIG','reliability':'keandalan','quality':'kualitas','active':'aktif','Belum ada source.':'Belum ada sumber data.','Belum ada dataset.':'Belum ada kumpulan data.','Belum ada observation.':'Belum ada indikator.',
+    'Problem Engine':'Masalah Indonesia','Future Radar':'Kemungkinan','Forecast Engine':'Perkiraan','Scenario Simulator':'Skenario','Solution AI':'Solusi & Aksi','Accuracy Engine':'Evaluasi'
+  };
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(n=>{let s=n.nodeValue;Object.entries(repl).forEach(([a,b])=>{s=s.split(a).join(b)});n.nodeValue=s});
+}
+
+function activate(id){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));$(id)?.classList.add('active');document.querySelectorAll('.public-menu>button').forEach(b=>b.classList.toggle('active',(b.textContent||'').replace('⌄','').trim()===LABELS[id]||b.textContent?.startsWith(id)));window.scrollTo({top:0,behavior:'smooth'});try{window.lucide?.createIcons()}catch{}}
+
+async function renderPublicData(){
+  const host=$('data');if(!host)return;
+  host.innerHTML=`<div class="page suite-page public-data-page"><span class="suite-kicker">DATA & STATISTIK</span><h2>Data Indonesia dalam satu tempat</h2><p class="muted suite-desc">Lihat cakupan wilayah, indikator, sumber data, dan pembaruan dengan bahasa yang mudah dipahami.</p><div class="suite-grid-4"><div class="suite-kpi"><span class="suite-icon">⌂</span><div><small>PROVINSI</small><b>38</b><span class="public-kpi-note">Seluruh Indonesia</span></div></div><div class="suite-kpi"><span class="suite-icon">▣</span><div><small>KAB/KOTA</small><b>514</b><span class="public-kpi-note">Seluruh Indonesia</span></div></div><div class="suite-kpi"><span class="suite-icon">▤</span><div><small>KECAMATAN</small><b>7.282</b><span class="public-kpi-note">Seluruh Indonesia</span></div></div><div class="suite-kpi"><span class="suite-icon">⌂</span><div><small>DESA/KEL</small><b>83.529</b><span class="public-kpi-note">Seluruh Indonesia</span></div></div></div><div class="suite-grid-3"><div class="card suite-panel"><h3>Sumber Data</h3><div id="pub-sources" class="suite-list"><div class="loading">Memuat…</div></div></div><div class="card suite-panel"><h3>Kumpulan Data</h3><div id="pub-datasets" class="suite-list"><div class="loading">Memuat…</div></div></div><div class="card suite-panel"><h3>Indikator</h3><div id="pub-observations" class="suite-list"><div class="loading">Memuat…</div></div></div></div><div class="card suite-panel"><div class="suite-panel-head"><div><h3>Kualitas & Pembaruan Data</h3><p>Informasi ditampilkan bersama sumber dan waktu pembaruannya.</p></div><button class="btn-outline" id="pub-data-refresh">Perbarui</button></div><div id="pub-data-status" class="suite-status">Menyiapkan ringkasan…</div></div></div>`;
+  activate('data');
+  const q=window.__IPM_QUERY;
+  if(typeof q!=='function'){removeTechnicalNodes(host);return}
+  const fill=(id,html)=>{const el=$(id);if(el)el.innerHTML=html};
+  async function load(){
+    try{
+      const [s,ds,ob]=await Promise.all([
+        q('/rest/v1/sources?select=id,name,publisher,reliability_score,active&order=name.asc&limit=8'),
+        q('/rest/v1/datasets?select=id,name,category,quality_score,last_updated_at&order=updated_at.desc&limit=8'),
+        q('/rest/v1/observations?select=id,metric,value_numeric,value_text,unit,observed_at,quality_score&order=observed_at.desc&limit=8')
+      ]);
+      fill('pub-sources',s?.length?s.map(x=>`<div class="suite-row"><div><b>${esc(x.name)}</b><small>${esc(x.publisher||'Sumber publik')} · keandalan ${esc(x.reliability_score??'—')}</small></div><span class="pill">${x.active?'Aktif':'Tidak aktif'}</span></div>`).join(''):'<div class="empty">Belum ada sumber data.</div>');
+      fill('pub-datasets',ds?.length?ds.map(x=>`<div class="suite-row"><div><b>${esc(x.name)}</b><small>${esc(x.category||'Data publik')} · kualitas ${esc(x.quality_score??'—')}</small></div><span class="pill">${x.last_updated_at?new Date(x.last_updated_at).toLocaleDateString('id-ID'):'—'}</span></div>`).join(''):'<div class="empty">Belum ada kumpulan data.</div>');
+      fill('pub-observations',ob?.length?ob.map(x=>`<div class="suite-row"><div><b>${esc(x.metric)}</b><small>${esc(x.value_numeric??x.value_text??'—')} ${esc(x.unit||'')} · kualitas ${esc(x.quality_score??'—')}</small></div><span class="pill">${x.observed_at?new Date(x.observed_at).toLocaleDateString('id-ID'):'—'}</span></div>`).join(''):'<div class="empty">Belum ada indikator.</div>');
+      const vals=[...s.map(x=>Number(x.reliability_score)),...ds.map(x=>Number(x.quality_score))].filter(Number.isFinite);const score=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):null;fill('pub-data-status',score!=null?`<b>${score}%</b> rata-rata kualitas/keandalan dari data yang tersedia.`:'Kualitas data belum memiliki cukup nilai untuk diringkas.');
+    }catch(err){fill('pub-data-status',`Data belum dapat diperbarui saat ini.`)}
+    removeTechnicalNodes(host);replaceTechnicalText(host);
+  }
+  $('pub-data-refresh')?.addEventListener('click',load);load();
+}
+
+function wrapRender(){
+  const original=window.render;
+  if(typeof original!=='function' || original.__publicArchitecture)return;
+  async function publicRender(v,x=''){
+    if(v==='control')return original('home');
+    if(v==='data')return renderPublicData();
+    const out=await original(v,x);
+    setTimeout(()=>{const host=$(v);if(host){replaceTechnicalText(host);removeTechnicalNodes(host)}},0);
+    setTimeout(()=>{const host=$(v);if(host){replaceTechnicalText(host);removeTechnicalNodes(host);try{window.lucide?.createIcons()}catch{}}},180);
+    return out;
+  }
+  publicRender.__publicArchitecture=true;window.render=publicRender;
+}
+
+function cleanWholeDocument(){
+  document.querySelectorAll('[data-view="control"]').forEach(x=>x.remove());
+  $('control')?.classList.remove('active');
+  const active=document.querySelector('.view.active');if(active){replaceTechnicalText(active);removeTechnicalNodes(active)}
+}
+
+function boot(){
+  injectStyle();wireTree();wrapRender();cleanWholeDocument();
+  const observer=new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length)){const active=document.querySelector('.view.active');if(active){replaceTechnicalText(active);removeTechnicalNodes(active)}}});
+  observer.observe(document.body,{childList:true,subtree:true});
+  setTimeout(cleanWholeDocument,250);setTimeout(cleanWholeDocument,800);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
