@@ -1,8 +1,21 @@
 (()=> {
 'use strict';
 const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
+const publicNav={
+  intelligence:'Wawasan',
+  monitoring:'Pantau',
+  future:'Kemungkinan',
+  solutions:'Solusi'
+};
+function cleanNav(){
+  document.querySelectorAll('.nav-link[data-view]').forEach(a=>{
+    const key=a.getAttribute('data-view');
+    if(publicNav[key]) a.textContent=publicNav[key];
+  });
+}
 function feature(icon,title,text,view,meta=''){return `<article class="pub-feature"><div class="pub-feature-icon">${icon}</div><div class="pub-feature-body"><span>${esc(meta)}</span><h3>${esc(title)}</h3><p>${esc(text)}</p><button class="btn-outline" data-view="${esc(view)}">Buka Fitur →</button></div></article>`}
 function add(){
+  cleanNav();
   const host=document.querySelector('main')||document.body;
   if(document.getElementById('public-features')) return;
   const wrap=document.createElement('section');
