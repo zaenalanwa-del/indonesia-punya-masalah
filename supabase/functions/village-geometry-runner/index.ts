@@ -21,6 +21,12 @@ function json(data: unknown, status = 200) {
   });
 }
 
+function responseError(result: any, context: string): string | null {
+  if (!result) return `${context}:EMPTY_RESPONSE`;
+  if (result.error) return `${context}:${result.error.message}`;
+  return null;
+}
+
 async function sha256(text: string): Promise<string> {
   const bytes = new TextEncoder().encode(text);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
@@ -37,19 +43,11 @@ function polygonParts(geometry: any): number[][][][] {
 
 function mergePolygonGeometries(features: any[], villageCode: string) {
   const parts: number[][][][] = [];
-  for (const feature of features) {
-    parts.push(...polygonParts(feature?.geometry));
-  }
-
-  if (parts.length === 0) {
-    throw new Error(`BIG_NO_POLYGON_GEOMETRY: ${villageCode}`);
-  }
-
-  if (parts.length === 1) {
-    return { type: "Polygon", coordinates: parts[0] };
-  }
-
-  return { type: "MultiPolygon", coordinates: parts };
+  for (const feature of features) parts.push(...polygonParts(feature?.geometry));
+  if (parts.length === 0) throw new Error(`BIG_NO_POLYGON_GEOMETRY:${villageCode}`);
+  return parts.length === 1
+    ? { type: "Polygon", coordinates: parts[0] }
+    : { type: "MultiPolygon", coordinates: parts };
 }
 
 async function processOne(supabase: ReturnType<typeof createClient>, region: any) {
@@ -73,19 +71,21 @@ async function processOne(supabase: ReturnType<typeof createClient>, region: any
 
   const response = await fetch(url);
   const text = await response.text();
-  if (!response.ok) {
-    throw new Error(`BIG_HTTP_${response.status}: ${text.slice(0, 500)}`);
+  if (!response.ok) throw new Error(`BIG_HTTP_${response.status}:${text.slice(0, 500)}`);
+
+  let fc: any;
+  try {
+    fc = JSON.parse(text);
+  } catch {
+    throw new Error(`BIG_INVALID_JSON:${villageCode}`);
   }
 
-  const fc = JSON.parse(text);
   if (fc?.type !== "FeatureCollection") {
-    throw new Error(`BIG_GEOJSON_TYPE: ${fc?.type ?? "unknown"}`);
+    throw new Error(`BIG_GEOJSON_TYPE:${fc?.type ?? "unknown"}`);
   }
 
   const features = Array.isArray(fc.features) ? fc.features : [];
-  if (features.length === 0) {
-    throw new Error(`BIG_ZERO_FEATURES: ${villageCode}`);
-  }
+  if (features.length === 0) throw new Error(`BIG_ZERO_FEATURES:${villageCode}`);
 
   const geometry = mergePolygonGeometries(features, villageCode);
   const geometryText = JSON.stringify(geometry);
@@ -97,13 +97,11 @@ async function processOne(supabase: ReturnType<typeof createClient>, region: any
     p_geometry_hash: geometryHash,
   });
 
-  if (!rpc) throw new Error(`RPC_UNDEFINED: ${villageCode}`);
-  if (rpc.error) throw new Error(`RPC: ${rpc.error.message}`);
+  const rpcError = responseError(rpc, `RPC:${villageCode}`);
+  if (rpcError) throw new Error(rpcError);
 
-  const updated = Number(rpc.data ?? 0);
-  if (updated !== 1) {
-    throw new Error(`GEOMETRY_NOT_UPDATED: ${villageCode}:${updated}`);
-  }
+  const updated = Number(rpc?.data ?? 0);
+  if (updated !== 1) throw new Error(`GEOMETRY_NOT_UPDATED:${villageCode}:${updated}`);
 
   return {
     code: villageCode,
@@ -114,10 +112,7 @@ async function processOne(supabase: ReturnType<typeof createClient>, region: any
   };
 }
 
-async function loadVillagePage(
-  supabase: ReturnType<typeof createClient>,
-  lastCode: string,
-) {
+async function loadVillagePage(supabase: ReturnType<typeof createClient>, lastCode: string) {
   let query = supabase
     .from("regions")
     .select("id,code,name,admin_code_pum,parent_region_id")
@@ -129,10 +124,9 @@ async function loadVillagePage(
   if (lastCode) query = query.gt("admin_code_pum", lastCode);
 
   const result = await query;
-  if (!result) throw new Error("Regions response undefined");
-  if (result.error) throw new Error(`REGIONS_READ: ${result.error.message}`);
-
-  return Array.isArray(result.data) ? result.data : [];
+  const resultError = responseError(result, "REGIONS_READ");
+  if (resultError) throw new Error(resultError);
+  return Array.isArray(result?.data) ? result.data : [];
 }
 
 Deno.serve(async (req: Request) => {
@@ -143,10 +137,15 @@ Deno.serve(async (req: Request) => {
     const rawKeys = Deno.env.get("SUPABASE_SECRET_KEYS");
     if (!supabaseUrl || !rawKeys) throw new Error("Supabase configuration missing");
 
-    const keys = JSON.parse(rawKeys);
+    let keys: any;
+    try {
+      keys = JSON.parse(rawKeys);
+    } catch {
+      throw new Error("SUPABASE_SECRET_KEYS_INVALID_JSON");
+    }
+
     const secretKey = keys?.default;
     if (!secretKey) throw new Error("Default secret key missing");
-
     const supabase = createClient(supabaseUrl, secretKey);
 
     const progressResult = await supabase
@@ -155,10 +154,10 @@ Deno.serve(async (req: Request) => {
       .eq("job_name", JOB_NAME)
       .maybeSingle();
 
-    if (!progressResult) throw new Error("Progress response undefined");
-    if (progressResult.error) throw new Error(`PROGRESS_READ: ${progressResult.error.message}`);
+    const progressError = responseError(progressResult, "PROGRESS_READ");
+    if (progressError) throw new Error(progressError);
 
-    let progress = progressResult.data;
+    let progress: any = progressResult?.data ?? null;
     if (!progress) {
       const seed = await supabase
         .from(PROGRESS_TABLE)
@@ -172,7 +171,10 @@ Deno.serve(async (req: Request) => {
           last_error: null,
           updated_at: new Date().toISOString(),
         }, { onConflict: "job_name" });
-      if (seed.error) throw new Error(`PROGRESS_SEED: ${seed.error.message}`);
+
+      const seedError = responseError(seed, "PROGRESS_SEED");
+      if (seedError) throw new Error(seedError);
+
       progress = {
         job_name: JOB_NAME,
         last_code: "",
@@ -180,37 +182,31 @@ Deno.serve(async (req: Request) => {
         success_count: 0,
         failed_count: 0,
         status: "running",
-      } as any;
+      };
     }
 
-    if (progress.status === "completed") {
-      return json({
-        ok: true,
-        stage: "VILLAGE_GEOMETRY_COMPLETE",
-        ...progress,
-      });
+    if (progress?.status === "completed") {
+      return json({ ok: true, stage: "VILLAGE_GEOMETRY_COMPLETE", ...progress });
     }
 
-    const lastCode = String(progress.last_code ?? "");
+    const lastCode = String(progress?.last_code ?? "");
     const villages = await loadVillagePage(supabase, lastCode);
 
     if (villages.length === 0) {
       const done = await supabase
         .from(PROGRESS_TABLE)
-        .update({
-          status: "completed",
-          updated_at: new Date().toISOString(),
-        })
+        .update({ status: "completed", updated_at: new Date().toISOString() })
         .eq("job_name", JOB_NAME);
-      if (done.error) throw new Error(`PROGRESS_COMPLETE: ${done.error.message}`);
+      const doneError = responseError(done, "PROGRESS_COMPLETE");
+      if (doneError) throw new Error(doneError);
 
       return json({
         ok: true,
         stage: "VILLAGE_GEOMETRY_COMPLETE",
         status: "completed",
-        processed: progress.processed ?? 0,
-        success_count: progress.success_count ?? 0,
-        failed_count: progress.failed_count ?? 0,
+        processed: progress?.processed ?? 0,
+        success_count: progress?.success_count ?? 0,
+        failed_count: progress?.failed_count ?? 0,
       });
     }
 
@@ -226,8 +222,8 @@ Deno.serve(async (req: Request) => {
           } catch (error) {
             return {
               ok: false,
-              code: String(region.admin_code_pum ?? region.code ?? ""),
-              name: region.name,
+              code: String(region?.admin_code_pum ?? region?.code ?? ""),
+              name: region?.name,
               error: error instanceof Error ? error.message : String(error),
             };
           }
@@ -245,14 +241,14 @@ Deno.serve(async (req: Request) => {
     let contiguousCount = 0;
 
     for (const region of villages) {
-      const code = String(region.admin_code_pum ?? region.code ?? "").trim();
+      const code = String(region?.admin_code_pum ?? region?.code ?? "").trim();
       if (!successCodes.has(code)) break;
       contiguousLast = code;
       contiguousCount++;
     }
 
-    const nextProcessed = Number(progress.processed ?? 0) + contiguousCount;
-    const nextSuccessCount = Number(progress.success_count ?? 0) + contiguousCount;
+    const nextProcessed = Number(progress?.processed ?? 0) + contiguousCount;
+    const nextSuccessCount = Number(progress?.success_count ?? 0) + contiguousCount;
 
     if (contiguousCount > 0) {
       const updated = await supabase
@@ -266,7 +262,9 @@ Deno.serve(async (req: Request) => {
           updated_at: new Date().toISOString(),
         })
         .eq("job_name", JOB_NAME);
-      if (updated.error) throw new Error(`PROGRESS_UPDATE: ${updated.error.message}`);
+
+      const updateError = responseError(updated, "PROGRESS_UPDATE");
+      if (updateError) throw new Error(updateError);
     } else if (failures.length) {
       const updated = await supabase
         .from(PROGRESS_TABLE)
@@ -276,7 +274,9 @@ Deno.serve(async (req: Request) => {
           updated_at: new Date().toISOString(),
         })
         .eq("job_name", JOB_NAME);
-      if (updated.error) throw new Error(`PROGRESS_FAILURE: ${updated.error.message}`);
+
+      const updateError = responseError(updated, "PROGRESS_FAILURE");
+      if (updateError) throw new Error(updateError);
     }
 
     return json({
