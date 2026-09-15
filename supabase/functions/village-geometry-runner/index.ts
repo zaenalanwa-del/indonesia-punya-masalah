@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const BIG_QUERY_URL =
-  "https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_DESA_AR/MapServer/0/query";
+  "https://geoservices.big.go.id/rbi/rest/services/BATASWILAYAH/BATAS_DESAKEL_AR/MapServer/0/query";
 
 const PROGRESS_TABLE = "region_geometry_progress_village";
 const JOB_NAME = "village-geometry";
