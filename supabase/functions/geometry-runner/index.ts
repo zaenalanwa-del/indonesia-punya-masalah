@@ -8,6 +8,7 @@ const JOB_NAME = "district-geometry";
 const DEFAULT_BATCH_SIZE = 10;
 const MAX_BATCH_SIZE = 10;
 const CONCURRENCY = 5;
+const REGION_PAGE_SIZE = 1000;
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data, null, 2), {
@@ -115,6 +116,36 @@ async function processOne(
   };
 }
 
+async function loadAllDistricts(
+  supabase: ReturnType<typeof createClient>,
+) {
+  const all: any[] = [];
+
+  for (let from = 0; ; from += REGION_PAGE_SIZE) {
+    const to = from + REGION_PAGE_SIZE - 1;
+
+    const pageResult = await supabase
+      .from("regions")
+      .select("id,code,name,admin_code_pum,parent_region_id")
+      .eq("level", "district")
+      .eq("source_name", "BIG")
+      .order("admin_code_pum", { ascending: true })
+      .range(from, to);
+
+    if (!pageResult) throw new Error("Regions response undefined");
+    if (pageResult.error) {
+      throw new Error(`REGIONS_READ: ${pageResult.error.message}`);
+    }
+
+    const page = Array.isArray(pageResult.data) ? pageResult.data : [];
+    all.push(...page);
+
+    if (page.length < REGION_PAGE_SIZE) break;
+  }
+
+  return all;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok");
@@ -147,7 +178,6 @@ Deno.serve(async (req: Request) => {
       MAX_BATCH_SIZE,
     );
 
-    // Read current progress.
     const progressResult = await supabase
       .from(PROGRESS_TABLE)
       .select("*")
@@ -160,24 +190,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const progress = progressResult.data;
-
-    // Read all districts once. The table contains only ~7k rows,
-    // which is small enough to select without geometry.
-    const regionsResult = await supabase
-      .from("regions")
-      .select("id,code,name,admin_code_pum,parent_region_id")
-      .eq("level", "district")
-      .eq("source_name", "BIG")
-      .order("admin_code_pum", { ascending: true });
-
-    if (!regionsResult) throw new Error("Regions response undefined");
-    if (regionsResult.error) {
-      throw new Error(`REGIONS_READ: ${regionsResult.error.message}`);
-    }
-
-    const districts = Array.isArray(regionsResult.data)
-      ? regionsResult.data
-      : [];
+    const districts = await loadAllDistricts(supabase);
 
     if (districts.length === 0) {
       throw new Error("No BIG districts found");
@@ -205,6 +218,7 @@ Deno.serve(async (req: Request) => {
         processed: progress?.processed ?? 0,
         success_count: progress?.success_count ?? 0,
         failed_count: progress?.failed_count ?? 0,
+        total_districts_loaded: districts.length,
       });
     }
 
@@ -214,7 +228,6 @@ Deno.serve(async (req: Request) => {
     const successes: any[] = [];
     const failures: any[] = [];
 
-    // Process up to CONCURRENCY districts in parallel.
     for (const group of groups) {
       const results = await Promise.all(
         group.map(async (region: any) => {
@@ -240,9 +253,6 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Only advance progress through the last contiguous successful code.
-    // This prevents skipping a failed district while allowing later parallel
-    // requests to complete.
     const successCodes = new Set(successes.map((x) => String(x.code)));
     let contiguousLast = lastCode;
     let contiguousCount = 0;
@@ -292,6 +302,7 @@ Deno.serve(async (req: Request) => {
       stage: "DISTRICT_GEOMETRY_BATCH",
       batch_requested: batch.length,
       parallel_width: CONCURRENCY,
+      total_districts_loaded: districts.length,
       succeeded: successes.length,
       failed: failures.length,
       contiguous_advanced: contiguousCount,
