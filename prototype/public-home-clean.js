@@ -1,66 +1,35 @@
 (()=>{
 'use strict';
+const U='https://gfggmkeucgqkkyvummpu.supabase.co',K='sb_publishable_ptCVbq9h15prKhT0OO5Zmg_LkE3cbK0';
 const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));
-const previousRender=window.render;
+async function api(path){const r=await fetch(U+path,{headers:{apikey:K,Authorization:`Bearer ${K}`,Accept:'application/json'}});if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}
+const icon=c=>c==='Infrastruktur'?'🛣️':c==='Kesehatan'?'🏥':c==='Pendidikan'?'🏫':c==='Lingkungan'?'🌱':c==='Ekonomi'?'📈':c==='Sosial'?'👥':'◉';
 function home(){
  const host=document.getElementById('home'); if(!host)return;
- host.innerHTML=`
- <div class="clean-home">
-  <section class="clean-hero">
-   <div class="clean-hero-copy">
-    <span class="clean-eyebrow">PORTAL DATA & ASPIRASI PUBLIK</span>
-    <h1>WASKITA —<br>Indonesia Punya Masalah</h1>
-    <p>Lihat masalah Indonesia dari tingkat desa hingga nasional, pahami datanya, dan ikuti perkembangannya.</p>
-    <form class="clean-search" id="cleanSearch"><span>⌕</span><input id="cleanQuestion" placeholder="Cari masalah, daerah, desa, kecamatan, atau topik…" autocomplete="off"><button type="submit">Cari</button></form>
-   </div>
-   <div class="clean-garuda" role="img" aria-label="Garuda IKN"></div>
-  </section>
-
-  <section class="clean-stats" aria-label="Ringkasan wilayah Indonesia">
-   <article><b>38</b><strong>Provinsi</strong><span>Seluruh Indonesia</span></article>
-   <article><b>514</b><strong>Kabupaten/Kota</strong><span>Seluruh Indonesia</span></article>
-   <article><b>7.282</b><strong>Kecamatan</strong><span>Seluruh Indonesia</span></article>
-   <article><b>83.529</b><strong>Desa/Kelurahan</strong><span>Seluruh Indonesia</span></article>
-  </section>
-
-  <section class="clean-section">
-   <div class="clean-section-head"><div><span>JELAJAHI INDONESIA</span><h2>Mulai dari wilayah Anda</h2><p>Pilih tingkat wilayah untuk melihat masalah, data, dan laporan warga.</p></div></div>
-   <div class="clean-hierarchy">
-    <button data-view="map"><i>🇮🇩</i><b>Indonesia</b><span>›</span></button>
-    <button data-view="regions"><i>▦</i><b>Provinsi</b><span>›</span></button>
-    <button data-view="regions"><i>▦</i><b>Kabupaten/Kota</b><span>›</span></button>
-    <button data-view="regions"><i>▦</i><b>Kecamatan</b><span>›</span></button>
-    <button data-view="regions"><i>⌂</i><b>Desa/Kelurahan</b><span>›</span></button>
-   </div>
-  </section>
-
-  <section class="clean-two-col">
-   <article class="clean-panel clean-map-card"><div class="clean-panel-head"><div><span>PETA INDONESIA</span><h2>Lihat kondisi wilayah</h2></div><button data-view="map" class="clean-link">Buka peta →</button></div><div class="clean-map-placeholder"><div class="clean-map-dots">Indonesia</div><p>Peta interaktif tersedia untuk menjelajahi wilayah dan masalah.</p></div></article>
-   <article class="clean-panel clean-report-card"><span>SUARA WARGA</span><h2>Ada masalah di sekitar Anda?</h2><p>Kirim laporan warga. Laporan akan melalui proses verifikasi sebelum menjadi informasi publik.</p><button data-view="report" class="clean-primary">Laporkan Sekarang →</button></article>
-  </section>
-
-  <section class="clean-section">
-   <div class="clean-section-head"><div><span>MASALAH TERBARU</span><h2>Yang sedang terjadi</h2></div><button data-view="problems" class="clean-link">Lihat semua →</button></div>
-   <div class="clean-issues">
-    <button data-view="problems"><i>🛣️</i><div><b>Jalan Rusak di Desa Sumberrejo</b><span>Kab. Wonogiri, Jawa Tengah</span></div><em>Infrastruktur</em></button>
-    <button data-view="problems"><i>🛒</i><div><b>Harga Sembako Terus Naik</b><span>Kota Makassar, Sulawesi Selatan</span></div><em>Ekonomi</em></button>
-    <button data-view="problems"><i>🏫</i><div><b>Akses Pendidikan Terbatas</b><span>Kab. Nias Barat, Sumatera Utara</span></div><em>Pendidikan</em></button>
-    <button data-view="problems"><i>🌧️</i><div><b>Banjir di Permukiman Warga</b><span>Kota Semarang, Jawa Tengah</span></div><em>Lingkungan</em></button>
-   </div>
-  </section>
-
-  <section class="clean-two-col clean-lower">
-   <article class="clean-panel"><div class="clean-panel-head"><div><span>KATEGORI</span><h2>Masalah berdasarkan bidang</h2></div><button data-view="problems" class="clean-link">Semua kategori →</button></div><div class="clean-cats"><button data-view="problems">Ekonomi <b>28,4%</b></button><button data-view="problems">Sosial <b>22,7%</b></button><button data-view="problems">Kesehatan <b>16,3%</b></button><button data-view="problems">Pendidikan <b>12,6%</b></button><button data-view="problems">Infrastruktur</button><button data-view="problems">Lingkungan</button></div></article>
-   <article class="clean-panel"><div class="clean-panel-head"><div><span>TREN & PERINGATAN</span><h2>Perubahan yang perlu diperhatikan</h2></div><button data-view="monitoring" class="clean-link">Buka pantauan →</button></div><ul class="clean-alerts"><li><b>●</b> Masalah kemiskinan meningkat di sejumlah provinsi</li><li><b>●</b> Daerah rawan banjir perlu dipantau</li><li><b>●</b> Tren harga pangan mengalami kenaikan</li><li><b>●</b> Pembangunan infrastruktur terus berubah</li></ul></article>
-  </section>
-
-  <section class="clean-info"><div><span>DATA YANG DAPAT DITELUSURI</span><h2>Lihat. Pahami. Antisipasi.</h2><p>WASKITA menghubungkan data wilayah, masalah, sumber informasi, dan suara warga dalam satu pengalaman publik yang sederhana.</p></div><button data-view="data" class="clean-primary">Jelajahi Data & Statistik →</button></section>
+ host.innerHTML=`<div class="clean-home">
+  <section class="clean-hero"><div class="clean-hero-copy"><span class="clean-eyebrow">WASKITA · PORTAL DATA & ASPIRASI PUBLIK</span><h1>Indonesia dalam satu<br><strong>peta masalah.</strong></h1><p>Telusuri wilayah, buka masalah yang tercatat, lihat data publik, dan sampaikan laporan warga.</p><form class="clean-search" id="cleanSearch"><span>⌕</span><input id="cleanQuestion" placeholder="Cari masalah, provinsi, kabupaten, kecamatan, atau desa…" autocomplete="off"><button type="submit">Cari</button></form><div class="hero-actions"><button data-view="map" class="clean-primary">Jelajahi Peta Indonesia →</button><button data-view="report" class="clean-ghost">Suara Warga</button></div></div><div class="clean-garuda" role="img" aria-label="Garuda IKN"></div></section>
+  <section class="clean-stats" id="liveStats"><article><b>—</b><strong>Provinsi</strong><span>data wilayah publik</span></article><article><b>—</b><strong>Kabupaten/Kota</strong><span>data wilayah publik</span></article><article><b>—</b><strong>Kecamatan</strong><span>data wilayah publik</span></article><article><b>—</b><strong>Masalah publik</strong><span>tercatat di sistem</span></article></section>
+  <section class="clean-section"><div class="clean-section-head"><div><span>JELAJAHI WILAYAH</span><h2>Dari Indonesia sampai desa</h2><p>Alur publik terhubung: Indonesia → Provinsi → Kabupaten/Kota → Kecamatan → Desa/Kelurahan → Masalah.</p></div><button data-view="map" class="clean-link">Buka peta lengkap →</button></div><div class="clean-hierarchy"><button data-view="map"><i>🇮🇩</i><div><b>Indonesia</b><small>Mulai penelusuran</small></div><span>›</span></button><button data-view="map"><i>▦</i><div><b>Provinsi</b><small>Pilih provinsi</small></div><span>›</span></button><button data-view="map"><i>▦</i><div><b>Kabupaten / Kota</b><small>Telusuri daerah</small></div><span>›</span></button><button data-view="map"><i>▦</i><div><b>Kecamatan</b><small>Turun ke wilayah</small></div><span>›</span></button><button data-view="map"><i>⌂</i><div><b>Desa / Kelurahan</b><small>Lihat masalah</small></div><span>›</span></button></div></section>
+  <section class="clean-feature"><article class="clean-panel clean-map-card"><div class="clean-panel-head"><div><span>PETA INTERAKTIF</span><h2>Telusuri Indonesia</h2><p>Klik provinsi untuk masuk ke tingkat wilayah berikutnya.</p></div><button data-view="map" class="clean-link">Buka peta →</button></div><div class="clean-map-placeholder"><div id="homeIndonesiaMap" class="clean-map-real"></div><div class="clean-map-caption">Peta provinsi · klik wilayah untuk membuka detail</div></div></article><article class="clean-panel clean-report-card"><span>SUARA WARGA</span><h2>Laporkan masalah di sekitar Anda</h2><p>Masukkan informasi publik tentang masalah di wilayah Anda. Laporan warga tetap dibedakan dari data yang sudah terverifikasi.</p><button data-view="report" class="clean-primary">Buat Laporan Warga →</button><div class="report-steps"><span>01 Kirim</span><span>02 Verifikasi</span><span>03 Tampil publik</span></div></article></section>
+  <section class="clean-section"><div class="clean-section-head"><div><span>MASALAH TERBARU</span><h2>Data yang benar-benar tersedia</h2><p>Daftar ini diambil dari data masalah publik, bukan contoh statis.</p></div><button data-view="problems" class="clean-link">Lihat semua masalah →</button></div><div class="clean-issues" id="homeIssues"><div class="clean-loading">Memuat data masalah…</div></div></section>
+  <section class="clean-feature clean-lower"><article class="clean-panel"><div class="clean-panel-head"><div><span>DATA & STATISTIK</span><h2>Ringkasan yang bisa ditelusuri</h2><p>Statistik publik mengikuti data masalah yang tersedia saat ini.</p></div><button data-view="data" class="clean-link">Buka statistik →</button></div><div class="mini-stats" id="miniStats"><div><b>—</b><span>Total masalah</span></div><div><b>—</b><span>Kategori</span></div><div><b>—</b><span>Wilayah terisi</span></div></div><div class="clean-category-list" id="homeCategories"><span>Memuat kategori…</span></div></article><article class="clean-panel monitoring-panel"><div class="clean-panel-head"><div><span>PANTAU PERUBAHAN</span><h2>Ikuti pembaruan</h2><p>Gunakan detail masalah untuk melihat status dan waktu pembaruan terakhir.</p></div><button data-view="monitoring" class="clean-link">Buka pantauan →</button></div><div class="monitoring-flow"><div><b>01</b><strong>Masalah tercatat</strong><span>Wilayah & kategori</span></div><div><b>02</b><strong>Data diperbarui</strong><span>Status & waktu</span></div><div><b>03</b><strong>Warga menanggapi</strong><span>Laporan terkait</span></div></div></article></section>
+  <section class="clean-info"><div><span>WASKITA</span><h2>Lihat. Pahami. Antisipasi.</h2><p>Satu pintu untuk menjelajahi wilayah, masalah publik, data, laporan warga, dan perubahan—tanpa membuka mesin internal.</p></div><div class="info-actions"><button data-view="problems" class="clean-primary">Lihat Masalah</button><button data-view="data" class="clean-ghost-dark">Lihat Data</button></div></section>
  </div>`;
- wire();
- const form=document.getElementById('cleanSearch');
- form?.addEventListener('submit',e=>{e.preventDefault();const q=document.getElementById('cleanQuestion')?.value.trim();if(q)window.render?.('result',q)});
+ wire(); loadHomeData();
+ const form=document.getElementById('cleanSearch');form?.addEventListener('submit',e=>{e.preventDefault();const q=document.getElementById('cleanQuestion')?.value.trim();if(q)window.render?.('result',q)});
 }
-function wire(){document.querySelectorAll('#home [data-view]').forEach(b=>{b.onclick=()=>window.render?.(b.dataset.view)});try{window.lucide?.createIcons()}catch{}}
-window.render=async function(v,x=''){if(v==='home'){home();window.scrollTo({top:0,behavior:'smooth'});return}if(typeof previousRender==='function')return previousRender(v,x)};
+function wire(){document.querySelectorAll('#home [data-view]').forEach(b=>b.onclick=()=>window.render?.(b.dataset.view));try{window.lucide?.createIcons()}catch{}}
+async function loadHomeData(){
+ try{
+  const [problems,regions]=await Promise.all([api('/rest/v1/problems?select=id,title,category,status,updated_at,region_id&order=updated_at.desc&limit=100'),api('/rest/v1/regions?select=id,level,parent_region_id&source_name=eq.BIG&limit=1000')]);
+  const levels={province:0,regency:0,district:0,village:0};regions.forEach(r=>{const s=String(r.level||'').toLowerCase();if(s.includes('prov'))levels.province++;else if(s.includes('kab')||s.includes('kota')||s.includes('regenc'))levels.regency++;else if(s.includes('kec')||s.includes('district'))levels.district++;else if(s.includes('desa')||s.includes('kelur')||s.includes('village'))levels.village++});
+  const vals=[levels.province,levels.regency,levels.district,problems.length];document.querySelectorAll('#liveStats article b').forEach((x,i)=>x.textContent=vals[i].toLocaleString('id-ID'));
+  const issues=document.getElementById('homeIssues');issues.innerHTML=problems.slice(0,6).map(x=>`<button class="clean-issue" data-problem="${esc(x.id)}"><i>${icon(x.category)}</i><div><b>${esc(x.title||'Masalah tanpa judul')}</b><span>${esc(x.category||'Masalah')} · ${esc(x.status||'tercatat')} · ${x.updated_at?new Date(x.updated_at).toLocaleDateString('id-ID'):''}</span></div><em>Detail →</em></button>`).join('')||'<div class="clean-empty">Belum ada masalah publik yang tersedia.</div>';
+  issues.querySelectorAll('[data-problem]').forEach(b=>b.onclick=()=>window.render?.('problem-detail',b.dataset.problem));
+  const counts={};problems.forEach(x=>counts[x.category||'Lainnya']=(counts[x.category||'Lainnya']||0)+1);const cats=document.getElementById('homeCategories');cats.innerHTML=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`<button data-view="problems"><span>${icon(k)} ${esc(k)}</span><b>${v}</b></button>`).join('')||'<span>Belum ada kategori.</span>';cats.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>window.render?.('problems'));
+  const mini=document.getElementById('miniStats');if(mini)mini.innerHTML=`<div><b>${problems.length}</b><span>Total masalah</span></div><div><b>${Object.keys(counts).length}</b><span>Kategori</span></div><div><b>${new Set(problems.map(x=>x.region_id).filter(Boolean)).size}</b><span>Wilayah terisi</span></div>`;
+ }catch(e){document.getElementById('homeIssues')?.replaceChildren(Object.assign(document.createElement('div'),{className:'clean-empty',textContent:'Data masalah belum dapat dimuat. Buka Masalah untuk mencoba lagi.'}))}
+}
+const previousRender=window.render;window.render=async function(v,x=''){if(v==='home'){home();window.scrollTo({top:0,behavior:'smooth'});return}if(typeof previousRender==='function')return previousRender(v,x)};
 document.addEventListener('DOMContentLoaded',home);
 })();
