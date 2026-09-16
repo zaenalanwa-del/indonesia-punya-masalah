@@ -27,10 +27,32 @@ jobs:
         uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: Prepare static Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          rsync -a --exclude '_site' ./ _site/
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ('index.html','admin.html'):
+              p=Path('_site')/name
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('href="/styles.css"','href="./styles.css"')
+              s=s.replace('src="/app.js"','src="./app.js"')
+              s=s.replace('src="/admin.js"','src="./admin.js"')
+              s=s.replace('href="/admin.html"','href="./admin.html"')
+              s=s.replace('href="/"','href="./index.html"')
+              if name=='admin.html' and './admin.js' not in s:
+                  s=s.replace('</body>','<script src="./admin.js"></script></body>')
+              p.write_text(s,encoding='utf-8')
+          Path('_site/.nojekyll').touch()
+          for p in Path('_site').rglob('server.py'):
+              p.unlink()
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
