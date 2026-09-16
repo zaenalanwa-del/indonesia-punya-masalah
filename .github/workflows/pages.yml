@@ -31,35 +31,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf _site
           mkdir -p _site
           rsync -a --exclude '_site' --exclude '.git' --exclude '.github' --exclude 'node_modules' ./ _site/
-          python3 - <<'PY'
-          from pathlib import Path
-          for name in ('index.html','admin.html'):
-              p=Path('_site')/name
-              s=p.read_text(encoding='utf-8')
-              s=s.replace('href="/styles.css"','href="./styles.css"')
-              s=s.replace('src="/app.js"','src="./app.js"')
-              s=s.replace('src="/admin.js"','src="./admin.js"')
-              s=s.replace('href="/admin.html"','href="./admin.html"')
-              s=s.replace('href="/"','href="./index.html"')
-              if name=='admin.html' and './admin.js' not in s:
-                  s=s.replace('</body>','<script src="./admin.js"></script></body>')
-              p.write_text(s,encoding='utf-8')
-          Path('_site/.nojekyll').touch()
-          for p in Path('_site').rglob('server.py'):
-              p.unlink()
-          required=['index.html','admin.html','styles.css','app.js','admin.js']
-          missing=[x for x in required if not (Path('_site')/x).is_file()]
-          if missing:
-              raise SystemExit(f'Missing Pages files: {missing}')
-          for name in ('index.html','admin.html'):
-              s=(Path('_site')/name).read_text(encoding='utf-8')
-              for needle in ('/styles.css','/app.js','/admin.js'):
-                  if needle in s:
-                      raise SystemExit(f'Absolute Pages asset path remains in {name}: {needle}')
-          print('Static Pages smoke test: PASS')
-          PY
+          sed -i 's#href="/styles.css"#href="./styles.css"#g; s#src="/app.js"#src="./app.js"#g; s#src="/admin.js"#src="./admin.js"#g; s#href="/admin.html"#href="./admin.html"#g; s#href="/"#href="./index.html"#g' _site/index.html _site/admin.html
+          touch _site/.nojekyll
+          find _site -type f -name 'server.py' -delete
+          test -f _site/index.html
+          test -f _site/admin.html
+          test -f _site/styles.css
+          test -f _site/app.js
+          test -f _site/admin.js
+          ! grep -q 'href="/styles.css"' _site/index.html
+          ! grep -q 'src="/app.js"' _site/index.html
+          ! grep -q 'href="/styles.css"' _site/admin.html
+          echo 'Static Pages smoke test: PASS'
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
