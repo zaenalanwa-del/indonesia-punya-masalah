@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Attach public enhancement
+      - name: Attach public enhancement and routing
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -18,11 +18,14 @@ jobs:
           s=p.read_text(encoding='utf-8')
           if '/public-enhance.js' not in s:
               s=s.replace('</body>','<script src="/public-enhance.js?v=20260916-3"></script>\n</body>')
+          if '/public-routing.js' not in s:
+              s=s.replace('</body>','<script src="/public-routing.js?v=20260916-1"></script>\n</body>')
           s=s.replace('<title>WASKITA — Indonesia Punya Masalah</title>','<title>Indonesia Punya Masalah — Portal Data & Aspirasi Publik</title>')
+          s=s.replace('data-build="waskita-public-v2"','data-build="indonesia-punya-masalah-public-v3"')
           p.write_text(s,encoding='utf-8')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git diff --cached --quiet || git commit -m 'Activate public navigation enhancement'
+          git diff --cached --quiet || git commit -m 'Activate public routing and enhancement'
           git push
