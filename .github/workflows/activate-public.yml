@@ -10,22 +10,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Attach public enhancement and routing
+      - name: Attach public runtime modules
         run: |
           python - <<'PY'
           from pathlib import Path
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          if '/public-enhance.js' not in s:
-              s=s.replace('</body>','<script src="/public-enhance.js?v=20260916-3"></script>\n</body>')
-          if '/public-routing.js' not in s:
-              s=s.replace('</body>','<script src="/public-routing.js?v=20260916-1"></script>\n</body>')
+          additions = [
+              '<script src="/public-enhance.js?v=20260916-4"></script>',
+              '<script src="/public-routing.js?v=20260916-2"></script>',
+              '<script src="/public-functions.js?v=20260916-1"></script>'
+          ]
+          for tag in additions:
+              src=tag.split('src="',1)[1].split('"',1)[0].split('?',1)[0]
+              if src not in s:
+                  s=s.replace('</body>',tag+'\n</body>')
           s=s.replace('<title>WASKITA — Indonesia Punya Masalah</title>','<title>Indonesia Punya Masalah — Portal Data & Aspirasi Publik</title>')
-          s=s.replace('data-build="waskita-public-v2"','data-build="indonesia-punya-masalah-public-v3"')
+          s=s.replace('data-build="waskita-public-v2"','data-build="indonesia-punya-masalah-reference-v4"')
           p.write_text(s,encoding='utf-8')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git diff --cached --quiet || git commit -m 'Activate public routing and enhancement'
+          git diff --cached --quiet || git commit -m 'Activate integrated public feature runtime'
           git push
