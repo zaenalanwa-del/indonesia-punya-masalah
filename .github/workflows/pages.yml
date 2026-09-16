@@ -35,11 +35,13 @@ jobs:
           mkdir -p _site
           rsync -a --exclude '_site' --exclude '.git' --exclude '.github' --exclude 'node_modules' ./ _site/
           sed -i 's#href="/styles.css"#href="./styles.css"#g; s#src="/app.js"#src="./app.js"#g; s#src="/admin.js"#src="./admin.js"#g; s#href="/admin.html"#href="./admin.html"#g; s#href="/"#href="./index.html"#g' _site/index.html _site/admin.html
+          sed -i 's#</head>#<link rel="stylesheet" href="./reference-fidelity.css">\n</head>#' _site/index.html
           touch _site/.nojekyll
           find _site -type f -name 'server.py' -delete
           test -f _site/index.html
           test -f _site/admin.html
           test -f _site/styles.css
+          test -f _site/reference-fidelity.css
           test -f _site/app.js
           test -f _site/admin.js
           ! grep -q 'href="/styles.css"' _site/index.html
