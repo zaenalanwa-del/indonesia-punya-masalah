@@ -1,103 +1,141 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Indonesia Punya Masalah — Portal Data & Aspirasi Publik</title>
-<meta name="description" content="Portal nasional untuk melihat masalah publik, data, suara warga, perubahan, dan ruang solusi Indonesia.">
-<meta name="theme-color" content="#0875d8">
+<meta name="description" content="Portal nasional untuk melihat masalah publik, data, suara warga, perubahan, dan solusi Indonesia.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/site.css?v=20260916-4">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site.css?v=20260916-5">
 </head>
-<body data-build="indonesia-punya-masalah-reference-v4">
-<header class="site-header">
-  <div class="sidebar-brand">
+<body data-build="indonesia-punya-masalah-reference-v5">
+<header class="header">
+  <div class="header-inner">
     <a class="brand" href="#beranda" aria-label="Indonesia Punya Masalah">
-      <span class="brand-mark" aria-hidden="true"><i></i><b></b></span>
-      <span class="brand-copy"><strong>INDONESIA<br>PUNYA MASALAH</strong><small>Bersama Melihat • Mendengar • Mencari Solusi</small></span>
+      <span class="flag"><i></i><b></b></span>
+      <span class="brand-name">INDONESIA<br><strong>PUNYA MASALAH</strong></span>
+      <span class="brand-divider"></span>
+      <span class="brand-motto">Bersama Melihat<br>Mendengar<br>Mencari Solusi</span>
     </a>
+    <nav class="nav" id="mainNav" aria-label="Navigasi utama">
+      <a class="active" href="#beranda"><span>⌂</span>Beranda</a>
+      <a href="#peta"><span>⌖</span>Peta Indonesia</a>
+      <a href="#masalah"><span>♙</span>Masalah</a>
+      <a href="#data"><span>▥</span>Data &amp; Statistik</a>
+      <a href="#suara"><span>♧</span>Suara Warga</a>
+      <a href="#intelligence"><span>⌁</span>Intelligence</a>
+      <a href="#solusi"><span>♧</span>Solusi</a>
+      <a href="#lainnya"><span>•••</span>Lainnya⌄</a>
+    </nav>
+    <div class="header-actions"><button class="search-icon" id="headerSearch" aria-label="Cari">⌕</button><button class="login" data-auth="login">Masuk</button><button class="signup" data-auth="register">Daftar</button></div>
+    <button class="mobile-menu" id="menuBtn" aria-label="Menu">☰</button>
   </div>
-  <button class="mobile-menu" id="menuBtn" aria-label="Buka menu" aria-expanded="false">☰</button>
-  <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
-    <a class="active" href="#beranda">Beranda</a>
-    <a href="#peta">Peta Indonesia</a>
-    <a href="#masalah">Masalah</a>
-    <a href="#data">Data &amp; Statistik</a>
-    <a href="#suara">Suara Warga</a>
-    <a href="#intelligence">Intelligence</a>
-    <a href="#solusi">Solusi</a>
-    <a href="#lainnya">Lainnya⌄</a>
-  </nav>
-  <div class="sidebar-bottom"><span class="status-dot"></span><span>Portal publik Indonesia</span></div>
 </header>
-
-<div class="topbar">
-  <div class="topbar-title"><span class="topbar-label">PORTAL PUBLIK</span><strong>Indonesia Punya Masalah</strong></div>
-  <div class="topbar-center"><button class="top-search" id="headerSearch"><span>⌕</span><span>Cari masalah, wilayah, data, atau solusi...</span></button></div>
-  <div class="header-actions"><button class="icon-btn" aria-label="Notifikasi">♢</button><button class="login" data-auth="login">Masuk</button><button class="signup" data-auth="register">Daftar</button></div>
-</div>
 
 <main>
 <section class="hero" id="beranda">
   <div class="hero-bg"></div>
-  <div class="hero-inner">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
     <div class="hero-copy">
-      <div class="hero-kicker">PORTAL DATA &amp; ASPIRASI PUBLIK</div>
-      <h1>Indonesia <em>Punya Masalah.</em></h1>
-      <p>Dari desa hingga pusat, semua masalah bisa dilihat, dipantau, dan dicari solusinya bersama.</p>
-      <form class="hero-search" id="searchForm"><span>⌕</span><input id="searchInput" aria-label="Cari masalah" placeholder="Cari masalah, wilayah, data, atau solusi..." autocomplete="off"><button type="submit">Cari</button></form>
-      <div class="quick-tags"><button data-category="Kemiskinan">Kemiskinan</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button><button data-category="Ekonomi">Ekonomi</button></div>
+      <div class="kicker">Portal Data &amp; Aspirasi Publik</div>
+      <h1>Indonesia Punya Masalah</h1>
+      <p>Dari Desa hingga Pusat, semua masalah bisa dilihat,<br class="desktop">dipantau, dan dicari solusinya bersama.</p>
+      <form class="hero-search" id="searchForm"><span>⌕</span><input id="searchInput" placeholder="Cari masalah, daerah, desa, kecamatan, atau topik..." autocomplete="off"><button type="submit">⌕</button></form>
+      <div class="chips"><button data-category="Kemiskinan">Kemiskinan</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button><button data-category="Ekonomi">Ekonomi</button></div>
     </div>
-    <aside class="hero-person"><div class="hero-person-top"><span>SUARA WARGA</span><b>Bagikan apa yang terjadi<br>di sekitar Anda.</b></div><div class="person-silhouette"><span class="head"></span><span class="body"></span><span class="bag"></span></div><div class="handwrite">Suara Anda<br><b>untuk Indonesia</b><br>yang lebih baik</div></aside>
+    <div class="hero-citizen"><div class="scribble">Suara Anda<br>untuk Indonesia<br><strong>yang lebih baik</strong></div><div class="student"><div class="student-head"></div><div class="student-body"></div><div class="backpack"></div></div></div>
   </div>
 </section>
 
-<section class="stats-wrap" id="data"><div class="stats-grid">
-  <article class="stat-card"><b data-count="38">38</b><strong>Provinsi</strong><small>cakupan nasional</small></article>
-  <article class="stat-card"><b data-count="514">514</b><strong>Kabupaten/Kota</strong><small>seluruh Indonesia</small></article>
-  <article class="stat-card"><b data-count="7282">7.282</b><strong>Kecamatan</strong><small>administrasi wilayah</small></article>
-  <article class="stat-card"><b data-count="83529">83.529</b><strong>Desa/Kelurahan</strong><small>hingga tingkat lokal</small></article>
-  <article class="report-card" id="suara"><div><span>Laporkan Masalah di Sekitar Anda</span><p>Sampaikan kondisi yang Anda lihat. Laporan masuk ke antrean review.</p><button data-report>＋ Buat Laporan</button></div><div class="phone">▣</div></article>
-</div></section>
-
-<section class="dashboard" id="peta">
-  <aside class="explore-card">
-    <div class="explore-head"><span class="eyebrow">WILAYAH</span><h2>Jelajahi Indonesia</h2><p>Pilih wilayah atau kategori untuk melihat masalah dan data.</p></div>
-    <div class="region-list"><button class="region active" data-region="Indonesia">◎ Indonesia</button><button class="region" data-region="Jawa Tengah">▦ Jawa Tengah</button><button class="region" data-region="Jawa Barat">▦ Jawa Barat</button><button class="region" data-region="Jawa Timur">▦ Jawa Timur</button><button class="region" data-region="Sumatera">▦ Sumatera</button><button class="region" data-region="Kalimantan">▦ Kalimantan</button></div>
-    <div class="category-title">KATEGORI MASALAH</div><div class="category-list"><button data-category="Ekonomi">Ekonomi</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button><button data-category="Sosial">Sosial</button></div>
-    <button class="all-link" id="showAll">Lihat semua masalah →</button>
-  </aside>
-
-  <section class="map-panel">
-    <div class="panel-head"><div><span class="eyebrow">VISUALISASI</span><h2>Peta Indonesia</h2><small id="mapSubtitle">Distribusi masalah berdasarkan wilayah</small></div><div class="map-switch"><button class="active" data-map-mode="Masalah">Masalah</button><button data-map-mode="Data">Data</button></div></div>
-    <div class="map-area" id="mapArea"><div class="map-grid"></div><svg class="indonesia-map" viewBox="0 0 720 330" role="img" aria-label="Visualisasi wilayah Indonesia"><path class="island low" d="M55 112 C20 130 18 157 48 170 C75 181 112 168 135 149 C158 131 145 111 118 108 C93 105 72 104 55 112Z"/><path class="island mid" d="M150 205 C190 192 250 195 292 205 C313 210 315 224 292 230 C246 241 188 236 151 224 C137 219 137 210 150 205Z"/><path class="island high" d="M285 80 C316 52 363 47 392 70 C410 85 401 121 379 143 C359 163 324 159 298 137 C278 120 271 96 285 80Z"/><path class="island mid" d="M412 101 C438 76 468 86 480 106 L462 128 L482 150 L455 164 L431 145 L409 160 L395 136 L412 119 L399 108Z"/><path class="island very" d="M540 150 C578 132 635 137 683 151 C695 156 694 171 677 177 C634 192 580 190 544 177 C528 171 526 157 540 150Z"/><path class="island low small" d="M311 225 C322 220 338 222 346 227 C349 233 335 238 322 236 C313 234 307 229 311 225Z"/></svg><div class="map-pins"><button class="map-pin pin1" title="Jawa Tengah">●</button><button class="map-pin pin2" title="Jawa Barat">●</button><button class="map-pin pin3" title="Kalimantan">●</button><button class="map-pin pin4" title="Sulawesi">●</button><button class="map-pin pin5" title="Papua">●</button></div><div class="map-controls"><button data-zoom="in">+</button><button data-zoom="out">−</button></div><div class="legend"><span><i class="low-dot"></i>Rendah</span><span><i class="mid-dot"></i>Sedang</span><span><i class="high-dot"></i>Tinggi</span><span><i class="very-dot"></i>Sangat tinggi</span></div></div>
-  </section>
-
-  <aside class="latest-panel" id="masalah"><div class="panel-head"><div><span class="eyebrow">LIVE FEED</span><h2>Masalah Terbaru</h2></div><button id="latestAll">Lihat semua</button></div><div id="problemList">
-    <article class="problem" data-category="Infrastruktur" data-location="Purworejo"><div class="latest-icon red">⚠</div><div><h3>Jalan rusak dan akses warga</h3><p>Purworejo · contoh tampilan</p><span class="tag">Infrastruktur</span></div></article>
-    <article class="problem" data-category="Lingkungan" data-location="Demak"><div class="latest-icon orange">≈</div><div><h3>Banjir berulang di permukiman</h3><p>Demak · contoh tampilan</p><span class="tag">Lingkungan</span></div></article>
-    <article class="problem" data-category="Pendidikan" data-location="Wonogiri"><div class="latest-icon blue">＋</div><div><h3>Ruang kelas dan fasilitas belajar</h3><p>Wonogiri · contoh tampilan</p><span class="tag">Pendidikan</span></div></article>
-    <article class="problem" data-category="Kesehatan" data-location="Lampung Selatan"><div class="latest-icon green">♥</div><div><h3>Keterbatasan tenaga medis</h3><p>Lampung Selatan · contoh tampilan</p><span class="tag">Kesehatan</span></div></article>
-  </div><div class="data-note">Data pada kartu ini bersifat contoh sampai sumber produksi terhubung.</div></aside>
+<section class="stat-row" id="data">
+  <article class="stat"><div class="stat-icon red">⌖</div><div><strong data-count="38">38</strong><b>Provinsi</b><small>Seluruh Indonesia</small></div></article>
+  <article class="stat"><div class="stat-icon blue">▥</div><div><strong data-count="514">514</strong><b>Kabupaten/Kota</b><small>Seluruh Indonesia</small></div></article>
+  <article class="stat"><div class="stat-icon green">▦</div><div><strong data-count="7282">7.282</strong><b>Kecamatan</b><small>Seluruh Indonesia</small></div></article>
+  <article class="stat"><div class="stat-icon orange">⌂</div><div><strong data-count="83529">83.529</strong><b>Desa/Kelurahan</b><small>Seluruh Indonesia</small></div></article>
+  <article class="report" id="suara"><div class="report-icon">♣</div><div><strong>Laporkan Masalah<br>di Sekitar Anda</strong><p>Bersama kita bisa membuat<br>perubahan nyata.</p><button data-report>＋ &nbsp;Laporkan Sekarang&nbsp; →</button></div><div class="phone-art"><span>●</span><i>⌖</i></div></article>
 </section>
 
-<section class="lower-grid"><article class="most-card"><div class="section-head"><div><span class="eyebrow">ANALISIS</span><h2>Masalah Paling Banyak</h2></div><button data-toast="Data lengkap akan tersedia setelah sumber produksi aktif.">Lihat data lengkap →</button></div><div class="most-items"><button class="most economic" data-category="Ekonomi"><b>EKONOMI</b><strong>—</strong><small>belum terhubung</small></button><button class="most social" data-category="Sosial"><b>SOSIAL</b><strong>—</strong><small>belum terhubung</small></button><button class="most health" data-category="Kesehatan"><b>KESEHATAN</b><strong>—</strong><small>belum terhubung</small></button><button class="most education" data-category="Pendidikan"><b>PENDIDIKAN</b><strong>—</strong><small>belum terhubung</small></button></div></article><article class="trend-card"><div class="section-head"><div><span class="eyebrow">MONITORING</span><h2>Tren &amp; Peringatan</h2></div><button data-toast="Monitoring detail tersedia setelah sumber produksi aktif.">Detail →</button></div><div class="trend"><i>↗</i><span>Harga kebutuhan pokok</span><b>watch</b></div><div class="trend"><i>!</i><span>Curah hujan dan risiko banjir</span><b>watch</b></div><div class="trend"><i>↗</i><span>Laporan infrastruktur</span><b>watch</b></div><div class="data-note">Sinyal contoh — belum merupakan peringatan produksi.</div></article></section>
+<section class="main-grid" id="peta">
+  <aside class="explorer card">
+    <h2>Jelajahi Indonesia</h2><p>Pilih wilayah untuk melihat data dan masalah</p>
+    <div class="explore-list">
+      <button class="selected" data-region="Indonesia"><span>🇮🇩</span>Indonesia <b>›</b></button>
+      <button data-region="Provinsi"><span>♜</span>Provinsi <b>›</b></button>
+      <button data-region="Kabupaten/Kota"><span>▥</span>Kabupaten/Kota <b>›</b></button>
+      <button data-region="Kecamatan"><span>▦</span>Kecamatan <b>›</b></button>
+      <button data-region="Desa/Kelurahan"><span>⌂</span>Desa/Kelurahan <b>›</b></button>
+      <button data-region="Dusun"><span>⌂</span>Dusun <b>›</b></button>
+    </div>
+    <h3>Kategori Masalah</h3>
+    <div class="category-grid"><button data-category="Ekonomi"><i class="c-orange">▤</i>Ekonomi</button><button data-category="Sosial"><i class="c-purple">♟</i>Sosial</button><button data-category="Kesehatan"><i class="c-green">♥</i>Kesehatan</button><button data-category="Infrastruktur"><i class="c-orange">▦</i>Infrastruktur</button><button data-category="Pendidikan"><i class="c-blue">▣</i>Pendidikan</button><button data-category="Lingkungan"><i class="c-green">♧</i>Lingkungan</button></div>
+    <button class="all-categories" id="showAll">Lihat Semua Kategori &nbsp;→</button>
+  </aside>
 
-<section class="intelligence-section" id="intelligence"><div class="intelligence-top"><div><span class="blue-kicker">INTELLIGENCE</span><h2>Data yang membantu memahami apa yang terjadi.</h2><p>Gabungkan data, laporan warga, bukti, dan perubahan dari waktu ke waktu.</p></div><button class="outline-btn" id="intelligenceBtn">Buka Intelligence →</button></div><div class="intelligence-cards"><button class="intel-card" data-intel="evidence"><b>01 · EVIDENCE</b><h3>Bukti &amp; Sumber</h3><p>Setiap klaim penting dapat ditelusuri ke sumber dan waktu pengamatan.</p><small>Provenance →</small></button><button class="intel-card" data-intel="monitoring"><b>02 · MONITORING</b><h3>Pantau Perubahan</h3><p>Bandingkan kondisi wilayah dan topik untuk melihat perubahan.</p><small>Monitoring →</small></button><button class="intel-card" data-intel="signal"><b>03 · SIGNAL</b><h3>Sinyal Dini</h3><p>Temukan pola dan indikator yang perlu diperhatikan lebih lanjut.</p><small>Future Radar →</small></button><button class="intel-card" data-intel="answer"><b>04 · ANSWER</b><h3>Jawaban Terstruktur</h3><p>Bedakan fakta, ketidakpastian, dan informasi yang masih perlu diverifikasi.</p><small>Answer →</small></button></div></section>
+  <section class="map-card card">
+    <div class="map-head"><span class="map-title">⌖ &nbsp; Peta Indonesia</span><div class="map-tabs"><button class="active">Peta</button><button>Satelit</button></div></div>
+    <div class="map-canvas" id="mapArea">
+      <div class="map-bg-lines"></div>
+      <svg class="realistic-map" viewBox="0 0 900 410" aria-label="Peta visual Indonesia" role="img">
+        <g stroke="#fff" stroke-width="3" stroke-linejoin="round">
+          <path fill="#ffbf2f" d="M95 104l24-26 52 7 39 28-9 24-44-2-32 17-31-17z"/><path fill="#48b96d" d="M155 157l61 4 31 25-14 25-80-7-31-20z"/>
+          <path fill="#ff7136" d="M228 219l80-8 73 14 20 19-45 16-111-9-45-14z"/><path fill="#f0d23d" d="M292 105l46-24 65 15 23 39-30 26-68 2-44-24z"/>
+          <path fill="#48b96d" d="M408 109l54-36 70 20 20 35-34 20-58-8-44 28-27-23z"/><path fill="#ff7a2e" d="M501 143l49-24 40 16 8 29-39 14-42-11z"/>
+          <path fill="#7bcf55" d="M556 173l52-20 49 20-10 30-61 13-43-16z"/><path fill="#ffbf2f" d="M663 170l77-8 51 17-12 29-77 8-49-18z"/>
+          <path fill="#e9493f" d="M777 231l51-7 38 18-16 24-62 3-35-17z"/><path fill="#4bbd72" d="M655 248l62-14 55 17 9 23-66 18-55-17z"/>
+          <path fill="#f3cf3b" d="M427 238l48-10 41 16-8 23-52 7-38-16z"/><path fill="#46b86c" d="M356 270l42-8 38 15-8 21-53 6-27-16z"/>
+        </g>
+        <g fill="#fff" opacity=".8"><circle cx="190" cy="136" r="3"/><circle cx="256" cy="170" r="3"/><circle cx="389" cy="190" r="3"/><circle cx="611" cy="221" r="3"/><circle cx="730" cy="196" r="3"/></g>
+      </svg>
+      <div class="map-pin p1">●</div><div class="map-pin p2">●</div><div class="map-pin p3">●</div><div class="map-pin p4">●</div><div class="map-pin p5">●</div>
+      <div class="map-zoom"><button data-zoom="in">＋</button><button data-zoom="out">−</button><button>⚙</button></div>
+      <div class="map-legend"><span><i class="low"></i>Rendah</span><span><i class="mid"></i>Sedang</span><span><i class="high"></i>Tinggi</span><span><i class="very"></i>Sangat Tinggi</span></div>
+    </div>
+  </section>
 
-<section class="future-section"><div class="future-head"><div><span class="eyebrow">NOW · WHY · THEN · ACTION</span><h2>Dari masalah menjadi pemahaman dan tindakan.</h2></div><p><b>Lihat → Dengarkan → Buktikan → Pahami → Antisipasi → Bertindak → Ukur → Belajar.</b></p></div><div class="future-grid"><article><span>NOW</span><h3>Apa yang terjadi?</h3><p>Masalah, lokasi, laporan, dan data terkini.</p></article><article><span>WHY</span><h3>Mengapa terjadi?</h3><p>Konteks, bukti, sumber, dan faktor yang berkaitan.</p></article><article><span>THEN</span><h3>Apa yang mungkin terjadi?</h3><p>Perubahan, sinyal, risiko, dan skenario.</p></article><article><span>ACTION</span><h3>Apa yang bisa dilakukan?</h3><p>Solusi, kolaborasi, outcome, dan pembelajaran.</p></article></div></section>
+  <aside class="latest card" id="masalah">
+    <div class="section-title"><h2>Masalah Terbaru</h2><button id="latestAll">Lihat Semua →</button></div>
+    <article class="issue"><div class="thumb t1"></div><div><strong>Jalan Rusak di Desa Sumberrejo</strong><small> Kab. Wonogiri, Jawa Tengah</small><em>◷ 2 jam yang lalu</em></div><label class="tag infra">Infrastruktur</label></article>
+    <article class="issue"><div class="thumb t2"></div><div><strong>Harga Sembako Terus Naik</strong><small> Kota Makassar, Sulawesi Selatan</small><em>◷ 3 jam yang lalu</em></div><label class="tag econ">Ekonomi</label></article>
+    <article class="issue"><div class="thumb t3"></div><div><strong>Akses Pendidikan Terbatas</strong><small> Kab. Nias Barat, Sumatera Utara</small><em>◷ 4 jam yang lalu</em></div><label class="tag edu">Pendidikan</label></article>
+    <article class="issue"><div class="thumb t4"></div><div><strong>Banjir di Permukiman Warga</strong><small> Kota Semarang, Jawa Tengah</small><em>◷ 5 jam yang lalu</em></div><label class="tag env">Lingkungan</label></article>
+    <div class="data-note">Contoh tampilan — sumber produksi belum terhubung.</div>
+  </aside>
+</section>
 
-<section class="feature-band" id="solusi"><div class="feature-photo"><div><span>UNTUK KEPUTUSAN YANG TEPAT</span><h2>Data yang lengkap,<br>untuk keputusan yang tepat.</h2><p>Masalah terlihat lebih jelas ketika data, suara warga, dan konteks wilayah berada dalam satu tempat.</p><button class="light-btn" data-report>＋ Sampaikan suara Anda</button></div></div><div class="feature-list"><span class="eyebrow">FITUR PLATFORM</span><h3>Semua yang dibutuhkan publik.</h3><p>✓ Peta dan wilayah Indonesia</p><p>✓ Database masalah publik</p><p>✓ Suara dan laporan warga</p><p>✓ Data &amp; statistik</p><p>✓ Intelligence &amp; monitoring</p><p>✓ Future radar &amp; skenario</p><p>✓ Ruang solusi dan kolaborasi</p></div></section>
+<section class="analysis-grid">
+  <article class="analysis card"><div class="section-title"><h2>Masalah Paling Banyak</h2><button data-toast="Data peringkat akan muncul setelah sumber produksi aktif.">Lihat Semua →</button></div><div class="analysis-items">
+    <button data-category="Ekonomi"><i class="circle orange">▤</i><span>Ekonomi</span><strong>—</strong><small>belum terhubung</small></button>
+    <button data-category="Sosial"><i class="circle purple">♟</i><span>Sosial</span><strong>—</strong><small>belum terhubung</small></button>
+    <button data-category="Kesehatan"><i class="circle green">♥</i><span>Kesehatan</span><strong>—</strong><small>belum terhubung</small></button>
+    <button data-category="Pendidikan"><i class="circle blue">▣</i><span>Pendidikan</span><strong>—</strong><small>belum terhubung</small></button>
+  </div></article>
+  <article class="warnings card"><div class="section-title"><h2>Tren &amp; Peringatan</h2><button data-toast="Monitoring produksi belum aktif.">Lihat Semua →</button></div>
+    <div class="warning"><i class="red">↗</i><span>Masalah kemiskinan meningkat di 12 provinsi</span></div><div class="warning"><i class="blue">⌁</i><span>82 daerah rawan banjir</span></div><div class="warning"><i class="orange">↗</i><span>Tren harga pangan naik 15%</span></div><div class="warning"><i class="green">▥</i><span>Pembangunan infrastruktur baru</span></div>
+    <div class="data-note">Sinyal contoh — bukan peringatan produksi.</div>
+  </article>
+</section>
 
-<section class="more-section" id="lainnya"><div><span class="eyebrow">LAINNYA</span><h2>Bangun pengetahuan publik bersama.</h2><p>Jelajahi sumber, metodologi, API layanan, dokumentasi, dan ruang kolaborasi.</p></div><div class="more-links"><button data-toast="Dokumentasi akan dibuka saat modul tersedia.">Dokumentasi</button><button data-toast="API publik akan mengikuti sumber produksi.">API &amp; Data</button><button data-toast="Halaman metodologi sedang disiapkan.">Metodologi</button><button data-toast="Kolaborasi publik akan tersedia bertahap.">Kolaborasi</button></div></section>
+<section class="feature-band card" id="intelligence">
+  <div class="feature-photo"></div><div class="feature-copy"><h2>Data yang lengkap,<br>untuk keputusan yang tepat.</h2><p>Kami menggabungkan data, teknologi, dan partisipasi masyarakat untuk membantu menyelesaikan masalah Indonesia.</p><button id="intelligenceBtn">Pelajari Lebih Lanjut &nbsp;→</button></div>
+  <div class="feature-list"><h3>Fitur Unggulan</h3><div class="feature-grid"><a href="#peta"><i>⌖</i><span><b>Peta Interaktif</b>Real-time</span></a><a href="#suara"><i>♧</i><span><b>Laporan Warga</b>Analisis &amp; Prediksi</span></a><a href="#suara"><i>♧</i><span><b>Laporan Warga</b>Partisipasi Publik</span></a><a href="#intelligence"><i>▥</i><span><b>Monitoring</b>Tren &amp; Risiko</span></a><a href="#solusi"><i>♢</i><span><b>Solusi</b>Rekomendasi &amp; Aksi</span></a><a href="#data"><i>▦</i><span><b>Dashboard</b>Data &amp; Statistik</span></a></div></div>
+</section>
 
-<section class="modal" id="reportModal" aria-hidden="true"><div class="modal-card"><button class="close" aria-label="Tutup">×</button><span class="blue-kicker">SUARA WARGA</span><h2>Laporkan Masalah</h2><p>Laporan diterima sebagai laporan warga dan masuk status <b>menunggu review</b>.</p><form id="reportForm"><label>Judul masalah<input name="title" required placeholder="Contoh: Jalan desa rusak parah"></label><label>Wilayah<input name="location" required placeholder="Desa / Kecamatan / Kabupaten"></label><label>Kategori<select name="category"><option>Infrastruktur</option><option>Pendidikan</option><option>Kesehatan</option><option>Ekonomi</option><option>Lingkungan</option><option>Sosial</option></select></label><label>Deskripsi<textarea name="description" required rows="5" placeholder="Jelaskan kondisi yang Anda lihat..."></textarea></label><button class="signup submit" type="submit">Kirim Laporan</button></form></div></section>
-<section class="modal" id="authModal" aria-hidden="true"><div class="modal-card compact"><button class="close" aria-label="Tutup">×</button><span class="blue-kicker">AKUN</span><h2 id="authTitle">Masuk</h2><p id="authDesc">Akses akun untuk menyimpan laporan dan mengikuti perkembangan masalah.</p><form id="authForm"><label>Email<input type="email" name="email" required placeholder="nama@email.com"></label><label>Kata sandi<input type="password" name="password" required minlength="6" placeholder="••••••••"></label><button class="signup submit" type="submit" id="authSubmit">Masuk</button></form><button class="switch-auth" id="switchAuth">Belum punya akun? Daftar</button></div></section>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<section class="intelligence-deep" aria-label="Lapisan intelligence">
+  <div class="deep-head"><div><span>INTELLIGENCE</span><h2>Lihat. Pahami. Antisipasi.</h2><p>Lapisan analitik nasional untuk menghubungkan bukti, perubahan, sinyal, dan pilihan tindakan.</p></div><button class="outline" id="deepIntelligence">Buka Intelligence →</button></div>
+  <div class="deep-cards"><article><b>NOW</b><h3>Apa yang terjadi?</h3><p>Masalah, lokasi, data, dan suara warga yang terverifikasi.</p></article><article><b>WHY</b><h3>Mengapa terjadi?</h3><p>Konteks, bukti, faktor penyebab, dan keterkaitan.</p></article><article><b>THEN</b><h3>Apa yang mungkin terjadi?</h3><p>Tren, early signal, risiko, skenario, dan Future Radar.</p></article><article id="solusi"><b>ACTION</b><h3>Apa yang bisa dilakukan?</h3><p>Solusi, rekomendasi, pelaksanaan, dampak, dan pembelajaran.</p></article></div>
+</section>
+
+<section class="trust-strip" id="lainnya"><div><b>Evidence &amp; Provenance</b><span>Setiap informasi penting harus dapat ditelusuri ke sumber, waktu, wilayah, dan status verifikasi.</span></div><div><b>Human Review</b><span>Laporan warga masuk antrean review sebelum menjadi klaim publik.</span></div><div><b>Future Radar</b><span>Sinyal dan prediksi dipisahkan dari fakta yang sudah terverifikasi.</span></div></section>
 </main>
-<footer><div class="footer-inner"><div><div class="footer-brand"><span class="brand-mark"><i></i><b></b></span><strong>INDONESIA<br><small>PUNYA MASALAH</small></strong></div><p>Bersama melihat, mendengar, dan mencari solusi untuk Indonesia.</p></div><div><b>Publik</b><a href="#peta">Peta Indonesia</a><a href="#masalah">Masalah</a><a href="#data">Data &amp; Statistik</a><a href="#suara">Suara Warga</a></div><div><b>Intelligence</b><a href="#intelligence">Evidence</a><a href="#intelligence">Monitoring</a><a href="#intelligence">Future Radar</a><a href="#solusi">Solusi</a></div><div><b>Proyek</b><a href="#lainnya">Dokumentasi</a><a href="#lainnya">API &amp; Data</a><a href="#lainnya">Metodologi</a><a href="#lainnya">Kolaborasi</a></div></div><div class="copyright">© 2026 Indonesia Punya Masalah · <span>Data contoh ditandai sampai sumber produksi diaktifkan.</span></div></footer>
-<script src="/app.js?v=20260916-3" defer></script>
-<script src="/public-enhance.js?v=20260916-4"></script>
+
+<footer class="footer"><div class="footer-brand"><span class="flag"><i></i><b></b></span><strong>INDONESIA<br>PUNYA MASALAH</strong><small>Dari Rakyat, Untuk Indonesia</small></div><nav><a href="#beranda">Beranda</a><a href="#peta">Peta Indonesia</a><a href="#masalah">Masalah</a><a href="#data">Data &amp; Statistik</a><a href="#suara">Suara Warga</a><a href="#intelligence">Intelligence</a><a href="#solusi">Solusi</a><a href="#lainnya">Tentang Kami</a></nav><div class="copyright">© 2026 Indonesia Punya Masalah. Hak cipta dilindungi.</div></footer>
+
+<script src="/app.js?v=20260916-5"></script>
 <script src="/public-routing.js?v=20260916-2"></script>
 <script src="/public-functions.js?v=20260916-1"></script>
+<script>
+(()=>{const q=s=>document.querySelector(s), qa=s=>document.querySelectorAll(s);qa('.map-tabs button').forEach(b=>b.addEventListener('click',()=>{qa('.map-tabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}));q('#headerSearch')?.addEventListener('click',()=>q('#searchInput')?.focus());q('#deepIntelligence')?.addEventListener('click',()=>location.href='/portal.html?section=Intelligence');q('#intelligenceBtn')?.addEventListener('click',()=>location.href='/portal.html?section=Intelligence');qa('.nav>a').forEach(a=>a.addEventListener('click',()=>{qa('.nav>a').forEach(x=>x.classList.remove('active'));a.classList.add('active')}));})();
+</script>
 </body></html>
