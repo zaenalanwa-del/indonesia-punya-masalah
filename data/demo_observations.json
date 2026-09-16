@@ -1,0 +1,6 @@
+[
+  {"source_id":"src-official-weather","region":"Kabupaten Purworejo","metric":"rainfall_risk","value":78,"unit":"score","observed_at":"2026-09-13T08:00:00+07:00"},
+  {"source_id":"src-citizen","region":"Kabupaten Purworejo","metric":"flood_reports_24h","value":18,"unit":"reports","observed_at":"2026-09-13T09:00:00+07:00"},
+  {"source_id":"src-news","region":"Kabupaten Purworejo","metric":"flood_related_articles_24h","value":4,"unit":"articles","observed_at":"2026-09-13T09:30:00+07:00"},
+  {"source_id":"src-social","region":"Kabupaten Purworejo","metric":"flood_social_signal_velocity","value":38,"unit":"percent_change","observed_at":"2026-09-13T10:00:00+07:00"}
+]

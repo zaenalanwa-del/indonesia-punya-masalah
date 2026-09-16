@@ -1,0 +1,6 @@
+[
+  {"id":"src-official-weather","name":"Demo Official Weather","publisher":"Synthetic","source_type":"official","access_level":"public","reliability_score":92},
+  {"id":"src-citizen","name":"Citizen Reports","publisher":"Indonesia Punya Masalah","source_type":"human","access_level":"public","reliability_score":58},
+  {"id":"src-news","name":"Demo Local News","publisher":"Synthetic","source_type":"media","access_level":"public","reliability_score":72},
+  {"id":"src-social","name":"Demo Social Signal","publisher":"Synthetic","source_type":"social","access_level":"public","reliability_score":45}
+]

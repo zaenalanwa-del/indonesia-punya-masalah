@@ -1,24 +1,27 @@
-# Indonesia Punya Masalah — Build v2 Vertical Slice
+# INDONESIA PUNYA MASALAH — REAL UI BUILD
 
-This package turns the Master Architecture into a runnable development starter for the first vertical slice:
+UI utama sekarang dipisahkan jelas menjadi dua permukaan:
 
-User question → intent/location/time → source registry → evidence → confidence → answer → sources → next actions.
+- `/` — **UI Publik**: masalah, peta, data & statistik, suara warga, perubahan, wawasan, kemungkinan, dan solusi.
+- `/admin.html` dan `/admin/` — **UI Admin / Control Center**: problem queue, human review, data health, intelligence pipeline, geography sync, RBAC, finance, dan governance.
 
-## Contents
-- `db/schema_v2.sql` — expanded PostgreSQL/PostGIS schema
-- `backend/orchestrator.py` — dependency-free demo orchestrator with deterministic sample data
-- `backend/server.py` — dependency-free local HTTP API server
-- `api/openapi_v2.yaml` — OpenAPI 3.1 API contract
-- `sample_data/demo_sources.json` — demo source registry
-- `sample_data/demo_observations.json` — demo observations/signals
-- `prototype/` — responsive browser prototype connected to the local demo API
-- `docs/` — architecture and vertical-slice specification
-- `ops/` — runbook and validation checklist
+## Prinsip arsitektur
+UI publik tidak menampilkan mesin internal secara mentah. Klaim dan jawaban produksi harus memiliki provenance, evidence, confidence, status, dan penanganan unknown/conflict. Struktur data dan intelligence fabric sebelumnya tetap dipertahankan sebagai fondasi backend.
 
-## Run the demo
+## Jalankan lokal
 ```bash
-python3 backend/server.py
+python3 server/server.py
 ```
-Then open `http://127.0.0.1:8787/`.
+Buka `http://127.0.0.1:8787/` atau `http://127.0.0.1:8787/admin.html`.
 
-The demo deliberately uses synthetic data. Replace it with legally accessible production sources through the ingestion layer.
+## Production wiring
+1. Supabase/PostGIS dan schema inti.
+2. Auth + RBAC.
+3. Geography resmi dan sinkronisasi.
+4. Connector data resmi sesuai akses/lisensi.
+5. Storage foto/video laporan warga.
+6. Human review queue.
+7. Renderer peta real dengan geometry wilayah.
+8. Observability, secrets, CI/CD, dan deployment.
+
+**Catatan:** angka dan isi kartu pada UI adalah data demo/placeholder sampai source produksi diaktifkan.
