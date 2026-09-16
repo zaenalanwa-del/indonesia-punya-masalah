@@ -1,20 +1,38 @@
-# INDONESIA PUNYA MASALAH — REAL UI BUILD 
+# INDONESIA PUNYA MASALAH — REAL UI BUILD v4
 
-UI utama sekarang dipisahkan jelas menjadi dua permukaan:
+## MASTER VISUAL REFERENCE — AKTIF
 
-- `/` — **UI Publik**: masalah, peta, data & statistik, suara warga, perubahan, wawasan, kemungkinan, dan solusi.
+Gambar dashboard yang diberikan pengguna dan dicatat pada `docs/REFERENCE_UI.md` adalah **master acuan tampilan website saat ini**.
+
+Aturan utama: revisi UI publik harus mengikuti gambar tersebut sedekat mungkin pada komposisi, sidebar kiri, header bersih, hero, kartu, grid, tipografi, spacing, peta, feed masalah, suara warga, monitoring, intelligence, dan solusi.
+
+## Permukaan aplikasi
+
+- `/` — **UI Publik utama**: dashboard nasional, peta, masalah, data & statistik, suara warga, monitoring, intelligence, NOW/WHY/THEN/ACTION, future radar, dan solusi.
+- `/portal.html?section=...` — ruang modul publik dengan shell visual yang sama.
 - `/admin.html` dan `/admin/` — **UI Admin / Control Center**: problem queue, human review, data health, intelligence pipeline, geography sync, RBAC, finance, dan governance.
 
-## Prinsip arsitektur
-UI publik tidak menampilkan mesin internal secara mentah. Klaim dan jawaban produksi harus memiliki provenance, evidence, confidence, status, dan penanganan unknown/conflict. Struktur data dan intelligence fabric sebelumnya tetap dipertahankan sebagai fondasi backend.
+## Fitur publik yang sudah dikembangkan pada UI
 
-## Jalankan lokal
-```bash
-python3 server/server.py
-```
-Buka `http://127.0.0.1:8787/` atau `http://127.0.0.1:8787/admin.html`.
+- Navigasi sidebar bertingkat.
+- Pencarian dan filter masalah.
+- Jelajah wilayah dan kategori.
+- Peta Indonesia dengan layer Masalah/Data, pin, legenda, dan zoom.
+- Feed masalah terbaru.
+- Kartu statistik nasional sebagai struktur portal.
+- Form laporan warga dan status penerimaan/review.
+- Modul Data & Statistik dengan tab nasional, wilayah, sumber, dan metodologi.
+- Modul Intelligence dengan Evidence/Provenance, Monitoring, Sinyal Dini, Future Radar, Prediction Ledger, dan Ask Indonesia.
+- Modul Solusi, kolaborasi, outcome, dan dampak.
+- Modul Transparansi, Dokumentasi, API & Data, dan Metodologi.
+- Responsive desktop, tablet, dan mobile.
 
-## Production wiring
+## Prinsip data
+
+UI boleh terisi agar struktur dan pengalaman pengguna dapat dikembangkan, tetapi **data contoh tidak boleh dipresentasikan sebagai fakta nasional produksi**. Status, provenance, evidence, confidence, unknown, conflict, dan waktu observasi harus tetap dibedakan.
+
+## Fondasi produksi
+
 1. Supabase/PostGIS dan schema inti.
 2. Auth + RBAC.
 3. Geography resmi dan sinkronisasi.
@@ -24,5 +42,10 @@ Buka `http://127.0.0.1:8787/` atau `http://127.0.0.1:8787/admin.html`.
 7. Renderer peta real dengan geometry wilayah.
 8. Observability, secrets, CI/CD, dan deployment.
 
-**Catatan:** angka dan isi kartu pada UI adalah data demo/placeholder sampai source produksi diaktifkan.
-CATAT
+## Jalankan lokal
+
+```bash
+python3 server/server.py
+```
+
+Buka `http://127.0.0.1:8787/` atau `http://127.0.0.1:8787/admin.html`.
