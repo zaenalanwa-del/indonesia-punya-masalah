@@ -1,0 +1,16 @@
+/* WASKITA public-facing visual layer */
+:root{--w-blue:#0756a6;--w-blue2:#0b73d1;--w-ink:#102b49}
+body{background:#f5f8fc!important}
+.header .brand strong{font-size:16px!important;letter-spacing:.02em!important}
+.header .brand strong:first-line{font-size:20px!important}
+#home>.hero{background:#0756a6!important;border-radius:18px!important;overflow:hidden!important;position:relative!important;min-height:360px!important;margin:18px auto 12px!important;max-width:1280px!important;box-shadow:0 16px 40px rgba(9,53,95,.15)!important}
+#home>.hero .hero-copy{position:relative!important;z-index:3!important;padding:42px 44px!important;max-width:620px!important;color:#fff!important}
+#home>.hero .hero-copy h1{color:#fff!important;font-size:42px!important;letter-spacing:-.04em!important}
+#home>.hero .hero-copy p{color:#e8f3ff!important}
+#home>.hero .topic-chips{display:none!important}
+#home>.hero .hero-human{position:absolute!important;inset:0 0 0 auto!important;width:58%!important;height:100%!important;background-image:linear-gradient(90deg,#0756a6 0%,rgba(7,86,166,.72) 16%,rgba(7,86,166,.08) 48%,rgba(7,86,166,0) 100%),url('https://commons.wikimedia.org/wiki/Special:Redirect/file/Istana_Garuda_IKN.png')!important;background-size:cover!important;background-position:center!important;opacity:1!important}
+#home>.hero .hero-human>*{display:none!important}
+#home>.hero .search-wrap{max-width:590px!important}
+#home>.hero:after{content:'WASKITA  •  Lihat. Pahami. Antisipasi.';position:absolute;right:26px;bottom:18px;color:rgba(255,255,255,.86);font:700 11px/1.2 Inter,system-ui,sans-serif;letter-spacing:.04em;z-index:4}
+.footer-brand strong{font-size:15px!important}
+@media(max-width:760px){#home>.hero{margin:76px 12px 12px!important;min-height:470px!important}#home>.hero .hero-copy{padding:34px 24px!important}#home>.hero .hero-copy h1{font-size:31px!important}.header .brand strong{font-size:13px!important}.header .brand strong:first-line{font-size:16px!important}#home>.hero .hero-human{width:100%!important;opacity:.78!important;background-position:center!important}#home>.hero:after{right:16px;font-size:9px}}
