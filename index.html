@@ -1,80 +1,27 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Indonesia Punya Masalah</title>
 <meta name="description" content="Portal Data & Aspirasi Publik Indonesia — melihat, memahami, dan mencari solusi bersama.">
-<link rel="stylesheet" href="/styles.css?v=20260916">
+<link rel="stylesheet" href="/site.css?v=20260916">
 </head>
 <body>
-<header class="site-header">
-  <div class="container header-inner">
-    <a class="brand" href="#beranda" aria-label="Indonesia Punya Masalah">
-      <span class="brand-mark"><i></i><b></b></span>
-      <span class="brand-copy"><strong>INDONESIA<br>PUNYA MASALAH</strong><small>Bersama Melihat • Mendengar • Mencari Solusi</small></span>
-    </a>
-    <button class="mobile-menu" id="menuBtn" aria-label="Buka menu">☰</button>
-    <nav class="main-nav" id="mainNav">
-      <a class="active" href="#beranda">Beranda</a>
-      <a href="#peta">Peta Indonesia</a>
-      <a href="#masalah">Masalah</a>
-      <a href="#data">Data &amp; Statistik</a>
-      <a href="#suara">Suara Warga</a>
-      <a href="#intelligence">Intelligence</a>
-      <a href="#solusi">Solusi</a>
-      <a href="#lainnya">Lainnya</a>
-    </nav>
-    <div class="header-actions"><button class="search-icon" id="headerSearch" aria-label="Cari">⌕</button><a class="login" href="#masuk">Masuk</a><a class="signup" href="#daftar">Daftar</a></div>
-  </div>
-</header>
-
+<header class="site-header"><div class="container header-inner">
+<a class="brand" href="#beranda"><span class="brand-mark"><i></i><b></b></span><span class="brand-copy"><strong>INDONESIA<br>PUNYA MASALAH</strong><small>Bersama Melihat • Mendengar • Mencari Solusi</small></span></a>
+<button class="mobile-menu" id="menuBtn" aria-label="Buka menu">☰</button>
+<nav class="main-nav" id="mainNav"><a class="active" href="#beranda">Beranda</a><a href="#peta">Peta Indonesia</a><a href="#masalah">Masalah</a><a href="#data">Data &amp; Statistik</a><a href="#suara">Suara Warga</a><a href="#intelligence">Intelligence</a><a href="#solusi">Solusi</a><a href="#lainnya">Lainnya</a></nav>
+<div class="header-actions"><button class="search-icon" id="headerSearch" aria-label="Cari">⌕</button><a class="login" href="#masuk">Masuk</a><a class="signup" href="#daftar">Daftar</a></div>
+</div></header>
 <main>
-<section class="hero" id="beranda">
-  <div class="hero-bg"></div>
-  <div class="container hero-inner">
-    <div class="hero-copy">
-      <div class="hero-kicker">PORTAL DATA &amp; ASPIRASI PUBLIK</div>
-      <h1>Indonesia <em>Punya Masalah.</em></h1>
-      <p>Dari Desa hingga Pusat, semua masalah bisa dilihat, dipantau, dan dicari solusinya bersama.</p>
-      <form class="hero-search" id="searchForm"><span>⌕</span><input id="searchInput" placeholder="Cari masalah, wilayah, data, atau solusi..." autocomplete="off"><button type="submit">Cari</button></form>
-      <div class="quick-tags"><button>🔎 Kemiskinan</button><button>🎓 Pendidikan</button><button>❤ Kesehatan</button><button>⌂ Infrastruktur</button><button>♻ Lingkungan</button><button>▣ Ekonomi</button></div>
-    </div>
-    <div class="hero-person" aria-hidden="true"><div class="person-silhouette"><span class="head"></span><span class="body"></span><span class="bag"></span></div><div class="handwrite">Suara Anda<br><b>untuk Indonesia</b><br>yang lebih baik</div></div>
-  </div>
-</section>
-
-<section class="stats-wrap"><div class="container stats-grid">
-  <article class="stat-card"><b>38</b><strong>Provinsi</strong><small>seluruh Indonesia</small></article>
-  <article class="stat-card"><b>514</b><strong>Kabupaten/Kota</strong><small>cakupan wilayah</small></article>
-  <article class="stat-card"><b>7.282</b><strong>Kecamatan</strong><small>data administratif</small></article>
-  <article class="stat-card"><b>83.529</b><strong>Desa/Kelurahan</strong><small>hingga tingkat lokal</small></article>
-  <article class="report-card"><div><span>Laporkan Masalah di Sekitar Anda</span><p>Sampaikan kondisi yang Anda lihat. Laporan masuk ke antrean review.</p><button data-report>+ Buat Laporan</button></div><div class="phone">▣</div></article>
-</div></section>
-
-<section class="container section" id="peta"><div class="dashboard">
-  <aside class="explore-card"><div class="explore-head"><h2>Jelajahi Indonesia</h2><p>Pilih wilayah atau kategori untuk melihat masalah dan data.</p></div>
-    <a class="region active" href="#peta"><span>◎</span> Indonesia</a><a class="region" href="#peta"><span>▦</span> Jawa Tengah</a><a class="region" href="#peta"><span>▦</span> Jawa Barat</a><a class="region" href="#peta"><span>▦</span> Jawa Timur</a><a class="region" href="#peta"><span>▦</span> Sumatera</a><a class="region" href="#peta"><span>▦</span> Kalimantan</a>
-    <div class="category-title">KATEGORI MASALAH</div><div class="category-list"><button data-category="Ekonomi">Ekonomi</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button></div><a class="all-link" href="#masalah">Lihat semua masalah →</a>
-  </aside>
-  <section class="map-panel"><div class="panel-head"><div><h2>Peta Indonesia</h2><small>Distribusi masalah berdasarkan wilayah</small></div><div class="map-switch"><button class="active">Masalah</button><button>Data</button></div></div><div class="map-area"><div class="islands"><i class="sumatra"></i><i class="java"></i><i class="kalimantan"></i><i class="sulawesi"></i><i class="papua"></i><i class="bali"></i></div><b class="map-pin pin1">●</b><b class="map-pin pin2">●</b><b class="map-pin pin3">●</b><b class="map-pin pin4">●</b><b class="map-pin pin5">●</b><div class="map-controls"><button>+</button><button>−</button></div><div class="legend"><span><i class="low"></i>Rendah</span><span><i class="mid"></i>Sedang</span><span><i class="high"></i>Tinggi</span><span><i class="very"></i>Sangat tinggi</span></div></div></section>
-  <aside class="latest-panel" id="masalah"><div class="panel-head"><h2>Masalah Terbaru</h2><a href="#masalah">Lihat semua</a></div>
-    <article class="problem"><div class="latest-icon red">⚠</div><div><h3>Jalan rusak dan akses warga</h3><p>Purworejo · 2 jam lalu</p><span class="tag">Infrastruktur</span></div></article>
-    <article class="problem"><div class="latest-icon orange">≈</div><div><h3>Banjir berulang di permukiman</h3><p>Demak · 4 jam lalu</p><span class="tag">Lingkungan</span></div></article>
-    <article class="problem"><div class="latest-icon blue">＋</div><div><h3>Ruang kelas dan fasilitas belajar</h3><p>Wonogiri · 6 jam lalu</p><span class="tag">Pendidikan</span></div></article>
-    <article class="problem"><div class="latest-icon green">♥</div><div><h3>Keterbatasan tenaga medis</h3><p>Lampung Selatan · 8 jam lalu</p><span class="tag">Kesehatan</span></div></article>
-  </aside>
-</div></section>
-
+<section class="hero" id="beranda"><div class="hero-bg"></div><div class="container hero-inner"><div class="hero-copy"><div class="hero-kicker">PORTAL DATA &amp; ASPIRASI PUBLIK</div><h1>Indonesia <em>Punya Masalah.</em></h1><p>Dari Desa hingga Pusat, semua masalah bisa dilihat, dipantau, dan dicari solusinya bersama.</p><form class="hero-search" id="searchForm"><span>⌕</span><input id="searchInput" placeholder="Cari masalah, wilayah, data, atau solusi..." autocomplete="off"><button type="submit">Cari</button></form><div class="quick-tags"><button data-category="Kemiskinan">Kemiskinan</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button><button data-category="Ekonomi">Ekonomi</button></div></div><div class="hero-person" aria-hidden="true"><div class="person-silhouette"><span class="head"></span><span class="body"></span><span class="bag"></span></div><div class="handwrite">Suara Anda<br><b>untuk Indonesia</b><br>yang lebih baik</div></div></div></section>
+<section class="stats-wrap"><div class="container stats-grid"><article class="stat-card"><b>38</b><strong>Provinsi</strong><small>seluruh Indonesia</small></article><article class="stat-card"><b>514</b><strong>Kabupaten/Kota</strong><small>cakupan wilayah</small></article><article class="stat-card"><b>7.282</b><strong>Kecamatan</strong><small>data administratif</small></article><article class="stat-card"><b>83.529</b><strong>Desa/Kelurahan</strong><small>hingga tingkat lokal</small></article><article class="report-card"><div><span>Laporkan Masalah di Sekitar Anda</span><p>Sampaikan kondisi yang Anda lihat. Laporan masuk ke antrean review.</p><button data-report>+ Buat Laporan</button></div><div class="phone">▣</div></article></div></section>
+<section class="container section" id="peta"><div class="dashboard"><aside class="explore-card"><div class="explore-head"><h2>Jelajahi Indonesia</h2><p>Pilih wilayah atau kategori untuk melihat masalah dan data.</p></div><a class="region active" href="#peta">◎ Indonesia</a><a class="region" href="#peta">▦ Jawa Tengah</a><a class="region" href="#peta">▦ Jawa Barat</a><a class="region" href="#peta">▦ Jawa Timur</a><a class="region" href="#peta">▦ Sumatera</a><a class="region" href="#peta">▦ Kalimantan</a><div class="category-title">KATEGORI MASALAH</div><div class="category-list"><button data-category="Ekonomi">Ekonomi</button><button data-category="Pendidikan">Pendidikan</button><button data-category="Kesehatan">Kesehatan</button><button data-category="Infrastruktur">Infrastruktur</button><button data-category="Lingkungan">Lingkungan</button></div><a class="all-link" href="#masalah">Lihat semua masalah →</a></aside><section class="map-panel"><div class="panel-head"><div><h2>Peta Indonesia</h2><small>Distribusi masalah berdasarkan wilayah</small></div><div class="map-switch"><button class="active">Masalah</button><button>Data</button></div></div><div class="map-area"><div class="islands"><i class="sumatra"></i><i class="java"></i><i class="kalimantan"></i><i class="sulawesi"></i><i class="papua"></i><i class="bali"></i></div><b class="map-pin pin1">●</b><b class="map-pin pin2">●</b><b class="map-pin pin3">●</b><b class="map-pin pin4">●</b><b class="map-pin pin5">●</b><div class="map-controls"><button>+</button><button>−</button></div><div class="legend"><span><i class="low"></i>Rendah</span><span><i class="mid"></i>Sedang</span><span><i class="high"></i>Tinggi</span><span><i class="very"></i>Sangat tinggi</span></div></div></section><aside class="latest-panel" id="masalah"><div class="panel-head"><h2>Masalah Terbaru</h2><a href="#masalah">Lihat semua</a></div><article class="problem"><div class="latest-icon red">⚠</div><div><h3>Jalan rusak dan akses warga</h3><p>Purworejo · 2 jam lalu</p><span class="tag">Infrastruktur</span></div></article><article class="problem"><div class="latest-icon orange">≈</div><div><h3>Banjir berulang di permukiman</h3><p>Demak · 4 jam lalu</p><span class="tag">Lingkungan</span></div></article><article class="problem"><div class="latest-icon blue">＋</div><div><h3>Ruang kelas dan fasilitas belajar</h3><p>Wonogiri · 6 jam lalu</p><span class="tag">Pendidikan</span></div></article><article class="problem"><div class="latest-icon green">♥</div><div><h3>Keterbatasan tenaga medis</h3><p>Lampung Selatan · 8 jam lalu</p><span class="tag">Kesehatan</span></div></article></aside></div></section>
 <section class="container lower-grid" id="data"><article class="most-card"><div class="section-head"><h2>Masalah Paling Banyak</h2><a href="#data">Lihat data lengkap →</a></div><div class="most-items"><div class="most economic"><b>EKONOMI</b><strong>32%</strong></div><div class="most social"><b>SOSIAL</b><strong>24%</strong></div><div class="most health"><b>KESEHATAN</b><strong>19%</strong></div><div class="most education"><b>PENDIDIKAN</b><strong>15%</strong></div></div></article><article class="trend-card"><div class="section-head"><h2>Tren &amp; Peringatan</h2><a href="#data">Detail →</a></div><div class="trend"><i>↗</i><span>Harga kebutuhan pokok perlu dipantau</span></div><div class="trend"><i>!</i><span>Curah hujan tinggi di beberapa wilayah</span></div><div class="trend"><i>↗</i><span>Laporan infrastruktur meningkat</span></div></article></section>
-
 <section class="container intelligence-section" id="intelligence"><div class="intelligence-top"><div><span class="blue-kicker">INTELLIGENCE</span><h2>Data yang membantu memahami apa yang terjadi.</h2><p>Gabungkan data, laporan warga, bukti, dan perubahan dari waktu ke waktu.</p></div><button class="outline-btn">Buka Intelligence →</button></div><div class="intelligence-cards"><article><b>01 · EVIDENCE</b><h3>Bukti &amp; Sumber</h3><p>Setiap klaim penting dapat ditelusuri ke sumber dan waktu pengamatan.</p><small>Provenance →</small></article><article><b>02 · MONITORING</b><h3>Pantau Perubahan</h3><p>Bandingkan kondisi wilayah dan topik untuk melihat perubahan.</p><small>Monitoring →</small></article><article><b>03 · SIGNAL</b><h3>Sinyal Dini</h3><p>Temukan pola dan indikator yang perlu diperhatikan lebih lanjut.</p><small>Future Radar →</small></article><article><b>04 · ANSWER</b><h3>Jawaban Terstruktur</h3><p>Bedakan fakta, ketidakpastian, dan informasi yang masih perlu diverifikasi.</p><small>Answer →</small></article></div></section>
-
 <section class="container feature-band" id="solusi"><div class="feature-photo"><div><span>UNTUK KEPUTUSAN YANG TEPAT</span><h2>Data yang lengkap,<br>untuk keputusan yang tepat.</h2><p>Masalah terlihat lebih jelas ketika data, suara warga, dan konteks wilayah berada dalam satu tempat.</p></div></div><div class="feature-list"><h3>Fitur Unggulan</h3><p>✓ Peta dan wilayah Indonesia</p><p>✓ Database masalah publik</p><p>✓ Suara dan laporan warga</p><p>✓ Data &amp; statistik</p><p>✓ Intelligence &amp; monitoring</p><p>✓ Ruang solusi dan kolaborasi</p></div></section>
-
-<section class="report-modal" id="reportModal" aria-hidden="true"><div class="modal-card"><button class="close" aria-label="Tutup">×</button><span class="blue-kicker">SUARA WARGA</span><h2>Laporkan Masalah</h2><p>Laporan akan diterima sebagai laporan warga dan menunggu proses review.</p><form id="reportForm"><label>Judul masalah<input name="title" required placeholder="Contoh: Jalan desa rusak parah"></label><label>Wilayah<input name="location" required placeholder="Desa/Kecamatan/Kabupaten"></label><label>Kategori<select name="category"><option>Infrastruktur</option><option>Pendidikan</option><option>Kesehatan</option><option>Ekonomi</option><option>Lingkungan</option><option>Sosial</option></select></label><label>Deskripsi<textarea name="description" required rows="4" placeholder="Jelaskan kondisi yang Anda lihat..."></textarea></label><button class="signup submit" type="submit">Kirim Laporan</button></form></div></section>
+<section class="report-modal" id="reportModal" aria-hidden="true"><div class="modal-card"><button class="close" aria-label="Tutup">×</button><span class="blue-kicker">SUARA WARGA</span><h2>Laporkan Masalah</h2><p>Laporan diterima sebagai laporan warga dan menunggu proses review.</p><form id="reportForm"><label>Judul masalah<input name="title" required placeholder="Contoh: Jalan desa rusak parah"></label><label>Wilayah<input name="location" required placeholder="Desa/Kecamatan/Kabupaten"></label><label>Kategori<select name="category"><option>Infrastruktur</option><option>Pendidikan</option><option>Kesehatan</option><option>Ekonomi</option><option>Lingkungan</option><option>Sosial</option></select></label><label>Deskripsi<textarea name="description" required rows="4" placeholder="Jelaskan kondisi yang Anda lihat..."></textarea></label><button class="signup submit" type="submit">Kirim Laporan</button></form></div></section>
 </main>
 <footer><div class="container footer-inner"><div><div class="footer-brand"><span class="brand-mark"><i></i><b></b></span><strong>INDONESIA<br>PUNYA MASALAH</strong></div><p>Bersama melihat, mendengar, dan mencari solusi untuk Indonesia.</p></div><div><b>Publik</b><a href="#peta">Peta Indonesia</a><a href="#masalah">Masalah</a><a href="#data">Data &amp; Statistik</a></div><div><b>Partisipasi</b><a href="#suara" data-report>Suara Warga</a><a href="#solusi">Solusi</a><a href="#intelligence">Intelligence</a></div></div><div class="container copyright">© 2026 Indonesia Punya Masalah · Data demo ditampilkan sebagai contoh sampai sumber produksi diaktifkan.</div></footer>
 <script src="/app.js?v=20260916"></script>
-</body>
-</html>
+</body></html>
