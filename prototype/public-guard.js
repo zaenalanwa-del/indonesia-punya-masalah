@@ -18,7 +18,6 @@ function cleanPublicNav(root=document){
 const originalRender=window.render;
 window.render=function(view,arg=''){
   if(isInternalView(view)){
-    // Internal modules belong under /admin/; public navigation falls back to the public information page.
     if(typeof originalRender==='function') return originalRender('more');
     return;
   }
@@ -27,4 +26,7 @@ window.render=function(view,arg=''){
 
 cleanPublicNav();
 new MutationObserver(()=>cleanPublicNav()).observe(document.body,{childList:true,subtree:true});
+
+// Load the public-only live feature layer after the boundary is installed.
+const live=document.createElement('script');live.src='./public-live.js?v=1';live.async=false;document.head.appendChild(live);
 })();
