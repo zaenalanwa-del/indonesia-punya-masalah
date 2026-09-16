@@ -32,7 +32,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site
-          rsync -a --exclude '_site' ./ _site/
+          rsync -a --exclude '_site' --exclude '.git' --exclude '.github' --exclude 'node_modules' ./ _site/
           python3 - <<'PY'
           from pathlib import Path
           for name in ('index.html','admin.html'):
@@ -49,6 +49,17 @@ jobs:
           Path('_site/.nojekyll').touch()
           for p in Path('_site').rglob('server.py'):
               p.unlink()
+          required=['index.html','admin.html','styles.css','app.js','admin.js']
+          missing=[x for x in required if not (Path('_site')/x).is_file()]
+          if missing:
+              raise SystemExit(f'Missing Pages files: {missing}')
+          for name in ('index.html','admin.html'):
+              s=(Path('_site')/name).read_text(encoding='utf-8')
+              for needle in ('/styles.css','/app.js','/admin.js'):
+                  if needle in s:
+                      raise SystemExit(f'Absolute Pages asset path remains in {name}: {needle}')
+          print('Static Pages smoke test: PASS')
+          PY
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
