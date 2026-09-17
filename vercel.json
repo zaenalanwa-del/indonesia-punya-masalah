@@ -3,7 +3,7 @@
   "cleanUrls": true,
   "crons": [
     {
-      "path": "/api/sync?connector=bnpb_catalog,big_boundaries",
+      "path": "/api/sync-cron",
       "schedule": "30 3 * * *"
     }
   ]
