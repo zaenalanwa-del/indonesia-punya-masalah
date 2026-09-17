@@ -53,4 +53,7 @@ $$('.mediaCard').forEach(c=>c.onclick=()=>{openModal('#mediaModal');$('#mediaTit
 $('#reportForm').onsubmit=async e=>{e.preventDefault();let d=Object.fromEntries(new FormData(e.target));d.created_at=new Date().toISOString();d.verification_status='received';try{let r=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});if(!r.ok)throw Error();let j=await r.json();toast('Laporan diterima: '+(j.status||'received'));e.target.reset();closeModals()}catch(_){let arr=JSON.parse(localStorage.getItem('ipm_reports')||'[]');arr.push(d);localStorage.setItem('ipm_reports',JSON.stringify(arr));toast('Laporan tersimpan di perangkat. API server belum menyediakan penyimpanan permanen.');e.target.reset();closeModals()}};
 const counters=$$('[data-count]');if('IntersectionObserver'in window){let io=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting||en.target.dataset.done)return;en.target.dataset.done=1;let n=+en.target.dataset.count,s=performance.now();let f=t=>{let p=Math.min(1,(t-s)/800);en.target.textContent=Math.round(n*(1-Math.pow(1-p,3))).toLocaleString('id-ID');if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}),{threshold:.5});counters.forEach(x=>io.observe(x))}
 })();
-</script></body></html>
+</script><script src="/public-enhance.js?v=20260916-4"></script>
+<script src="/public-routing.js?v=20260916-2"></script>
+<script src="/public-functions.js?v=20260916-1"></script>
+</body></html>
