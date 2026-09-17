@@ -13,6 +13,24 @@ async function getTable(table, query='select=*') {
   return Array.isArray(data) ? data : [];
 }
 
+async function getRegionCounts() {
+  const levels = ['country','province','regency','district','village'];
+  const entries = await Promise.all(levels.map(async level => {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/regions?select=id&is_active=eq.true&level=eq.${encodeURIComponent(level)}&limit=1`, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: 'count=exact'
+      }
+    });
+    if (!r.ok) throw new Error(`regions:${level}: ${r.status}`);
+    const range = r.headers.get('content-range') || '';
+    const total = range.includes('/') ? Number(range.split('/').pop()) : null;
+    return [level, Number.isFinite(total) ? total : 0];
+  }));
+  return Object.fromEntries(entries);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
   if (!SUPABASE_KEY) return res.status(500).json({ error: 'Supabase is not configured' });
@@ -22,6 +40,9 @@ export default async function handler(req, res) {
   const result = { generated_at: new Date().toISOString(), source: 'Supabase', tables: {} };
 
   try {
+    const [regionCounts] = await Promise.all([getRegionCounts()]);
+    result.region_counts = regionCounts;
+
     await Promise.all(requested.map(async table => {
       let q = `select=*&limit=${limit}`;
       if (table === 'regions') q = `select=id,code,parent_code,name,level,latitude,longitude,region_type,official_name,boundary_status,last_synced_at,sync_status&is_active=eq.true&limit=${limit}`;
@@ -34,6 +55,14 @@ export default async function handler(req, res) {
       result.tables[table] = await getTable(table,q);
     }));
     result.counts = Object.fromEntries(Object.entries(result.tables).map(([k,v])=>[k,v.length]));
+    result.data_status = {
+      geography: 'authoritative_database',
+      published_problems: result.tables.problems ? result.tables.problems.length : 0,
+      verified_citizen_reports: result.tables.citizen_reports ? result.tables.citizen_reports.length : 0,
+      intelligence_signals: result.tables.early_signals ? result.tables.early_signals.length : 0,
+      forecasts: result.tables.forecasts ? result.tables.forecasts.length : 0,
+      solutions: result.tables.solutions ? result.tables.solutions.length : 0
+    };
     return res.status(200).json(result);
   } catch (error) {
     console.error('portal-data failed', error);
