@@ -1,29 +1,41 @@
 # REFERENCE UI — INDONESIA PUNYA MASALAH
 
-## Acuan visual aktif
+## FINAL ACUAN VISUAL
 
-Mulai 16 September 2026, gambar dashboard yang diberikan pengguna pada percakapan ini ditetapkan sebagai **master visual utama proyek** untuk seluruh permukaan publik.
+Reference final: `a3ddef09-c54f-4bac-8296-c84498e8af41.png`.
 
-Acuan tersebut adalah gambar dashboard `a3ddef09-c54f-4bac-8296-c84498e8af41.png` yang diberikan ulang oleh pengguna di percakapan.
+This latest image is the authoritative visual reference for the public website. Earlier sidebar-based public designs are historical references only and must not override this final direction.
 
-## Implementasi v4
+### Public composition
+1. Horizontal top header with brand, tagline, navigation, search, Masuk, and Daftar.
+2. Hero landscape with public portal headline, large search, quick categories, and citizen voice visual.
+3. National geography statistic cards and the Laporkan Masalah callout.
+4. Three-column content: Jelajahi Indonesia / Peta Indonesia / Masalah Terbaru.
+5. Masalah Paling Banyak and Tren & Peringatan.
+6. Data yang lengkap, untuk keputusan yang tepat banner.
+7. Fitur Unggulan.
+8. Dark navy footer.
 
-Revisi besar v4 menerapkan acuan tersebut langsung pada struktur halaman, bukan hanya melalui override CSS:
+## FUNCTIONAL EXPANSION
+The reference controls the visual shell, not the feature ceiling. Advanced functions from the project's previous blueprints are integrated behind and inside this shell:
+- multi-level geography;
+- real map layers and geometry;
+- public problem discovery and detail;
+- citizen reports, comments, polling and notifications;
+- data/statistics with source, period, freshness and quality;
+- evidence and provenance;
+- monitoring and early signals;
+- Wawasan and structured analysis;
+- Future Radar / Kemungkinan with assumptions and uncertainty;
+- Solutions, actions, outcomes and learning;
+- Ask Indonesia / structured query flow;
+- authentication and user workspaces;
+- admin moderation, governance, data health, RBAC and audit;
+- connector/sync operations for authorized sources;
+- API, PWA and observability.
 
-- Sidebar navigasi permanen di sebelah kiri.
-- Header atas bersih dan ringan pada area konten.
-- Pencarian, notifikasi, dan akses akun berada di header kanan.
-- Konten utama dimulai di kanan sidebar dan di bawah header.
-- Hero memakai kartu landscape besar dengan headline, pencarian, quick category, dan panel Suara Warga.
-- Statistik dibuat sebagai kartu ringkas sejajar dengan kartu pelaporan.
-- Area tengah memakai komposisi tiga kolom: Jelajahi Indonesia, Peta Indonesia, Masalah Terbaru.
-- Area bawah memakai kartu analisis, monitoring, Intelligence, NOW/WHY/THEN/ACTION, Solusi, dan informasi proyek.
-- Modul `/portal.html` menggunakan shell visual yang sama agar perpindahan halaman tidak terasa seperti aplikasi berbeda.
-- Navigasi bertingkat tetap tersedia pada sidebar, tetapi tidak mengubah struktur visual utama menjadi navbar horizontal.
-- Lapisan `public-enhance.js` lama tidak lagi menyuntik sistem UI kedua yang dapat menimpa master layout.
+## PUBLIC VS ADMIN
+Public UI remains human-first and never exposes internal engine terminology. Admin UI is a separate surface at `/admin.html` and `/admin/` and may be dense and operational.
 
-## Prinsip implementasi
-
-Setiap revisi UI publik harus menggunakan gambar acuan ini sebagai **master visual**, lalu menyesuaikan responsif, interaksi, aksesibilitas, dan data produksi tanpa mengubah karakter dasar layout.
-
-Angka atau isi contoh tidak boleh dipresentasikan sebagai data nasional produksi. Sumber produksi, provenance, confidence, dan status verifikasi harus tetap dibedakan secara jelas.
+## DATA HONESTY
+Official data, citizen reports, social signals, opinions, analysis, and forecasts remain visibly differentiated. No synthetic/demo value may be presented as verified national production data.
