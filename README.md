@@ -1,51 +1,26 @@
-# INDONESIA PUNYA MASALAH — REAL UI BUILD v4
+# INDONESIA PUNYA MASALAH — FINAL PORTAL
 
-## MASTER VISUAL REFERENCE — AKTIF
+## Master visual reference
+Gambar referensi terakhir yang diberikan pengguna menjadi acuan visual final UI publik: header horizontal, tanpa sidebar kiri, hero portal, pencarian utama, statistik, laporan warga, jelajah wilayah, peta Indonesia, masalah terbaru, analitik, monitoring, fitur unggulan, dan footer navy.
 
-Gambar dashboard yang diberikan pengguna dan dicatat pada `docs/REFERENCE_UI.md` adalah **master acuan tampilan website saat ini**.
+## Arsitektur permukaan
+- `/` — UI Publik utama: Beranda, Peta Indonesia, Masalah, Data & Statistik, Suara Warga, Intelligence, Solusi, dan Lainnya melalui pengalaman publik yang sederhana.
+- `/portal.html?section=...` — modul publik dengan shell visual yang konsisten dengan referensi final.
+- `/admin.html` — UI Admin terpisah untuk moderasi laporan, data operasional, RBAC, dan pengelolaan internal.
 
-Aturan utama: revisi UI publik harus mengikuti gambar tersebut sedekat mungkin pada komposisi, sidebar kiri, header bersih, hero, kartu, grid, tipografi, spacing, peta, feed masalah, suara warga, monitoring, intelligence, dan solusi.
+## Prinsip publik
+Mesin internal tidak ditampilkan sebagai control center publik. Publik berinteraksi melalui Peta, Wilayah, Masalah, Data, Suara Warga, Pantau Perubahan, Wawasan, Kemungkinan, dan Solusi. Navigasi publik dapat berkembang menjadi menu → submenu → sub-submenu tanpa mengekspos API, engine, pipeline, registry, configuration, atau model registry.
 
-## Permukaan aplikasi
+## Data & fondasi
+Supabase/PostGIS menjadi fondasi data. Skema inti mencakup regions, citizen_reports, problems, early_signals, forecasts, solutions, evidence, claims, query_runs, knowledge entities/relations, model registry/evaluations, audit logs, RBAC, reports, subscriptions, payments, dan modul operasional lain yang telah tersedia di database.
 
-- `/` — **UI Publik utama**: dashboard nasional, peta, masalah, data & statistik, suara warga, monitoring, intelligence, NOW/WHY/THEN/ACTION, future radar, dan solusi.
-- `/portal.html?section=...` — ruang modul publik dengan shell visual yang sama.
-- `/admin.html` dan `/admin/` — **UI Admin / Control Center**: problem queue, human review, data health, intelligence pipeline, geography sync, RBAC, finance, dan governance.
+Laporan warga dari UI publik disimpan ke `citizen_reports` dengan status awal `unverified`. Admin/moderator melakukan verifikasi atau penolakan. Data terverifikasi dapat menjadi bagian dari pengalaman publik sesuai kebijakan publikasi.
 
-## Fitur publik yang sudah dikembangkan pada UI
-
-- Navigasi sidebar bertingkat.
-- Pencarian dan filter masalah.
-- Jelajah wilayah dan kategori.
-- Peta Indonesia dengan layer Masalah/Data, pin, legenda, dan zoom.
-- Feed masalah terbaru.
-- Kartu statistik nasional sebagai struktur portal.
-- Form laporan warga dan status penerimaan/review.
-- Modul Data & Statistik dengan tab nasional, wilayah, sumber, dan metodologi.
-- Modul Intelligence dengan Evidence/Provenance, Monitoring, Sinyal Dini, Future Radar, Prediction Ledger, dan Ask Indonesia.
-- Modul Solusi, kolaborasi, outcome, dan dampak.
-- Modul Transparansi, Dokumentasi, API & Data, dan Metodologi.
-- Responsive desktop, tablet, dan mobile.
-
-## Prinsip data
-
-UI boleh terisi agar struktur dan pengalaman pengguna dapat dikembangkan, tetapi **data contoh tidak boleh dipresentasikan sebagai fakta nasional produksi**. Status, provenance, evidence, confidence, unknown, conflict, dan waktu observasi harus tetap dibedakan.
-
-## Fondasi produksi
-
-1. Supabase/PostGIS dan schema inti.
-2. Auth + RBAC.
-3. Geography resmi dan sinkronisasi.
-4. Connector data resmi sesuai akses/lisensi.
-5. Storage foto/video laporan warga.
-6. Human review queue.
-7. Renderer peta real dengan geometry wilayah.
-8. Observability, secrets, CI/CD, dan deployment.
+## Keamanan
+RLS aktif pada tabel inti. Akses admin laporan dibatasi melalui role `admin`, `super_admin`, atau `moderator`. Jangan pernah menaruh service-role secret di repository atau browser. Anti-spam, rate limiting, validasi konten, storage media, dan kebijakan publikasi tetap merupakan lapisan produksi yang harus dijaga.
 
 ## Jalankan lokal
-
 ```bash
 python3 server/server.py
 ```
-
 Buka `http://127.0.0.1:8787/` atau `http://127.0.0.1:8787/admin.html`.
