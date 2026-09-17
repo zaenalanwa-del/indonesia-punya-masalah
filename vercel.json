@@ -1,3 +1,10 @@
 {
-  "cleanUrls": true
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "crons": [
+    {
+      "path": "/api/sync?connector=bnpb_catalog,big_boundaries",
+      "schedule": "30 3 * * *"
+    }
+  ]
 }
