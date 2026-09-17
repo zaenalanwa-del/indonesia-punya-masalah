@@ -1,21 +1,29 @@
 INDONESIA PUNYA MASALAH — MASTER VISUAL REFERENCE
 
-STATUS: ACTIVE
-DATE: 2026-09-16
+STATUS: FINAL / ACTIVE
+DATE: 2026-09-17
+REFERENCE FILE: a3ddef09-c54f-4bac-8296-c84498e8af41.png
 
-The dashboard image supplied by the user and recorded in docs/REFERENCE_UI.md is the active master visual reference for the public website.
+The latest image supplied by the user is the FINAL visual authority for the PUBLIC website. It supersedes earlier UI directions.
 
-DO NOT revert the public site to a horizontal top navbar as its primary structure.
+FINAL PUBLIC VISUAL RULES
+- horizontal top header/navigation; NO permanent left sidebar on the public surface
+- Indonesian flag mark + INDONESIA PUNYA MASALAH branding
+- clean horizontal navigation: Beranda, Peta Indonesia, Masalah, Data & Statistik, Suara Warga, Intelligence, Solusi, Lainnya
+- hero landscape with Portal Data & Aspirasi Publik, Indonesia Punya Masalah, public search, category pills, and citizen voice visual
+- four national geography statistic cards plus the Laporkan Masalah callout
+- three-column main composition: Jelajahi Indonesia, Peta Indonesia, Masalah Terbaru
+- category/problem summaries and Tren & Peringatan
+- wide Data yang lengkap, untuk keputusan yang tepat banner
+- Fitur Unggulan panel
+- dark navy footer with public navigation and social links
+- rounded cards, generous whitespace, clear sans-serif typography, blue/white base with red/green/orange accents
 
-Primary visual rules:
-- permanent left sidebar
-- clean top header over the content area
-- large dashboard hero
-- compact white cards and tight grid
-- Indonesia map + latest problems composition
-- citizen voice/reporting panel
-- monitoring/intelligence/solution sections below
-- consistent typography, spacing, radius, borders and shadows
-- same visual shell across public modules
+FUNCTIONAL RULE
+The final image controls COMPOSITION and visual language. Advanced capabilities are added inside that composition rather than replacing it with an admin-style dashboard.
 
-Every future public UI revision must start from this reference and preserve the overall composition while expanding functionality.
+ADMIN VISUAL
+The admin surface is separate at /admin.html (and /admin/) and may use a denser operational layout. It must never replace or override the public visual reference.
+
+DATA RULE
+Real data, citizen reports, evidence, analysis, signals, forecasts, and solutions must retain provenance, time/period, confidence, verification state, and uncertainty. Demo content must never be presented as verified national production data.
