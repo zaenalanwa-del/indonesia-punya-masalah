@@ -28,4 +28,7 @@
 <script>
 const qs=s=>document.querySelector(s);document.querySelectorAll('[data-sub]').forEach(b=>b.addEventListener('click',()=>{const x=qs('#'+b.dataset.sub);x.classList.toggle('open');b.querySelector('.arrow').textContent=x.classList.contains('open')?'⌃':'⌄'}));
 function modal(){qs('#modal').classList.add('show')}function close(){qs('#modal').classList.remove('show')}qs('#comment').onclick=modal;qs('#close').onclick=close;qs('#cancel').onclick=close;qs('#send').onclick=()=>{close();alert('Suara warga berhasil masuk ke antrean review.');};qs('#bell').onclick=()=>alert('Tidak ada notifikasi baru yang perlu ditindaklanjuti.');qs('#search').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.value.trim())alert('Pencarian: '+e.target.value.trim())});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-</script></body></html>
+</script><script src="/public-enhance.js?v=20260916-4"></script>
+<script src="/public-routing.js?v=20260916-2"></script>
+<script src="/public-functions.js?v=20260916-1"></script>
+</body></html>
