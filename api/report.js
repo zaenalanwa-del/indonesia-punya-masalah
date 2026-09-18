@@ -32,6 +32,11 @@ export default async function handler(req, res) {
     }
   };
   if (body.region_id) payload.region_id = clean(body.region_id, 80);
+  else if (body.region_name) {
+    const rn = clean(body.region_name, 160);
+    const rr = await fetch(`${SUPABASE_URL}/rest/v1/regions?select=id&is_active=eq.true&name=ilike.*${encodeURIComponent(rn)}*&limit=1`, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (rr.ok) { const rows = await rr.json(); if (rows[0]?.id) payload.region_id = rows[0].id; }
+  }
 
   const r = await fetch(`${SUPABASE_URL}/rest/v1/citizen_reports`, {
     method: 'POST',
