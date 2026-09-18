@@ -48,10 +48,30 @@ async function forgotPassword(){
 openModal('Lupa Kata Sandi','<form class="authForm" id="resetForm"><input id="resetEmail" type="email" required placeholder="Email akun Anda"><button class="cta" type="submit">Kirim Tautan Reset</button><p class="authNote" id="resetMsg">Kami akan mengirim tautan untuk membuat kata sandi baru.</p></form>');
 $('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/#reset-password'});m.textContent=r.error?r.error.message:'Tautan reset sudah dikirim. Periksa email Anda.'});
 }
-async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();hydrate(portal);return portal}catch(e){console.warn(e);return null}}
+
+function initLiveProblemMap(rows=[]){
+ const el=$('.mapbox'); if(!el||!window.L)return;
+ el.innerHTML='<div class="mapTools"><button class="mapLayer active" data-layer="street">Peta</button><button class="mapLayer" data-layer="satellite">Satelit</button><span class="mapLive">● LIVE</span></div><div class="mapLegend"><b>Peta Masalah & Kejadian</b><span>🔴 Resmi</span><span>🟠 Berita</span><span>🔵 Laporan</span></div>';
+ const map=L.map(el,{scrollWheelZoom:false}).setView([-2.5,118],4.6);
+ const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
+ const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri'});
+ const layer=L.layerGroup().addTo(map);
+ const color=r=>r.source_type==='official_disaster'||r.source_type==='official_seismic'?'red':r.source_type==='news_signal'?'orange':'blue';
+ rows.filter(r=>Number.isFinite(Number(r.latitude))&&Number.isFinite(Number(r.longitude))).forEach(r=>{
+   const cls=color(r);
+   const icon=L.divIcon({className:'live-marker-wrap',html:'<span class="live-marker '+cls+'"></span>',iconSize:[18,18],iconAnchor:[9,9]});
+   const precision=r.metadata?.location_precision==='exact'?'Koordinat sumber':'Perkiraan pusat wilayah';
+   const popup='<div class="incidentPopup"><b>'+esc(r.title)+'</b><br><span>'+esc(r.incident_type||'Peristiwa')+' · '+esc(r.status||'unverified')+'</span><hr><b>Lokasi</b><br>'+esc(r.location_text||'Tidak tersedia')+'<br><b>Koordinat</b><br>'+Number(r.latitude).toFixed(5)+', '+Number(r.longitude).toFixed(5)+'<br><small>'+esc(precision)+' · Sumber: '+esc(r.source_name)+'</small>'+(r.source_url?'<br><a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">Buka sumber →</a>':'')+'</div>';
+   L.marker([Number(r.latitude),Number(r.longitude)],{icon}).addTo(layer).bindPopup(popup);
+ });
+ $('.mapLayer').forEach(b=>b.addEventListener('click',()=>{$('.mapLayer').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.layer==='satellite'){map.removeLayer(street);satellite.addTo(map)}else{map.removeLayer(satellite);street.addTo(map)}}));
+ setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
+}
+
+async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();try{const lr=await fetch('/api/live-map',{cache:'no-store'});portal.live_incidents=lr.ok?await lr.json():[]}catch{portal.live_incidents=[]}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
 function hydrate(d){
 const rc=d.region_counts||{};const hs=$$('.heroStat b');if(hs[0])hs[0].textContent=fmt(rc.province)+' Provinsi';if(hs[1])hs[1].textContent=fmt(rc.regency)+' Kabupaten/Kota';if(hs[2])hs[2].textContent=fmt(rc.district)+' Kecamatan';if(hs[3])hs[3].textContent=fmt(rc.village)+' Desa/Kelurahan';
-const problems=d.tables?.problems||[], reports=d.tables?.citizen_reports||[], signals=d.tables?.early_signals||[], forecasts=d.tables?.forecasts||[], solutions=d.tables?.solutions||[];
+const live=d.live_incidents||[];initLiveProblemMap(live);const problems=d.tables?.problems||[], reports=d.tables?.citizen_reports||[], signals=d.tables?.early_signals||[], forecasts=d.tables?.forecasts||[], solutions=d.tables?.solutions||[];
 const issueGrid=$('.issueGrid');if(issueGrid){if(!problems.length&&!reports.length)issueGrid.innerHTML='<div style="grid-column:1/-1;padding:28px;text-align:center;color:#789">Belum ada masalah terbit/terverifikasi di database publik.</div>';else{const rows=[...problems.map(x=>({...x,_type:'problem'})),...reports.map(x=>({...x,_type:'report'}))].sort((a,b)=>new Date(b.updated_at||b.reported_at||0)-new Date(a.updated_at||a.reported_at||0)).slice(0,4);issueGrid.innerHTML=rows.map((x,i)=>'<article class="issue"><img src="/assets/'+(['problem-road.svg','problem-flood.svg','problem-school.svg','problem-health.svg'][i%4])+'" alt=""><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>'+esc(x.severity||'')+' · '+esc(x.updated_at||x.reported_at||'')+'</p></div></article>').join('')}}
 const q=$$('.q');const vals=[problems.filter(x=>['active','open','ongoing'].includes(String(x.status||'').toLowerCase())).length,problems.filter(x=>['resolved','closed','completed'].includes(String(x.status||'').toLowerCase())).length,reports.length,solutions.length];q.forEach((el,i)=>{const b=el.querySelector('b');if(b)b.textContent=fmt(vals[i])});
 const voice=$('#citizenVoice');if(voice){voice.innerHTML=reports.length?reports.slice(0,3).map(x=>'<div class="rankrow"><span>◉</span><span>'+esc(x.title||'Laporan warga')+'<br><small>'+esc(x.category||'')+' · '+esc(x.reported_at||'')+'</small></span></div>').join(''):'<div class="rankrow"><span>◉</span><span>Belum ada suara warga terverifikasi.</span></div>'}
