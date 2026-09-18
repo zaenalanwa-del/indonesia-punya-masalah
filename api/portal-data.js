@@ -1,5 +1,5 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gfggmkeucgqkkyvummpu.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_ptCVbq9h15prKhT0OO5Zmg_LkE3cbw0';
 
 const allowed = new Set(['regions','problems','early_signals','forecasts','solutions','citizen_reports','data_sources']);
 
