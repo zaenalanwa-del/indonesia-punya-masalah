@@ -1,2 +1,15 @@
 const BASE='https://gfggmkeucgqkkyvummpu.supabase.co/functions/v1/public-portal-api';
-export default async function handler(req,res){if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});try{const q=new URLSearchParams();q.set('action','data');q.set('limit',String(Math.min(Math.max(Number(req.query.limit)||20,1),100)));const r=await fetch(BASE+'?'+q.toString());const text=await r.text();res.status(r.status);res.setHeader('Content-Type','application/json');return res.send(text)}catch(e){return res.status(502).json({error:'Data portal unavailable',message:e.message})}}
+export default async function handler(req,res){
+  if(req.method!=='GET')return res.status(405).json({error:'Method not allowed'});
+  try{
+    const q=new URLSearchParams();
+    q.set('action','data');
+    q.set('limit',String(Math.min(Math.max(Number(req.query.limit)||20,1),100)));
+    const headers={};
+    if(req.headers.authorization)headers.Authorization=req.headers.authorization;
+    const r=await fetch(BASE+'?'+q.toString(),{headers});
+    const text=await r.text();
+    res.status(r.status);res.setHeader('Content-Type','application/json');
+    return res.send(text);
+  }catch(e){return res.status(502).json({error:'Data portal unavailable',message:e.message})}
+}
