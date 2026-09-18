@@ -68,7 +68,7 @@ function initLiveProblemMap(rows=[]){
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
-async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();try{const lr=await fetch('/api/live-map',{cache:'no-store'});portal.live_incidents=lr.ok?await lr.json():[]}catch{portal.live_incidents=[]}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
+async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents=lj.incidents||[]}catch{portal.live_incidents=[]}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
 function hydrate(d){
 const rc=d.region_counts||{};const hs=$$('.heroStat b');if(hs[0])hs[0].textContent=fmt(rc.province)+' Provinsi';if(hs[1])hs[1].textContent=fmt(rc.regency)+' Kabupaten/Kota';if(hs[2])hs[2].textContent=fmt(rc.district)+' Kecamatan';if(hs[3])hs[3].textContent=fmt(rc.village)+' Desa/Kelurahan';
 const live=d.live_incidents||[];initLiveProblemMap(live);const problems=d.tables?.problems||[], reports=d.tables?.citizen_reports||[], signals=d.tables?.early_signals||[], forecasts=d.tables?.forecasts||[], solutions=d.tables?.solutions||[];
