@@ -1,5 +1,5 @@
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://gfggmkeucgqkkyvummpu.supabase.co';
-const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || 'sb_publishable_ptCVbq9h15prKhT0OO5Zmg_LkE3cbw0';
+const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdmZ2dta2V1Y2dxa2t5dnVtbXB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkzMDAxNDgsImV4cCI6MjEwNDg3NjE0OH0.6I5PTCZ_NddP6gNPaQy1yxuqz4izXlbB0MknYUSYM5c';
 
 const clean = (v, max = 5000) => v == null ? null : String(v).trim().slice(0, max) || null;
 const numberOrNull = v => { if (v === '' || v == null) return null; const n = Number(v); return Number.isFinite(n) ? n : null; };
