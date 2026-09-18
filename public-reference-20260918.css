@@ -7,3 +7,5 @@
 .authForm button{margin-top:4px}
 .authNote{font-size:12px;color:#6f7f92}
 .authLinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+
+.authTwo,.authThree{display:grid;gap:10px}.authTwo{grid-template-columns:1fr 1fr}.authThree{grid-template-columns:1fr 1fr 1fr}.authForm select{min-width:0}.gender{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px;margin:4px 0}.gender label{display:inline-flex;gap:5px;align-items:center}.privacy{font-size:12px;line-height:1.5;color:#667085;margin:4px 0}.authForm .outline{width:100%}@media(max-width:520px){.authTwo,.authThree{grid-template-columns:1fr}.gender{display:grid;grid-template-columns:1fr}.gender>span{grid-column:1/-1}}
