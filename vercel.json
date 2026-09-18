@@ -5,10 +5,6 @@
     {
       "path": "/api/sync-cron",
       "schedule": "30 3 * * *"
-    },
-    {
-      "path": "/api/live-incidents",
-      "schedule": "*/10 * * * *"
     }
   ]
 }
