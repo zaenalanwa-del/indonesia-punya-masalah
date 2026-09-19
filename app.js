@@ -114,7 +114,7 @@ function publicIssueImages(x){
  else if(typeof raw==='string')arr=raw.split(/[,\\n]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
  arr=[...new Set(arr.map(String))].slice(0,10);
- return arr.map(u=>/^(https?:\\/\\/)(commons\\.wikimedia\\.org|upload\\.wikimedia\\.org)/i.test(u)?photoProxy(u):u);
+ return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
 }
 function publicIssueImage(x){
  const urls=publicIssueImages(x);
