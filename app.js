@@ -134,41 +134,6 @@ function renderPublicIssueCards(rows){
    return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
  }).join('');
 }
-function publicIssueRegion(x){
- return x.region_name||x.location_text||x.region||x.region?.name||x.metadata?.region_name||'Wilayah belum diisi';
-}
-function publicIssueTime(x){
- return x.updated_at||x.reported_at||x.created_at||'';
-}
-function openPublicIssue(x){
- const el=document.getElementById('reportDetail');const list=document.getElementById('masalah');if(!el||!list)return;
- const im=publicIssueImage(x);const src=im.url||im.fallback;const isReal=!!im.url;
- el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan dalam satu halaman.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div><img class="reportDetailImage" src="'+esc(src)+'" alt="Foto '+esc(x.title||'laporan')+'" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||'Foto laporan'):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
- el.style.display='block';list.style.display='none';history.replaceState(null,'','#laporan/'+encodeURIComponent(x.id||'item'));el.scrollIntoView({behavior:'smooth',block:'start'});
- document.getElementById('backReports')?.addEventListener('click',()=>{el.style.display='none';list.style.display='block';history.replaceState(null,'','#masalah');list.scrollIntoView({behavior:'smooth',block:'start'})});
-}
-function renderPublicIssueCards(rows){
- const issueGrid=document.querySelector('.issueGrid');if(!issueGrid)return;
- window.publicIssueIndex=Object.fromEntries(rows.map((x,i)=>[String(x.id||('issue-'+i)),x]));
- issueGrid.innerHTML=rows.map((x,i)=>{
-   const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=im.url?'Foto laporan':'Foto kategori';
-   return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="lazy" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
- }).join('');
-}
-function hydrate(d){
-const rc=d.region_counts||{};const hs=$$('.heroStat b');if(hs[0])hs[0].textContent=fmt(rc.province)+' Provinsi';if(hs[1])hs[1].textContent=fmt(rc.regency)+' Kabupaten/Kota';if(hs[2])hs[2].textContent=fmt(rc.district)+' Kecamatan';if(hs[3])hs[3].textContent=fmt(rc.village)+' Desa/Kelurahan';
-const live=d.live_incidents||[];initLiveProblemMap(live);const problems=d.tables?.problems||[], reports=d.tables?.citizen_reports||[], signals=d.tables?.early_signals||[], forecasts=d.tables?.forecasts||[], solutions=d.tables?.solutions||[];
-const issueGrid=$('.issueGrid');
-if(issueGrid){
-  const allRows=[...problems.map(x=>({...x,_type:'problem'})),...reports.map(x=>({...x,_type:'report'}))];
-  const rows=(allRows.length?allRows:fallbackPublicReports).sort((a,b)=>new Date(b.updated_at||b.reported_at||b.created_at||0)-new Date(a.updated_at||a.reported_at||a.created_at||0));
-  renderPublicIssueCards(rows.slice(0,4));
-}
-const q=$$('.q');const vals=[problems.filter(x=>['active','open','ongoing'].includes(String(x.status||'').toLowerCase())).length,problems.filter(x=>['resolved','closed','completed'].includes(String(x.status||'').toLowerCase())).length,reports.length,solutions.length];q.forEach((el,i)=>{const b=el.querySelector('b');if(b)b.textContent=fmt(vals[i])});
-const voice=$('#citizenVoice');if(voice){voice.innerHTML=reports.length?reports.slice(0,3).map(x=>'<div class="rankrow"><span>◉</span><span>'+esc(x.title||'Laporan warga')+'<br><small>'+esc(x.category||'')+' · '+esc(x.reported_at||'')+'</small></span></div>').join(''):'<div class="rankrow"><span>◉</span><span>Belum ada suara warga terverifikasi.</span></div>'}
-const rank=$('.rank');if(rank){const counts={};problems.forEach(x=>{const k=x.category||'Lainnya';counts[k]=(counts[k]||0)+1});const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);const rows=sorted.length?sorted.map((x,i)=>'<div class="rankrow"><span class="num">'+(i+1)+'</span><span>'+esc(x[0])+'</span><strong>'+fmt(x[1])+' masalah</strong></div>').join(''):'<div class="rankrow"><span>Belum ada data masalah terbit.</span></div>';rank.querySelectorAll('.rankrow').forEach(x=>x.remove());rank.insertAdjacentHTML('beforeend',rows)}
-const trends=$('.trendItems');if(trends)trends.innerHTML=(signals.length?signals.slice(0,4).map(s=>'<div class="rankrow"><span>↗</span><span>'+esc(s.title||s.description||'Sinyal baru')+'</span><strong>'+esc(s.change_percent!=null?s.change_percent+'%':'')+'</strong></div>').join(''):'<div class="rankrow"><span>Belum ada sinyal intelligence yang dipublikasikan.</span></div>');
-}
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
 async function report(){
  await getSession();
