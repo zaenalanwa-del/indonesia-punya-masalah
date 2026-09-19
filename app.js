@@ -188,7 +188,7 @@ function handleSubmenu(t){
  if(['Pola','Penyebab','Tren','Hubungan','Ringkasan Wilayah'].includes(t)) return show('insights');
  if(['Perkiraan','Perbandingan','Skenario'].includes(t)) return navList(t,forecasts.slice(0,10).map(x=>({title:x.title||x.name,meta:x.horizon||x.confidence||'Forecast'})),'Belum ada forecast yang dipublikasikan.');
  if(['Solusi Warga','Solusi Pemerintah','Praktik Baik','Evaluasi Hasil'].includes(t)) return navList(t,solutions.slice(0,10).map(x=>({title:x.title||x.name,meta:x.type||x.status||'Solusi'})),'Belum ada solusi yang dipublikasikan.');
- if(t==='Pusat Fitur'){document.querySelector('#fitur')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Tentang Nuansa Kita') return show('about');
+ if(t==='Pusat Fitur'){document.querySelector('#fitur')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Sumber & Media'){document.querySelector('#sumber-media')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Tentang Nuansa Kita') return show('about');
  if(t==='Bantuan') return openModal('Bantuan','<p>Gunakan menu panah untuk membuka submenu. Klik item submenu untuk membuka data atau fitur terkait.</p>');
  if(t==='Kontak') return openModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
  if(t==='Kebijakan & Privasi') return openModal('Kebijakan & Privasi','<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
