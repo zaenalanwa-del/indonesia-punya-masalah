@@ -175,7 +175,169 @@ async function report(){
 }
 const content={map:['Peta Indonesia','<p>Peta publik menggunakan geografi nasional dari database dan dapat diperluas dengan filter wilayah, kategori, periode, dan sumber.</p><div class="mapbox"></div>'],data:['Data & Statistik','<p>Modul ini membaca dataset, indikator, periode, kualitas, dan sumber dari portal data.</p><div class="rankrow"><span>Dataset terdaftar</span><strong>'+fmt(portal?.tables?.data_sources?.length)+'</strong></div>'],monitor:['Pantau Perubahan','<p>Modul membaca early signals yang telah dipublikasikan. Sinyal tanpa data tidak dibuat-buat.</p><div class="rankrow"><span>Sinyal tersedia</span><strong>'+fmt(portal?.tables?.early_signals?.length)+'</strong></div>'],insights:['Wawasan & Intelligence','<p>Analisis berbasis claims, evidence, observations, dan sumber. Hasil hanya ditampilkan bila tersedia di sistem.</p>'],forecast:['Kemungkinan / Future Radar','<p>Forecast publik ditampilkan dengan horizon, model, confidence, faktor, dan ketidakpastian ketika data tersedia.</p><div class="rankrow"><span>Forecast tersedia</span><strong>'+fmt(portal?.tables?.forecasts?.length)+'</strong></div>'],solutions:['Solusi','<p>Solusi publik berasal dari tabel solusi dan dapat memuat tipe, dampak, risiko, kelayakan, asumsi, serta outcome.</p><div class="rankrow"><span>Solusi tersedia</span><strong>'+fmt(portal?.tables?.solutions?.length)+'</strong></div>'],about:['Tentang Nuansa Kita','<p>NUANSA KITA — ASPIRASI PUBLIK INDONESIA adalah portal untuk melihat masalah, mendengar suara warga, memahami data, memantau perubahan, mengantisipasi kemungkinan, dan mencari solusi secara transparan.</p>']};
 function show(k){const v=content[k]||content.about;openModal(v[0],v[1])}
-const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about')};
+
+async function adFetch(action,options={}){
+ const method=options.method||'GET';
+ const qs=new URLSearchParams({action});
+ if(options.params)Object.entries(options.params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')qs.set(k,String(v))});
+ const headers={...(method!=='GET'?{'Content-Type':'application/json'}:{}),...authHeaders()};
+ const r=await fetch('/api/ads?'+qs.toString(),{method,headers,body:method==='GET'?undefined:JSON.stringify(options.body||{}),cache:'no-store'});
+ const d=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error(d.error||d.message||'Layanan iklan tidak tersedia');
+ return d;
+}
+function visitorKey(){
+ try{
+   let k=localStorage.getItem('nuansa_ad_visitor_key');
+   if(!k){k=crypto.randomUUID();localStorage.setItem('nuansa_ad_visitor_key',k)}
+   return k;
+ }catch{return 'session-'+Math.random().toString(36).slice(2)}
+}
+async function trackSiteVisit(){
+ try{await adFetch('visit',{method:'POST',body:{visitor_key:visitorKey()}})}catch{}
+}
+async function trackAdEvent(campaign_id,event_type){
+ try{await adFetch('event',{method:'POST',body:{campaign_id,event_type,visitor_key:visitorKey()}})}catch{}
+}
+function money(v){return 'Rp '+fmt(v)}
+async function loadPublicAds(){
+ const placements=['hero_banner','in_feed','sidebar','footer'];
+ await Promise.all(placements.map(async placement=>{
+   try{
+     const d=await adFetch('ads',{params:{placement,limit:4}});
+     const ads=d.ads||[];
+     document.querySelectorAll('[data-ad-placement="'+placement+'"]').forEach(slot=>{
+       if(!ads.length)return;
+       const ad=ads[0];
+       slot.classList.remove('empty');
+       slot.innerHTML='<span class="adSlotLabel">'+esc((ad.brand_name||'Sponsor')+' · '+esc(placement.replace('_',' ')))+'</span><a class="adCreative" href="'+esc(ad.destination_url||'#')+'" target="_blank" rel="noopener" data-ad-campaign="'+esc(ad.campaign_id)+'"><img src="'+esc(ad.media_url||'')+'" alt="'+esc(ad.title||ad.campaign_name||'Iklan')+'" loading="lazy" referrerpolicy="no-referrer"><span><h4>'+esc(ad.title||ad.campaign_name||'Iklan')+'</h4><p>'+esc(ad.description||'Informasi sponsor')+'</p><b>'+esc(ad.cta_text||'Lihat Selengkapnya')+' →</b></span></a>';
+       const link=slot.querySelector('[data-ad-campaign]');
+       if(link){
+         link.addEventListener('click',()=>trackAdEvent(ad.campaign_id,'click'));
+         if('IntersectionObserver' in window){
+           const io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){trackAdEvent(ad.campaign_id,'impression');io.disconnect()}},{threshold:.5});
+           io.observe(link);
+         }else trackAdEvent(ad.campaign_id,'impression');
+       }
+     });
+   }catch{}
+ }));
+ try{
+   const p=await adFetch('pricing');
+   const summary=document.getElementById('publicAdPriceSummary');
+   if(summary)summary.textContent=(p.tier_label||'Starter')+' · '+fmt(p.traffic_unique_30d||0)+' pengunjung unik 30 hari · faktor harga ×'+Number(p.factor||1).toFixed(2);
+ }catch{}
+}
+function adStatusBadge(s){
+ const v=String(s||'draft').toLowerCase();
+ const cls=['active','approved','paid','completed'].includes(v)?'ok':['rejected','cancelled'].includes(v)?'bad':'warn';
+ const label={pending_review:'Menunggu review',approved:'Disetujui',active:'Aktif',paused:'Dijeda',rejected:'Ditolak',cancelled:'Dibatalkan',draft:'Draft',completed:'Selesai'}[v]||v;
+ return '<span class="adStatus '+cls+'">'+esc(label)+'</span>';
+}
+function advertiserDashboardHtml(d){
+ const a=d.advertiser;
+ const p=d.pricing||{};
+ const campaigns=d.campaigns||[];
+ const slots=p.slots||[];
+ const profile=a?'<div class="adCard"><h3>Profil Pengiklan</h3><p><b>'+esc(a.business_name)+'</b><br>'+esc(a.contact_name||'')+' · '+esc(a.email||'')+'<br>'+esc(a.phone||'')+'</p><small class="adHint">Status: '+adStatusBadge(a.status)+'</small></div>':'<div class="adCard"><h3>Profil Pengiklan</h3><p class="adHint">Profil belum dibuat. Gunakan tombol Pasang Iklan untuk mendaftarkan bisnis.</p></div>';
+ const priceRows=slots.map(s=>'<tr><td><strong>'+esc(s.name)+'</strong><br><small>'+esc(s.format||'')+'</small></td><td>'+money(s.price_monthly)+'</td><td>×'+Number(s.factor||1).toFixed(2)+'</td></tr>').join('');
+ const rows=campaigns.length?campaigns.map(c=>'<tr><td><strong>'+esc(c.campaign_name)+'</strong><br><small>'+esc(c.placement||'')+'</small></td><td>'+adStatusBadge(c.status)+'</td><td>'+money(c.quoted_price||c.budget||0)+'</td><td>'+fmt(c.impressions||0)+' / '+fmt(c.clicks||0)+'</td></tr>').join(''):'<tr><td colspan="4" class="adHint">Belum ada kampanye.</td></tr>';
+ return '<div class="adModalGrid">'+profile+'<div class="adCard"><h3>Tier Trafik Saat Ini</h3><p><b>'+esc(p.tier_label||'Starter')+'</b><br>'+fmt(p.traffic_unique_30d||0)+' pengunjung unik 30 hari · faktor ×'+Number(p.factor||1).toFixed(2)+'</p><button class="cta" id="newAdCampaign">Buat Kampanye →</button>'+(d.is_admin?'<button class="outline" id="openRedcard" style="margin-left:6px">REDCARD Admin</button>':'')+'</div></div><div class="adCard" style="margin-top:14px"><h3>Paket & Harga</h3><table class="adTable"><thead><tr><th>Slot</th><th>Harga aktif / 30 hari</th><th>Faktor</th></tr></thead><tbody>'+priceRows+'</tbody></table></div><div class="adCard" style="margin-top:14px"><h3>Kampanye Saya</h3><table class="adTable"><thead><tr><th>Kampanye</th><th>Status</th><th>Quote</th><th>Tayang / Klik</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+async function advertiserDashboard(){
+ await getSession();
+ if(!session){openModal('Pusat Pengiklan','<p>Login diperlukan untuk membuat dan mengelola kampanye iklan.</p><button class="cta" id="adLoginBtn">Masuk / Daftar →</button>');$('#adLoginBtn')?.addEventListener('click',()=>authPanel());return}
+ try{
+   const d=await adFetch('advertiser_dashboard');
+   const body=advertiserDashboardHtml(d);
+   openModal('Dashboard Pengiklan',body);
+   document.getElementById('newAdCampaign')?.addEventListener('click',advertise);
+   document.getElementById('openRedcard')?.addEventListener('click',redcard);
+   syncAdminNav(!!d.is_admin);
+ }catch(e){openModal('Dashboard Pengiklan','<p>'+esc(e.message)+'</p>')}
+}
+function syncAdminNav(show){
+ document.querySelectorAll('.adminAdNav').forEach(x=>x.style.display=show?'block':'none');
+}
+async function showAdPricing(){
+ try{
+   const p=await adFetch('pricing');
+   const rows=(p.slots||[]).map(s=>'<tr><td><strong>'+esc(s.name)+'</strong><br><small>'+esc(s.description||'')+'</small></td><td>'+esc(s.format||'')+'</td><td>'+money(s.price_monthly)+'/30 hari</td></tr>').join('');
+   openModal('Paket & Harga Iklan','<p>Tier saat ini: <b>'+esc(p.tier_label||'Starter')+'</b> · '+fmt(p.traffic_unique_30d||0)+' pengunjung unik 30 hari · faktor ×'+Number(p.factor||1).toFixed(2)+'</p><table class="adTable"><thead><tr><th>Penempatan</th><th>Format</th><th>Harga aktif</th></tr></thead><tbody>'+rows+'</tbody></table><p class="adHint">Harga kampanye dikunci saat quote dibuat. Kenaikan tier trafik berlaku untuk pesanan baru.</p><button class="cta" id="priceToAd">Pasang Iklan →</button>');
+   $('#priceToAd')?.addEventListener('click',advertise);
+ }catch(e){openModal('Paket & Harga Iklan','<p>'+esc(e.message)+'</p>')}
+}
+function advertiserFormHtml(d){
+ const a=d?.advertiser||{};
+ const slots=d?.pricing?.slots||[];
+ const slotOptions=slots.map(s=>'<option value="'+esc(s.code)+'">'+esc(s.name)+' · '+money(s.price_monthly)+'/30 hari</option>').join('');
+ return '<form class="adForm" id="advertiserForm"><div class="adCard"><h3>1 · Profil Bisnis</h3><div class="adTwo"><input name="business_name" required maxlength="160" placeholder="Nama bisnis / brand" value="'+esc(a.business_name||'')+'"><input name="contact_name" maxlength="120" placeholder="Nama kontak" value="'+esc(a.contact_name||'')+'"></div><div class="adTwo"><input name="phone" maxlength="60" placeholder="Nomor WhatsApp / telepon" value="'+esc(a.phone||'')+'"><input name="email" type="email" maxlength="160" placeholder="Email pengiklan" value="'+esc(a.email||session?.user?.email||'')+'"></div><input name="website" maxlength="240" placeholder="Website / landing page bisnis" value="'+esc(a.website||'')+'"></div><div class="adCard"><h3>2 · Kampanye</h3><input name="campaign_name" required maxlength="180" placeholder="Nama kampanye"><div class="adTwo"><input name="title" required maxlength="180" placeholder="Judul iklan"><select name="placement" required>'+slotOptions+'</select></div><div class="adTwo"><input name="duration_days" type="number" min="1" max="365" value="30" required><input name="start_at" type="date" title="Tanggal mulai (opsional)"></div><textarea name="description" maxlength="1000" placeholder="Deskripsi singkat iklan"></textarea><div class="adTwo"><input name="media_url" maxlength="1000" placeholder="URL gambar iklan (opsional jika upload)"><input name="destination_url" required maxlength="1000" type="url" placeholder="URL tujuan saat iklan diklik"></div><div class="adTwo"><input name="cta_text" maxlength="80" value="Lihat Selengkapnya" placeholder="Teks tombol"><input name="media_file" type="file" accept="image/jpeg,image/png,image/webp"></div><p class="adHint">Materi upload: JPG/PNG/WEBP, maksimal 10 MB. Kampanye baru masuk status menunggu review.</p><div class="adQuote" id="adQuote"><small>Quote harga</small><strong>Memuat…</strong><small id="adQuoteMeta"></small></div><button class="cta" type="submit">Kirim Kampanye untuk Review →</button></div></form>';
+}
+async function advertise(){
+ await getSession();
+ if(!session){openModal('Pasang Iklan','<p>Login / daftar dahulu agar kampanye memiliki pemilik dan dapat ditagihkan.</p><button class="cta" id="adLoginBtn">Masuk / Daftar →</button>');$('#adLoginBtn')?.addEventListener('click',()=>authPanel());return}
+ try{
+   const d=await adFetch('advertiser_dashboard');
+   openModal('Pasang Iklan',advertiserFormHtml(d));
+   syncAdminNav(!!d.is_admin);
+   const form=$('#advertiserForm');const placement=form?.querySelector('[name="placement"]');const days=form?.querySelector('[name="duration_days"]');const quote=$('#adQuote');
+   async function refreshQuote(){
+     try{
+       const q=await adFetch('quote',{params:{placement:placement.value,days:days.value||30}});
+       if(quote)quote.innerHTML='<small>Harga untuk kampanye ini</small><strong>'+money(q.price)+'</strong><small id="adQuoteMeta">'+esc(q.tier_label)+' · '+fmt(q.traffic_unique_30d||0)+' pengunjung unik 30 hari · harga dikunci saat order</small>';
+     }catch(e){if(quote)quote.innerHTML='<small>'+esc(e.message)+'</small>'}
+   }
+   placement?.addEventListener('change',refreshQuote);days?.addEventListener('input',refreshQuote);refreshQuote();
+   form?.addEventListener('submit',async e=>{
+     e.preventDefault();const btn=form.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='Menyimpan…';
+     try{
+       const fd=new FormData(form);const p=Object.fromEntries(fd.entries());
+       const profile=await adFetch('save_advertiser',{method:'POST',body:{business_name:p.business_name,contact_name:p.contact_name,phone:p.phone,email:p.email,website:p.website}});
+       let mediaUrl=String(p.media_url||'').trim();
+       const file=form.querySelector('[name="media_file"]')?.files?.[0];
+       if(file){
+         if(file.size>10*1024*1024)throw Error('File iklan melebihi 10 MB');
+         const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/ads/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
+         const up=await sb.storage.from('advertiser-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
+         if(up.error)throw up.error;
+         mediaUrl=sb.storage.from('advertiser-media').getPublicUrl(path).data.publicUrl||mediaUrl;
+       }
+       if(!mediaUrl)throw Error('Isi URL gambar iklan atau pilih file upload');
+       const start=p.start_at?new Date(p.start_at+'T00:00:00').toISOString():null;
+       const created=await adFetch('create_campaign',{method:'POST',body:{
+         advertiser_id:profile.advertiser_id,campaign_name:p.campaign_name,title:p.title,description:p.description,
+         placement:p.placement,duration_days:Number(p.duration_days||30),start_at:start,media_url:mediaUrl,
+         destination_url:p.destination_url,cta_text:p.cta_text||'Lihat Selengkapnya',billing_model:'monthly'
+       }});
+       openModal('Kampanye Terkirim','<p>Kampanye <b>'+esc(p.campaign_name)+'</b> sudah masuk antrean review.</p><div class="adQuote"><small>Quote terkunci</small><strong>'+money(created.quote?.price||0)+'</strong><small>'+esc(created.quote?.tier_label||'')+' · '+fmt(created.quote?.traffic_unique_30d||0)+' pengunjung unik 30 hari</small></div><p class="adHint">Kenaikan tier trafik akan memengaruhi pesanan baru, bukan mengubah quote kampanye ini.</p><button class="cta" id="afterAdDash">Buka Dashboard Pengiklan →</button>');
+       $('#afterAdDash')?.addEventListener('click',advertiserDashboard);
+     }catch(err){openModal('Kampanye Gagal','<p>'+esc(err.message||'Kampanye belum tersimpan')+'</p><button class="outline" id="retryAd">Kembali ke Form</button>');$('#retryAd')?.addEventListener('click',advertise)}
+     finally{btn.disabled=false;btn.textContent='Kirim Kampanye untuk Review →'}
+   });
+ }catch(e){openModal('Pasang Iklan','<p>'+esc(e.message)+'</p>')}
+}
+async function redcard(){
+ await getSession();
+ if(!session){openModal('REDCARD Administrasi','<p>Login diperlukan.</p>');return}
+ try{
+   const d=await adFetch('admin_dashboard');
+   syncAdminNav(true);
+   const t=d.traffic||{};const p=d.pricing||{};const tiers=d.tiers||[];const campaigns=d.campaigns||[];
+   const metrics='<div class="redcardTop"><div class="redcardMetric"><b>'+fmt(t.today_pageviews||0)+'</b><small>Pageview hari ini</small></div><div class="redcardMetric"><b>'+fmt(t.today_unique||0)+'</b><small>Pengunjung unik hari ini</small></div><div class="redcardMetric"><b>'+fmt(t.traffic_30d||0)+'</b><small>Pengunjung unik 30 hari</small></div><div class="redcardMetric"><b>'+fmt(t.ad_impressions_30d||0)+'</b><small>Tayangan iklan 30 hari</small></div></div>';
+   const tierHtml='<div class="tierGrid">'+tiers.map(x=>'<div class="tierBox"><h4>'+esc(x.label)+'</h4><input data-tier="'+esc(x.tier_name)+'" data-k="min" type="number" min="0" value="'+esc(x.min_unique_visitors_30d)+'" placeholder="Min 30d"><input data-tier="'+esc(x.tier_name)+'" data-k="max" type="number" min="0" value="'+esc(x.max_unique_visitors_30d??'')+'" placeholder="Max 30d (kosong = tanpa batas)"><input data-tier="'+esc(x.tier_name)+'" data-k="factor" type="number" min=".1" step=".05" value="'+esc(x.factor)+'" placeholder="Faktor harga"><button class="outline saveTier" data-tier="'+esc(x.tier_name)+'">Simpan tier</button></div>').join('')+'</div>';
+   const rows=campaigns.length?campaigns.map(c=>'<div class="redcardRow"><span><strong>'+esc(c.business_name||'Tanpa nama')+'</strong><br>'+esc(c.campaign_name)+'<br><small>'+esc(c.placement||'')+'</small></span><span>'+adStatusBadge(c.status)+'</span><span>'+money(c.quoted_price||0)+'<br><small>'+fmt(c.impressions||0)+' tayang / '+fmt(c.clicks||0)+' klik</small></span><span class="redcardBtns"><button data-review="approved" data-id="'+esc(c.id)+'">Approve</button><button data-review="active" data-id="'+esc(c.id)+'">Aktifkan</button><button data-review="paused" data-id="'+esc(c.id)+'">Jeda</button><button data-review="rejected" data-id="'+esc(c.id)+'">Tolak</button></span></div>').join(''):'<p class="adHint">Belum ada kampanye.</p>';
+   openModal('REDCARD · Administrasi Iklan',metrics+'<div class="adCard"><h3>Mesin Harga Otomatis</h3><p class="adHint">Faktor harga dibaca dari trafik pengunjung unik 30 hari. Perubahan tier hanya memengaruhi pesanan baru; quote kampanye lama tetap terkunci.</p>'+tierHtml+'</div><div class="adCard" style="margin-top:14px"><h3>Antrean Kampanye</h3><div class="redcardRows">'+rows+'</div></div>');
+   $('.saveTier').forEach(b=>b.addEventListener('click',async()=>{
+     const tier=b.dataset.tier;const min=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="min"]')?.value||0;const max=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="max"]')?.value||null;const factor=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="factor"]')?.value||1;
+     try{await adFetch('admin_tier',{method:'POST',body:{tier_name:tier,min_unique_visitors_30d:Number(min),max_unique_visitors_30d:max===''?null:Number(max),factor:Number(factor),label:tiers.find(x=>x.tier_name===tier)?.label||tier}});await redcard()}catch(e){openModal('REDCARD','<p>'+esc(e.message)+'</p>')}
+   }));
+   $('[data-review]').forEach(b=>b.addEventListener('click',async()=>{
+     const status=b.dataset.review,id=b.dataset.id,note=window.prompt('Catatan admin (opsional):','')||'';
+     try{await adFetch('admin_review',{method:'POST',body:{campaign_id:id,status,note}});await redcard()}catch(e){openModal('REDCARD','<p>'+esc(e.message)+'</p>')}
+   }));
+ }catch(e){openModal('REDCARD Administrasi','<p>'+esc(e.message||'Akses RedCard ditolak')+'</p>')}
+}
+const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 $$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
 function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
@@ -197,7 +359,7 @@ function handleSubmenu(t){
  if(['Pola','Penyebab','Tren','Hubungan','Ringkasan Wilayah'].includes(t)) return show('insights');
  if(['Perkiraan','Perbandingan','Skenario'].includes(t)) return navList(t,forecasts.slice(0,10).map(x=>({title:x.title||x.name,meta:x.horizon||x.confidence||'Forecast'})),'Belum ada forecast yang dipublikasikan.');
  if(['Solusi Warga','Solusi Pemerintah','Praktik Baik','Evaluasi Hasil'].includes(t)) return navList(t,solutions.slice(0,10).map(x=>({title:x.title||x.name,meta:x.type||x.status||'Solusi'})),'Belum ada solusi yang dipublikasikan.');
- if(t==='Pusat Fitur'){document.querySelector('#fitur')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Sumber & Media'){document.querySelector('#sumber-media')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Tentang Nuansa Kita') return show('about');
+ if(t==='Pusat Fitur'){document.querySelector('#fitur')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Sumber & Media'){document.querySelector('#sumber-media')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Pasang Iklan') return advertise(); if(t==='Paket & Harga') return showAdPricing(); if(t==='Dashboard Pengiklan') return advertiserDashboard(); if(t==='REDCARD Administrasi') return redcard(); if(t==='Tentang Nuansa Kita') return show('about');
  if(t==='Bantuan') return openModal('Bantuan','<p>Gunakan menu panah untuk membuka submenu. Klik item submenu untuk membuka data atau fitur terkait.</p>');
  if(t==='Kontak') return openModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
  if(t==='Kebijakan & Privasi') return openModal('Kebijakan & Privasi','<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
@@ -230,6 +392,8 @@ $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
 if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();});}
+trackSiteVisit();
+loadPublicAds();
 loadPortal();
 if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),60000)}
 setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
