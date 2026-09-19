@@ -25,7 +25,7 @@ const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistS
 let session=null;
 async function getSession(){if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
 function authHeaders(){return session?.access_token?{Authorization:'Bearer '+session.access_token}:{} }
-function renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const sub=session?'Akun aktif · Laporan Saya':'Masuk / Daftar';a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">●</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',authPanel)}
+function renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const sub=session?'Akun aktif · Laporan Saya':'Masuk / Daftar';a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',authPanel)}
 function authPanel(mode='login'){
 if(session){
 openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
@@ -83,10 +83,10 @@ function initLiveProblemMap(rows=[]){
 
 async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
 const fallbackPublicReports=[
-{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan kondisi jalan yang dikeluhkan warga. Data lapangan tetap perlu diverifikasi sebelum dinyatakan sebagai fakta terverifikasi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg'],source:'Foto referensi Wikimedia Commons'},
-{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan mengenai banjir yang berdampak pada permukiman warga. Jumlah terdampak dan kondisi terkini harus dicocokkan dengan sumber resmi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg'],source:'Foto referensi Wikimedia Commons'},
-{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan mengenai keterbatasan ruang kelas dan kegiatan belajar bergiliran.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg'],source:'Foto referensi Wikimedia Commons'},
-{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan mengenai kebutuhan tenaga medis di fasilitas kesehatan. Informasi perlu diverifikasi sebelum digunakan sebagai fakta terverifikasi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg'],source:'Foto referensi Wikimedia Commons'}
+{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan kondisi jalan yang dikeluhkan warga. Data lapangan tetap perlu diverifikasi sebelum dinyatakan sebagai fakta terverifikasi.',media_urls:['/assets/problem-road.svg'],source:'Foto referensi Wikimedia Commons'},
+{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan mengenai banjir yang berdampak pada permukiman warga. Jumlah terdampak dan kondisi terkini harus dicocokkan dengan sumber resmi.',media_urls:['/assets/problem-flood.svg'],source:'Foto referensi Wikimedia Commons'},
+{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan mengenai keterbatasan ruang kelas dan kegiatan belajar bergiliran.',media_urls:['/assets/problem-school.svg'],source:'Foto referensi Wikimedia Commons'},
+{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan mengenai kebutuhan tenaga medis di fasilitas kesehatan. Informasi perlu diverifikasi sebelum digunakan sebagai fakta terverifikasi.',media_urls:['/assets/problem-health.svg'],source:'Foto referensi Wikimedia Commons'}
 ];
 const issueFallbackImage={
   'Infrastruktur':'/assets/problem-road.svg',
@@ -99,13 +99,40 @@ const issueFallbackImage={
   'Sosial & Budaya':'/assets/problem-school.svg'
 };
 window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]));
-function publicIssueImage(x){
+function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
- let u='';
- if(Array.isArray(raw))u=typeof raw[0]==='string'?raw[0]:(raw[0]?.url||raw[0]?.publicUrl||raw[0]?.href||'');
- else if(typeof raw==='string')u=raw;
- else if(raw&&typeof raw==='object')u=raw.url||raw.publicUrl||raw.href||'';
- return {url:String(u||''),fallback:issueFallbackImage[String(x.category||'')]||'/assets/hero-reference.svg'};
+ let arr=[];
+ if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,\\n]/).map(v=>v.trim()).filter(Boolean);
+ else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
+ return [...new Set(arr.map(String))].slice(0,10);
+}
+function publicIssueImage(x){
+ const urls=publicIssueImages(x);
+ return {url:urls[0]||'',urls,fallback:issueFallbackImage[String(x.category||'')]||'/assets/hero-reference.svg'};
+}
+function publicIssueRegion(x){
+ return x.region_name||x.location_text||x.region||x.region?.name||x.metadata?.region_name||'Wilayah belum diisi';
+}
+function publicIssueTime(x){
+ return x.updated_at||x.reported_at||x.created_at||'';
+}
+function openPublicIssue(x){
+ const el=document.getElementById('reportDetail');const list=document.getElementById('masalah');if(!el||!list)return;
+ const im=publicIssueImage(x);const urls=im.urls.length?im.urls:[im.fallback];const isReal=im.urls.length>0;
+ const gallery='<div class="reportGallery">'+urls.map((u,i)=>'<button type="button" class="reportGalleryItem" data-src="'+esc(u)+'"><img src="'+esc(u)+'" alt="Foto laporan '+esc(x.title||'')+' '+(i+1)+'" onerror="this.onerror=null;this.src=\\''+esc(im.fallback)+'\\'"></button>').join('')+'</div>';
+ el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan jelas.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div>'+gallery+'<img id="reportDetailMainImage" class="reportDetailImage" src="'+esc(urls[0])+'" alt="Foto utama '+esc(x.title||'laporan')+'" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||('Foto laporan · '+urls.length+' foto')):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
+ el.style.display='block';list.style.display='none';history.replaceState(null,'','#laporan/'+encodeURIComponent(x.id||'item'));el.scrollIntoView({behavior:'smooth',block:'start'});
+ document.querySelectorAll('.reportGalleryItem').forEach(btn=>btn.addEventListener('click',()=>{const main=document.getElementById('reportDetailMainImage');if(main){main.src=btn.dataset.src;main.removeAttribute('data-fallback')}}));
+ document.getElementById('backReports')?.addEventListener('click',()=>{el.style.display='none';list.style.display='block';history.replaceState(null,'','#masalah');list.scrollIntoView({behavior:'smooth',block:'start'})});
+}
+function renderPublicIssueCards(rows){
+ const issueGrid=document.querySelector('.issueGrid');if(!issueGrid)return;
+ window.publicIssueIndex=Object.fromEntries(rows.map((x,i)=>[String(x.id||('issue-'+i)),x]));
+ issueGrid.innerHTML=rows.map((x,i)=>{
+   const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=im.urls.length?'Foto laporan':'Foto kategori';
+   return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
+ }).join('');
 }
 function publicIssueRegion(x){
  return x.region_name||x.location_text||x.region||x.region?.name||x.metadata?.region_name||'Wilayah belum diisi';
@@ -143,8 +170,35 @@ const rank=$('.rank');if(rank){const counts={};problems.forEach(x=>{const k=x.ca
 const trends=$('.trendItems');if(trends)trends.innerHTML=(signals.length?signals.slice(0,4).map(s=>'<div class="rankrow"><span>↗</span><span>'+esc(s.title||s.description||'Sinyal baru')+'</span><strong>'+esc(s.change_percent!=null?s.change_percent+'%':'')+'</strong></div>').join(''):'<div class="rankrow"><span>Belum ada sinyal intelligence yang dipublikasikan.</span></div>');
 }
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
-async function report(){await getSession();if(!session){openModal('Login Diperlukan','<p>Untuk menjaga agar setiap laporan dapat diawasi dan ditelusuri oleh admin, silakan masuk atau daftar terlebih dahulu.</p><button class="cta" id="goLogin">Masuk / Daftar →</button>');$('#goLogin')?.addEventListener('click',authPanel);return}openModal('Laporkan Masalah','<p>Laporan publik masuk sebagai <b>unverified</b> dan tidak tampil sebagai fakta terverifikasi sebelum proses verifikasi.</p><form id="rf"><input name="title" required maxlength="240" placeholder="Judul masalah"><input name="region_name" placeholder="Nama wilayah (opsional)"><select name="category"><option>Infrastruktur</option><option>Pendidikan</option><option>Kesehatan</option><option>Lingkungan</option><option>Ekonomi</option><option>Sosial</option></select><select name="severity"><option value="low">Rendah</option><option value="medium" selected>Sedang</option><option value="high">Tinggi</option><option value="critical">Kritis</option></select><textarea name="narrative" required maxlength="10000" placeholder="Jelaskan kejadian, lokasi, waktu, dan dampaknya."></textarea><button class="cta">Kirim Laporan →</button></form>');
-$('#rf').onsubmit=async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target).entries());const btn=e.target.querySelector('button');btn.disabled=true;try{const r=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(f)}),j=await r.json();if(!r.ok)throw Error();openModal('Laporan Diterima','<p>Laporan tersimpan di Supabase dan menunggu verifikasi.</p><p>ID: <b>'+esc(j.report_id||'diterima')+'</b></p>')}catch{openModal('Laporan Gagal','<p>Laporan belum tersimpan. Periksa koneksi dan coba kembali.</p>')}}}
+async function report(){
+ await getSession();
+ if(!session){
+   openModal('Login Diperlukan','<p>Untuk menjaga agar setiap laporan dapat diawasi dan ditelusuri oleh admin, silakan masuk atau daftar terlebih dahulu.</p><button class="cta" id="goLogin">Masuk / Daftar →</button>');
+   $('#goLogin')?.addEventListener('click',authPanel);return;
+ }
+ openModal('Laporkan Masalah','<p>Laporan publik masuk sebagai <b>unverified</b> dan tidak tampil sebagai fakta terverifikasi sebelum proses verifikasi.</p><form id="rf"><input name="title" required maxlength="240" placeholder="Judul masalah"><input name="region_name" placeholder="Nama wilayah (opsional)"><select name="category"><option>Infrastruktur</option><option>Pendidikan</option><option>Kesehatan</option><option>Lingkungan</option><option>Ekonomi</option><option>Sosial</option></select><select name="severity"><option value="low">Rendah</option><option value="medium" selected>Sedang</option><option value="high">Tinggi</option><option value="critical">Kritis</option></select><textarea name="narrative" required maxlength="10000" placeholder="Jelaskan kejadian, lokasi, waktu, dan dampaknya."></textarea><label class="uploadField"><b>Foto / Bukti Visual</b><input name="media_files" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Maksimal 6 foto, hingga 10 MB per foto.</small></label><button class="cta" type="submit">Kirim Laporan →</button></form>');
+ $('#rf').onsubmit=async e=>{
+   e.preventDefault();
+   const form=e.target;const f=Object.fromEntries(new FormData(form).entries());const fileInput=form.querySelector('input[name="media_files"]');const files=[...(fileInput?.files||[])].slice(0,6);const btn=form.querySelector('button');btn.disabled=true;btn.textContent='Mengunggah...';
+   try{
+     const media_urls=[];
+     for(const file of files){
+       if(file.size>10*1024*1024)throw Error('Ukuran foto melebihi 10 MB: '+file.name);
+       if(!/^image\\/(jpeg|png|webp)$/.test(file.type))throw Error('Format foto tidak didukung: '+file.name);
+       const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
+       const up=await sb.storage.from('citizen-report-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
+       if(up.error)throw up.error;
+       const pub=sb.storage.from('citizen-report-media').getPublicUrl(path);if(pub.data?.publicUrl)media_urls.push(pub.data.publicUrl);
+     }
+     f.media_urls=media_urls;delete f.media_files;btn.textContent='Menyimpan...';
+     const r=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(f)}),j=await r.json();
+     if(!r.ok)throw Error(j.error||'Laporan gagal disimpan');
+     await loadPortal();
+     openModal('Laporan Diterima','<p>Laporan tersimpan di Supabase dan menunggu verifikasi.</p><p>'+esc(media_urls.length)+' foto berhasil disimpan sebagai media laporan.</p><p>ID: <b>'+esc(j.report_id||'diterima')+'</b></p>');
+   }catch(err){openModal('Laporan Gagal','<p>'+esc(err?.message||'Laporan belum tersimpan. Periksa koneksi dan coba kembali.')+'</p>');}
+   finally{btn.disabled=false;btn.textContent='Kirim Laporan →'}
+ };
+}
 const content={map:['Peta Indonesia','<p>Peta publik menggunakan geografi nasional dari database dan dapat diperluas dengan filter wilayah, kategori, periode, dan sumber.</p><div class="mapbox"></div>'],data:['Data & Statistik','<p>Modul ini membaca dataset, indikator, periode, kualitas, dan sumber dari portal data.</p><div class="rankrow"><span>Dataset terdaftar</span><strong>'+fmt(portal?.tables?.data_sources?.length)+'</strong></div>'],monitor:['Pantau Perubahan','<p>Modul membaca early signals yang telah dipublikasikan. Sinyal tanpa data tidak dibuat-buat.</p><div class="rankrow"><span>Sinyal tersedia</span><strong>'+fmt(portal?.tables?.early_signals?.length)+'</strong></div>'],insights:['Wawasan & Intelligence','<p>Analisis berbasis claims, evidence, observations, dan sumber. Hasil hanya ditampilkan bila tersedia di sistem.</p>'],forecast:['Kemungkinan / Future Radar','<p>Forecast publik ditampilkan dengan horizon, model, confidence, faktor, dan ketidakpastian ketika data tersedia.</p><div class="rankrow"><span>Forecast tersedia</span><strong>'+fmt(portal?.tables?.forecasts?.length)+'</strong></div>'],solutions:['Solusi','<p>Solusi publik berasal dari tabel solusi dan dapat memuat tipe, dampak, risiko, kelayakan, asumsi, serta outcome.</p><div class="rankrow"><span>Solusi tersedia</span><strong>'+fmt(portal?.tables?.solutions?.length)+'</strong></div>'],about:['Tentang Nuansa Kita','<p>NUANSA KITA — ASPIRASI PUBLIK INDONESIA adalah portal untuk melihat masalah, mendengar suara warga, memahami data, memantau perubahan, mengantisipasi kemungkinan, dan mencari solusi secara transparan.</p>']};
 function show(k){const v=content[k]||content.about;openModal(v[0],v[1])}
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about')};
