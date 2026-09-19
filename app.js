@@ -203,4 +203,6 @@ $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
 if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();});}
 loadPortal();
+if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),60000)}
+setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
 })();
