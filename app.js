@@ -89,14 +89,14 @@ const fallbackPublicReports=[
 {id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan contoh untuk menjaga tampilan publik tetap terisi. Data contoh ini bukan laporan warga terverifikasi.',media_urls:['https://upload.wikimedia.org/wikipedia/commons/a/a8/Hospital_building_A.jpg'],source:'Ilustrasi kategori lokal',is_demo:true}
 ];
 const issueFallbackImage={
-  'Infrastruktur':'/assets/problem-road.svg',
-  'Bencana Alam':'/assets/problem-flood.svg',
-  'Lingkungan':'/assets/problem-flood.svg',
-  'Pendidikan':'/assets/problem-school.svg',
-  'Kesehatan':'/assets/problem-health.svg',
-  'Ekonomi':'/assets/problem-road.svg',
-  'Sosial':'/assets/problem-school.svg',
-  'Sosial & Budaya':'/assets/problem-school.svg'
+  'Infrastruktur':'https://rm.id/images/berita/med/sedang-mewabah-di-bekasi-dki-jakarta-jangan-sampai-ketularan-virus-jalan-rusak_28090.jpg',
+  'Bencana Alam':'https://img.jakpost.net/c/2026/02/18/2026_02_18_172722_1771417199._large.jpg',
+  'Lingkungan':'https://img.jakpost.net/c/2026/02/18/2026_02_18_172722_1771417199._large.jpg',
+  'Pendidikan':'https://pai.ftk.uin-alauddin.ac.id/assets/gambar/artikel/pai-artikel-262.jpg',
+  'Kesehatan':'https://upload.wikimedia.org/wikipedia/commons/a/a8/Hospital_building_A.jpg',
+  'Ekonomi':'https://www.jadeglobal.com/sites/default/files/styles/webp/public/2023-07/BJC-Case-Study-webpage-banner-desktop.jpg.webp?itok=MaTN2hEZ',
+  'Sosial':'https://www.insideindonesia.org/images/hoo1.jpg',
+  'Sosial & Budaya':'https://www.insideindonesia.org/images/hoo1.jpg'
 };
 window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]));
 function publicIssueImages(x){
@@ -120,8 +120,8 @@ function publicIssueTime(x){
 function openPublicIssue(x){
  const el=document.getElementById('reportDetail');const list=document.getElementById('masalah');if(!el||!list)return;
  const im=publicIssueImage(x);const urls=im.urls.length?im.urls:[im.fallback];const isReal=im.urls.length>0&&!x.is_demo;
- const gallery='<div class="reportGallery">'+urls.map((u,i)=>'<button type="button" class="reportGalleryItem" data-src="'+esc(u)+'"><img src="'+esc(u)+'" alt="Foto laporan '+esc(x.title||'')+' '+(i+1)+'" onerror="this.onerror=null;this.src=\\''+esc(im.fallback)+'\\'"></button>').join('')+'</div>';
- el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan jelas.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div>'+gallery+'<img id="reportDetailMainImage" class="reportDetailImage" src="'+esc(urls[0])+'" alt="Foto utama '+esc(x.title||'laporan')+'" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||('Foto laporan · '+urls.length+' foto')):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
+ const gallery='<div class="reportGallery">'+urls.map((u,i)=>'<button type="button" class="reportGalleryItem" data-src="'+esc(u)+'"><img src="'+esc(u)+'" alt="Foto laporan '+esc(x.title||'')+' '+(i+1)+'" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src=\\''+esc(im.fallback)+'\\'"></button>').join('')+'</div>';
+ el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan jelas.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div>'+gallery+'<img id="reportDetailMainImage" class="reportDetailImage" src="'+esc(urls[0])+'" alt="Foto utama '+esc(x.title||'laporan')+'" referrerpolicy="no-referrer" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||('Foto laporan · '+urls.length+' foto')):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
  el.style.display='block';list.style.display='none';history.replaceState(null,'','#laporan/'+encodeURIComponent(x.id||'item'));el.scrollIntoView({behavior:'smooth',block:'start'});
  document.querySelectorAll('.reportGalleryItem').forEach(btn=>btn.addEventListener('click',()=>{const main=document.getElementById('reportDetailMainImage');if(main){main.src=btn.dataset.src;main.removeAttribute('data-fallback')}}));
  document.getElementById('backReports')?.addEventListener('click',()=>{el.style.display='none';list.style.display='block';history.replaceState(null,'','#masalah');list.scrollIntoView({behavior:'smooth',block:'start'})});
@@ -131,7 +131,7 @@ function renderPublicIssueCards(rows){
  window.publicIssueIndex=Object.fromEntries(rows.map((x,i)=>[String(x.id||('issue-'+i)),x]));
  issueGrid.innerHTML=rows.map((x,i)=>{
    const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=(im.urls.length&&!x.is_demo)?'Foto laporan':'Foto kategori';
-   return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
+   return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" referrerpolicy="no-referrer" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
  }).join('');
 }
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
