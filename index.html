@@ -47,6 +47,28 @@
 footer{font-size:11px}
 @media(max-width:900px){.sidebar{width:240px}.main{margin-left:240px}.nav>a,.nav .group>button{font-size:12px}.nav .group .sub a{font-size:11px}}
 @media(max-width:700px){.sidebar{width:220px}.main{margin-left:220px}.nav>a,.nav .group>button{font-size:11px}.nav .group .sub a{font-size:10px}}
+</style><style id="submenu-final-fix">
+/* SIDEBAR SUBMENU FINAL */
+.sidebar{font-size:15px}
+.nav{gap:5px}
+.nav>a,.nav .group>button{font-size:15px!important;line-height:1.25!important;min-height:42px!important;padding:10px 12px!important}
+.nav .group>button{cursor:pointer!important;user-select:none!important}
+.nav .group>button .chev{font-size:18px!important;margin-left:auto!important}
+.nav .group>.sub{display:none!important;visibility:hidden!important;opacity:0!important;max-height:none!important;overflow:visible!important;pointer-events:none!important;padding:4px 4px 8px 28px!important}
+.nav .group.sub-open>.sub{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+.nav .group>.sub a{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;font-size:14px!important;line-height:1.35!important;padding:8px 10px!important;margin:1px 0!important;color:#355d7d!important;text-decoration:none!important;border-radius:6px!important}
+.nav .group>.sub a:hover{background:#e9f4ff!important;color:#0875d8!important}
+.nav .group.sub-open>button{background:#0875d8!important;color:#fff!important}
+.nav .group.sub-open>button .chev{transform:rotate(180deg)!important}
+.nav .group>.sub a:before{content:'›'!important;margin-right:8px!important;color:#5c9aca!important}
+.top{min-height:68px!important}
+.search input{font-size:15px!important}
+.user,.user strong{font-size:14px!important}.user small{font-size:11px!important}
+.head h2{font-size:20px!important}.muted{font-size:13px!important}
+.issue h3{font-size:15px!important}.issue p{font-size:12px!important}.badge{font-size:10px!important}
+.cat{font-size:13px!important}.rankrow{font-size:13px!important}.rankrow strong{font-size:12px!important}
+.module h2{font-size:22px!important}.module p{font-size:13px!important}
+.foot a,.foot small{font-size:11px!important}
 </style></head><body>
 <aside class="sidebar"><div class="brand"><img src="/assets/nuansa-kita-logo.svg" alt="NUANSA KITA — Aspirasi Publik Indonesia"></div><nav class="nav">
 <a class="active" href="#beranda"><span class="ico">⌂</span>Beranda</a><div class="group"><button type="button"><span class="ico">🌐</span>Jelajahi Indonesia <span class="chev" aria-hidden="true">⌄</span></button><div class="sub"><a href="#jelajah">Ringkasan Indonesia</a><a href="#jelajah">Provinsi</a><a href="#jelajah">Kabupaten/Kota</a><a href="#jelajah">Kecamatan</a><a href="#jelajah">Desa/Kelurahan</a><a href="#jelajah">Dusun</a></div></div>
@@ -127,5 +149,43 @@ function initSubmenus(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSubmenus);else initSubmenus();
 setTimeout(initSubmenus,300);
 setTimeout(initSubmenus,1000);
+})();
+</script><script id="submenu-final-js">
+(function(){
+  function closeOthers(current){
+    document.querySelectorAll('.nav .group.sub-open').forEach(function(g){
+      if(g!==current) g.classList.remove('sub-open');
+    });
+  }
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('.nav .group>button');
+    if(btn){
+      e.preventDefault();
+      e.stopPropagation();
+      const g=btn.closest('.group');
+      closeOthers(g);
+      g.classList.toggle('sub-open');
+      return;
+    }
+    const link=e.target.closest('.nav .group>.sub a');
+    if(link){
+      e.preventDefault();
+      e.stopPropagation();
+      const t=link.textContent.trim();
+      const map={
+        'Ringkasan Indonesia':'map','Provinsi':'map','Kabupaten/Kota':'map','Kecamatan':'map','Desa/Kelurahan':'map','Dusun':'map',
+        'Terkini':'monitor','Berdasarkan Wilayah':'map','Berdasarkan Kategori':'data','Mendesak':'monitor','Belum Terselesaikan':'monitor',
+        'Sumber Data':'data','Kumpulan Data':'data','Indikator':'data','Kualitas & Pembaruan Data':'data',
+        'Laporkan Masalah':'report','Cerita Warga':'report','Keluhan':'report','Usulan':'report','Polling':'report','Diskusi':'report',
+        'Masalah Baru':'monitor','Meningkat':'monitor','Menurun':'monitor','Ramai Dibicarakan':'monitor','Peringatan':'monitor',
+        'Pola':'insights','Penyebab':'insights','Tren':'insights','Hubungan':'insights','Ringkasan Wilayah':'insights',
+        'Perkiraan':'forecast','Perbandingan':'forecast','Skenario':'forecast',
+        'Solusi Warga':'solutions','Solusi Pemerintah':'solutions','Praktik Baik':'solutions','Evaluasi Hasil':'solutions'
+      };
+      if(window.actions && typeof window.actions[map[t]]==='function') window.actions[map[t]]();
+      else if(typeof window.show==='function') window.show(map[t]);
+      return;
+    }
+  },true);
 })();
 </script></body></html>
