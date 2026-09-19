@@ -85,12 +85,37 @@ const content={map:['Peta Indonesia','<p>Peta publik menggunakan geografi nasion
 function show(k){const v=content[k]||content.about;openModal(v[0],v[1])}
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about')};
 $$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
+function navList(title, rows, emptyText){
+ const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
+ openModal(title,body);
+}
+function handleSubmenu(t){
+ const tables=portal?.tables||{}, problems=tables.problems||[], reports=tables.citizen_reports||[], signals=tables.early_signals||[], forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
+ if(t==='Ringkasan Indonesia'||t==='Provinsi'||t==='Kabupaten/Kota'||t==='Kecamatan'||t==='Desa/Kelurahan'||t==='Dusun') {document.querySelector('#jelajah')?.scrollIntoView({behavior:'smooth'});return}
+ if(t==='Terkini') return navList('Masalah Terkini',[...problems,...reports].sort((a,b)=>new Date(b.updated_at||b.reported_at||0)-new Date(a.updated_at||a.reported_at||0)).slice(0,10).map(x=>({title:x.title,meta:x.category||x.verification_status})), 'Belum ada masalah terbit/terverifikasi.');
+ if(t==='Berdasarkan Wilayah') return navList('Masalah Berdasarkan Wilayah',problems.slice(0,10).map(x=>({title:x.region_name||x.location_text||'Wilayah belum diisi',meta:x.title})), 'Belum ada masalah dengan wilayah publik.');
+ if(t==='Berdasarkan Kategori'){const c={};problems.forEach(x=>{const k=x.category||'Lainnya';c[k]=(c[k]||0)+1});return navList('Masalah Berdasarkan Kategori',Object.entries(c).sort((a,b)=>b[1]-a[1]).map(x=>({title:x[0],meta:x[1]+' masalah'})),'Belum ada kategori masalah.')}
+ if(t==='Mendesak') return navList('Masalah Mendesak',problems.filter(x=>['critical','high','urgent','mendesak'].includes(String(x.severity||x.status||'').toLowerCase())).slice(0,10).map(x=>({title:x.title,meta:x.category||x.severity})), 'Belum ada masalah mendesak yang dipublikasikan.');
+ if(t==='Belum Terselesaikan') return navList('Masalah Belum Terselesaikan',problems.filter(x=>!['resolved','closed','completed'].includes(String(x.status||'').toLowerCase())).slice(0,10).map(x=>({title:x.title,meta:x.status||'Terbuka'})), 'Belum ada masalah terbuka yang dipublikasikan.');
+ if(t==='Sumber Data'||t==='Kumpulan Data') return navList(t,sources.slice(0,15).map(x=>({title:x.name||x.title,meta:x.organization||x.source_type||x.url})), 'Belum ada sumber data terdaftar.');
+ if(t==='Indikator'||t==='Kualitas & Pembaruan Data') return show('data');
+ if(['Laporkan Masalah'].includes(t)) return report();
+ if(['Cerita Warga','Keluhan','Usulan','Polling','Diskusi'].includes(t)) return navList(t,reports.slice(0,10).map(x=>({title:x.title,meta:x.category||x.reported_at})),'Belum ada konten publik pada bagian ini.');
+ if(['Masalah Baru','Meningkat','Menurun','Ramai Dibicarakan','Peringatan'].includes(t)) return navList(t,signals.slice(0,10).map(x=>({title:x.title||x.description,meta:x.change_percent!=null?x.change_percent+'%':'Sinyal'})),'Belum ada sinyal perubahan yang dipublikasikan.');
+ if(['Pola','Penyebab','Tren','Hubungan','Ringkasan Wilayah'].includes(t)) return show('insights');
+ if(['Perkiraan','Perbandingan','Skenario'].includes(t)) return navList(t,forecasts.slice(0,10).map(x=>({title:x.title||x.name,meta:x.horizon||x.confidence||'Forecast'})),'Belum ada forecast yang dipublikasikan.');
+ if(['Solusi Warga','Solusi Pemerintah','Praktik Baik','Evaluasi Hasil'].includes(t)) return navList(t,solutions.slice(0,10).map(x=>({title:x.title||x.name,meta:x.type||x.status||'Solusi'})),'Belum ada solusi yang dipublikasikan.');
+ if(t==='Tentang Nuansa Kita') return show('about');
+ if(t==='Bantuan') return openModal('Bantuan','<p>Gunakan menu panah untuk membuka submenu. Klik item submenu untuk membuka data atau fitur terkait.</p>');
+ if(t==='Kontak') return openModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
+ if(t==='Kebijakan & Privasi') return openModal('Kebijakan & Privasi','<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
+}
 document.addEventListener('click',e=>{
  const btn=e.target.closest('.nav .group>button');
- if(btn){e.preventDefault();e.stopPropagation();const group=btn.parentElement;document.querySelectorAll('.nav .group.open').forEach(g=>{if(g!==group)g.classList.remove('open')});group.classList.toggle('open');return}
+ if(btn){e.preventDefault();e.stopPropagation();const group=btn.closest('.group');document.querySelectorAll('.nav .group.open').forEach(g=>{if(g!==group)g.classList.remove('open')});group.classList.toggle('open');return false}
  const sub=e.target.closest('.nav .group .sub a');
- if(sub){e.preventDefault();e.stopPropagation();const t=sub.textContent.trim();const map={'Ringkasan Indonesia':'map','Provinsi':'map','Kabupaten/Kota':'map','Kecamatan':'map','Desa/Kelurahan':'map','Dusun':'map','Terkini':'monitor','Berdasarkan Wilayah':'map','Berdasarkan Kategori':'data','Mendesak':'monitor','Belum Terselesaikan':'monitor','Sumber Data':'data','Kumpulan Data':'data','Indikator':'data','Kualitas & Pembaruan Data':'data','Laporkan Masalah':'report','Cerita Warga':'report','Keluhan':'report','Usulan':'report','Polling':'report','Diskusi':'report','Masalah Baru':'monitor','Meningkat':'monitor','Menurun':'monitor','Ramai Dibicarakan':'monitor','Peringatan':'monitor','Pola':'insights','Penyebab':'insights','Tren':'insights','Hubungan':'insights','Ringkasan Wilayah':'insights','Perkiraan':'forecast','Perbandingan':'forecast','Skenario':'forecast','Solusi Warga':'solutions','Solusi Pemerintah':'solutions','Praktik Baik':'solutions','Evaluasi Hasil':'solutions'};const action=map[t];if(action&&actions[action])actions[action]();return}
-});
+ if(sub){e.preventDefault();e.stopPropagation();handleSubmenu(sub.textContent.trim());return false}
+},true);
 document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
