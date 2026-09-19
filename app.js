@@ -181,7 +181,7 @@ async function adFetch(action,options={}){
  const qs=new URLSearchParams({action});
  if(options.params)Object.entries(options.params).forEach(([k,v])=>{if(v!==undefined&&v!==null&&v!=='')qs.set(k,String(v))});
  const headers={...(method!=='GET'?{'Content-Type':'application/json'}:{}),...authHeaders()};
- const r=await fetch('/api/ads?'+qs.toString(),{method,headers,body:method==='GET'?undefined:JSON.stringify(options.body||{}),cache:'no-store'});
+ const r=await fetch('/api/portal-data?'+qs.toString(),{method,headers,body:method==='GET'?undefined:JSON.stringify(options.body||{}),cache:'no-store'});
  const d=await r.json().catch(()=>({}));
  if(!r.ok)throw Error(d.error||d.message||'Layanan iklan tidak tersedia');
  return d;
