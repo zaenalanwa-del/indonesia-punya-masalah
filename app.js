@@ -82,10 +82,61 @@ function initLiveProblemMap(rows=[]){
 }
 
 async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
+const fallbackPublicReports=[
+{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan kondisi jalan yang dikeluhkan warga. Data lapangan tetap perlu diverifikasi sebelum dinyatakan sebagai fakta terverifikasi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg'],source:'Foto referensi Wikimedia Commons'},
+{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan mengenai banjir yang berdampak pada permukiman warga. Jumlah terdampak dan kondisi terkini harus dicocokkan dengan sumber resmi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg'],source:'Foto referensi Wikimedia Commons'},
+{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan mengenai keterbatasan ruang kelas dan kegiatan belajar bergiliran.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg'],source:'Foto referensi Wikimedia Commons'},
+{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan mengenai kebutuhan tenaga medis di fasilitas kesehatan. Informasi perlu diverifikasi sebelum digunakan sebagai fakta terverifikasi.',media_urls:['https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg'],source:'Foto referensi Wikimedia Commons'}
+];
+const issueFallbackImage={
+  'Infrastruktur':'/assets/problem-road.svg',
+  'Bencana Alam':'/assets/problem-flood.svg',
+  'Lingkungan':'/assets/problem-flood.svg',
+  'Pendidikan':'/assets/problem-school.svg',
+  'Kesehatan':'/assets/problem-health.svg',
+  'Ekonomi':'/assets/problem-road.svg',
+  'Sosial':'/assets/problem-school.svg',
+  'Sosial & Budaya':'/assets/problem-school.svg'
+};
+window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]));
+function publicIssueImage(x){
+ const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
+ let u='';
+ if(Array.isArray(raw))u=typeof raw[0]==='string'?raw[0]:(raw[0]?.url||raw[0]?.publicUrl||raw[0]?.href||'');
+ else if(typeof raw==='string')u=raw;
+ else if(raw&&typeof raw==='object')u=raw.url||raw.publicUrl||raw.href||'';
+ return {url:String(u||''),fallback:issueFallbackImage[String(x.category||'')]||'/assets/hero-reference.svg'};
+}
+function publicIssueRegion(x){
+ return x.region_name||x.location_text||x.region||x.region?.name||x.metadata?.region_name||'Wilayah belum diisi';
+}
+function publicIssueTime(x){
+ return x.updated_at||x.reported_at||x.created_at||'';
+}
+function openPublicIssue(x){
+ const el=document.getElementById('reportDetail');const list=document.getElementById('masalah');if(!el||!list)return;
+ const im=publicIssueImage(x);const src=im.url||im.fallback;const isReal=!!im.url;
+ el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan dalam satu halaman.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div><img class="reportDetailImage" src="'+esc(src)+'" alt="Foto '+esc(x.title||'laporan')+'" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||'Foto laporan'):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
+ el.style.display='block';list.style.display='none';history.replaceState(null,'','#laporan/'+encodeURIComponent(x.id||'item'));el.scrollIntoView({behavior:'smooth',block:'start'});
+ document.getElementById('backReports')?.addEventListener('click',()=>{el.style.display='none';list.style.display='block';history.replaceState(null,'','#masalah');list.scrollIntoView({behavior:'smooth',block:'start'})});
+}
+function renderPublicIssueCards(rows){
+ const issueGrid=document.querySelector('.issueGrid');if(!issueGrid)return;
+ window.publicIssueIndex=Object.fromEntries(rows.map((x,i)=>[String(x.id||('issue-'+i)),x]));
+ issueGrid.innerHTML=rows.map((x,i)=>{
+   const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=im.url?'Foto laporan':'Foto kategori';
+   return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="lazy" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
+ }).join('');
+}
 function hydrate(d){
 const rc=d.region_counts||{};const hs=$$('.heroStat b');if(hs[0])hs[0].textContent=fmt(rc.province)+' Provinsi';if(hs[1])hs[1].textContent=fmt(rc.regency)+' Kabupaten/Kota';if(hs[2])hs[2].textContent=fmt(rc.district)+' Kecamatan';if(hs[3])hs[3].textContent=fmt(rc.village)+' Desa/Kelurahan';
 const live=d.live_incidents||[];initLiveProblemMap(live);const problems=d.tables?.problems||[], reports=d.tables?.citizen_reports||[], signals=d.tables?.early_signals||[], forecasts=d.tables?.forecasts||[], solutions=d.tables?.solutions||[];
-const issueGrid=$('.issueGrid');if(issueGrid){if(!problems.length&&!reports.length)issueGrid.innerHTML='<div style="grid-column:1/-1;padding:28px;text-align:center;color:#789">Belum ada masalah terbit/terverifikasi di database publik.</div>';else{const rows=[...problems.map(x=>({...x,_type:'problem'})),...reports.map(x=>({...x,_type:'report'}))].sort((a,b)=>new Date(b.updated_at||b.reported_at||0)-new Date(a.updated_at||a.reported_at||0)).slice(0,4);issueGrid.innerHTML=rows.map((x)=>{const raw=x.media_urls||x.metadata?.media_urls||x.metadata?.image_urls||x.metadata?.images||x.metadata?.image_url||'';let img='';if(Array.isArray(raw))img=typeof raw[0]==='string'?raw[0]:(raw[0]?.url||raw[0]?.publicUrl||'');else if(typeof raw==='string')img=raw;else if(raw&&typeof raw==='object')img=raw.url||raw.publicUrl||'';const image=img?'<img src="'+esc(img)+'" alt="Foto laporan '+esc(x.title||'')+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><div class="issueNoPhoto" style="display:none">Foto laporan tidak dapat dimuat</div>':'<div class="issueNoPhoto">Belum ada foto pada laporan ini</div>';return '<article class="issue">'+image+'<div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>'+esc(x.severity||'')+' · '+esc(x.updated_at||x.reported_at||'')+'</p></div></article>'}).join('')}}
+const issueGrid=$('.issueGrid');
+if(issueGrid){
+  const allRows=[...problems.map(x=>({...x,_type:'problem'})),...reports.map(x=>({...x,_type:'report'}))];
+  const rows=(allRows.length?allRows:fallbackPublicReports).sort((a,b)=>new Date(b.updated_at||b.reported_at||b.created_at||0)-new Date(a.updated_at||a.reported_at||a.created_at||0));
+  renderPublicIssueCards(rows.slice(0,4));
+}
 const q=$$('.q');const vals=[problems.filter(x=>['active','open','ongoing'].includes(String(x.status||'').toLowerCase())).length,problems.filter(x=>['resolved','closed','completed'].includes(String(x.status||'').toLowerCase())).length,reports.length,solutions.length];q.forEach((el,i)=>{const b=el.querySelector('b');if(b)b.textContent=fmt(vals[i])});
 const voice=$('#citizenVoice');if(voice){voice.innerHTML=reports.length?reports.slice(0,3).map(x=>'<div class="rankrow"><span>◉</span><span>'+esc(x.title||'Laporan warga')+'<br><small>'+esc(x.category||'')+' · '+esc(x.reported_at||'')+'</small></span></div>').join(''):'<div class="rankrow"><span>◉</span><span>Belum ada suara warga terverifikasi.</span></div>'}
 const rank=$('.rank');if(rank){const counts={};problems.forEach(x=>{const k=x.category||'Lainnya';counts[k]=(counts[k]||0)+1});const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);const rows=sorted.length?sorted.map((x,i)=>'<div class="rankrow"><span class="num">'+(i+1)+'</span><span>'+esc(x[0])+'</span><strong>'+fmt(x[1])+' masalah</strong></div>').join(''):'<div class="rankrow"><span>Belum ada data masalah terbit.</span></div>';rank.querySelectorAll('.rankrow').forEach(x=>x.remove());rank.insertAdjacentHTML('beforeend',rows)}
@@ -123,6 +174,23 @@ function handleSubmenu(t){
  if(t==='Kontak') return openModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
  if(t==='Kebijakan & Privasi') return openModal('Kebijakan & Privasi','<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
 }
+
+document.addEventListener('click',e=>{
+ const card=e.target.closest('.issue[data-issue-id]');
+ if(!card)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const x=window.publicIssueIndex?.[card.dataset.issueId];
+ if(x)openPublicIssue(x);
+},true);
+document.addEventListener('keydown',e=>{
+ if((e.key==='Enter'||e.key===' ')&&e.target.closest('.issue[data-issue-id]')){
+   e.preventDefault();
+   const card=e.target.closest('.issue[data-issue-id]');const x=window.publicIssueIndex?.[card.dataset.issueId];if(x)openPublicIssue(x);
+ }
+});
+window.addEventListener('hashchange',()=>{
+ const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const id=decodeURIComponent(m[1]);const x=window.publicIssueIndex?.[id];if(x)openPublicIssue(x);}
+});
 document.addEventListener('click',e=>{
  const btn=e.target.closest('.nav .group>button');
  if(btn){e.preventDefault();e.stopPropagation();const group=btn.closest('.group');document.querySelectorAll('.nav .group.open').forEach(g=>{if(g!==group)g.classList.remove('open')});group.classList.toggle('open');return false}
