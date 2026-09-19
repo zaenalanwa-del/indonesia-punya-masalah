@@ -91,20 +91,20 @@ const photoMeeting=photoProxy('https://commons.wikimedia.org/wiki/Special:Redire
 const photoStudents=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Group_of_students_at_school.jpg');
 const photoIKN='/assets/IKN%202026.png';
 const fallbackPublicReports=[
-{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoRoad],source:'Foto dokumentasi jalan · Wikimedia Commons',is_demo:true},
-{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoFlood],source:'Foto dokumentasi banjir · Wikimedia Commons',is_demo:true},
-{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoSchool],source:'Foto dokumentasi pendidikan · Wikimedia Commons',is_demo:true},
-{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoHospital],source:'Foto dokumentasi kesehatan · Wikimedia Commons',is_demo:true}
+{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Contoh tampilan laporan publik. Bukan laporan warga terverifikasi.',media_urls:[photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Jalan_Basuki_Rachmat_Ngawi-4.jpg')],source:'Foto jalan provinsi · Wikimedia Commons',is_demo:true},
+{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Contoh tampilan laporan publik. Bukan laporan warga terverifikasi.',media_urls:[photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg')],source:'Foto banjir · Wikimedia Commons',is_demo:true},
+{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Contoh tampilan laporan publik. Bukan laporan warga terverifikasi.',media_urls:[photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg')],source:'Foto sekolah · Wikimedia Commons',is_demo:true},
+{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Contoh tampilan laporan publik. Bukan laporan warga terverifikasi.',media_urls:[photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg')],source:'Foto fasilitas kesehatan · Wikimedia Commons',is_demo:true}
 ];
 const issueFallbackImage={
-  'Infrastruktur':photoRoad,
-  'Bencana Alam':photoFlood,
-  'Lingkungan':photoFlood,
-  'Pendidikan':photoSchool,
-  'Kesehatan':photoHospital,
-  'Ekonomi':photoMeeting,
-  'Sosial':photoStudents,
-  'Sosial & Budaya':photoStudents
+  'Infrastruktur':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Jalan_Basuki_Rachmat_Ngawi-4.jpg'),
+  'Bencana Alam':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg'),
+  'Lingkungan':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg'),
+  'Pendidikan':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg'),
+  'Kesehatan':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg'),
+  'Ekonomi':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Modern_office_workspace_featuring_a_computer.jpg'),
+  'Sosial':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Village_Meeting_Hall_of_Pandansari.jpg'),
+  'Sosial & Budaya':photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Village_Meeting_Hall_of_Pandansari.jpg')
 };
 window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]));
 function publicIssueImages(x){
