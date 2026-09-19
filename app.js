@@ -47,7 +47,7 @@ e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const m=$(
 if(isSignup){
 if(!f.identifier.includes('@')){m.textContent='Untuk pendaftaran saat ini gunakan alamat email. Login nomor telepon memerlukan layanan SMS Supabase.';return}
 const birth=f.birth_year+'-'+String(f.birth_month).padStart(2,'0')+'-'+String(f.birth_day).padStart(2,'0');
-const r=await sb.auth.signUp({email:f.identifier,password:f.password,options:{emailRedirectTo:window.location.origin+'/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}});
+const r=await sb.auth.signUp({email:f.identifier,password:f.password,options:{emailRedirectTo:'https://indonesia-punya-masalah.vercel.app/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}});
 if(r.error){m.textContent=r.error.message;return}
 m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda untuk konfirmasi akun sebelum login.';
 }else{
@@ -59,7 +59,7 @@ session=r.data.session;renderAuth();closeModal();loadPortal();
 }
 async function forgotPassword(){
 openModal('Lupa Kata Sandi','<form class="authForm" id="resetForm"><input id="resetEmail" type="email" required placeholder="Email akun Anda"><button class="cta" type="submit">Kirim Tautan Reset</button><p class="authNote" id="resetMsg">Kami akan mengirim tautan untuk membuat kata sandi baru.</p></form>');
-$('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/#reset-password'});m.textContent=r.error?r.error.message:'Tautan reset sudah dikirim. Periksa email Anda.'});
+$('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://indonesia-punya-masalah.vercel.app/#reset-password'});m.textContent=r.error?r.error.message:'Tautan reset sudah dikirim. Periksa email Anda.'});
 }
 
 function initLiveProblemMap(rows=[]){
