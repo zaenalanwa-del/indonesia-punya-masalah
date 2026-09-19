@@ -82,21 +82,29 @@ function initLiveProblemMap(rows=[]){
 }
 
 async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
+function photoProxy(url){return '/api/image?src='+encodeURIComponent(url)}
+const photoRoad=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Ubud-Jalan_Raya-Pothole-2009.jpeg');
+const photoFlood=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg');
+const photoSchool=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/The_atmosphere_of_a_junior_high_school_classroom_in_Indonesia.jpg');
+const photoHospital=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Indonesia_stadium_hospital_(10705267115).jpg');
+const photoMeeting=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/The_first_Ministerial_Meeting_in_Garuda_palace.jpg');
+const photoStudents=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Group_of_students_at_school.jpg');
+const photoIKN='/assets/IKN%202026.png';
 const fallbackPublicReports=[
-{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan contoh untuk menjaga tampilan publik tetap terisi. Data contoh ini bukan laporan warga terverifikasi.',media_urls:['https://rm.id/images/berita/med/sedang-mewabah-di-bekasi-dki-jakarta-jangan-sampai-ketularan-virus-jalan-rusak_28090.jpg'],source:'Ilustrasi kategori lokal',is_demo:true},
-{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan contoh untuk menjaga tampilan publik tetap terisi. Data contoh ini bukan laporan warga terverifikasi.',media_urls:['https://img.jakpost.net/c/2026/02/18/2026_02_18_172722_1771417199._large.jpg'],source:'Ilustrasi kategori lokal',is_demo:true},
-{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan contoh untuk menjaga tampilan publik tetap terisi. Data contoh ini bukan laporan warga terverifikasi.',media_urls:['https://pai.ftk.uin-alauddin.ac.id/assets/gambar/artikel/pai-artikel-262.jpg'],source:'Ilustrasi kategori lokal',is_demo:true},
-{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan contoh untuk menjaga tampilan publik tetap terisi. Data contoh ini bukan laporan warga terverifikasi.',media_urls:['https://upload.wikimedia.org/wikipedia/commons/a/a8/Hospital_building_A.jpg'],source:'Ilustrasi kategori lokal',is_demo:true}
+{id:'jalan-purworejo',title:'Jalan Provinsi di Purworejo Rusak Parah, Warga Resah',category:'Infrastruktur',status:'Mendesak',region_name:'Purworejo, Jawa Tengah',reported_at:'2 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoRoad],source:'Foto dokumentasi jalan · Wikimedia Commons',is_demo:true},
+{id:'banjir-demak',title:'Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi',category:'Bencana Alam',status:'Terkini',region_name:'Demak, Jawa Tengah',reported_at:'4 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoFlood],source:'Foto dokumentasi banjir · Wikimedia Commons',is_demo:true},
+{id:'sekolah-wonogiri',title:'Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift',category:'Pendidikan',status:'Belum Selesai',region_name:'Wonogiri, Jawa Tengah',reported_at:'6 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoSchool],source:'Foto dokumentasi pendidikan · Wikimedia Commons',is_demo:true},
+{id:'puskesmas-lampung',title:'Puskesmas di Lampung Kekurangan Tenaga Medis',category:'Kesehatan',status:'Terkini',region_name:'Lampung Selatan, Lampung',reported_at:'8 jam yang lalu',description:'Laporan contoh untuk tampilan publik. Data contoh ini bukan laporan warga terverifikasi.',media_urls:[photoHospital],source:'Foto dokumentasi kesehatan · Wikimedia Commons',is_demo:true}
 ];
 const issueFallbackImage={
-  'Infrastruktur':'https://rm.id/images/berita/med/sedang-mewabah-di-bekasi-dki-jakarta-jangan-sampai-ketularan-virus-jalan-rusak_28090.jpg',
-  'Bencana Alam':'https://img.jakpost.net/c/2026/02/18/2026_02_18_172722_1771417199._large.jpg',
-  'Lingkungan':'https://img.jakpost.net/c/2026/02/18/2026_02_18_172722_1771417199._large.jpg',
-  'Pendidikan':'https://pai.ftk.uin-alauddin.ac.id/assets/gambar/artikel/pai-artikel-262.jpg',
-  'Kesehatan':'https://upload.wikimedia.org/wikipedia/commons/a/a8/Hospital_building_A.jpg',
-  'Ekonomi':'https://www.jadeglobal.com/sites/default/files/styles/webp/public/2023-07/BJC-Case-Study-webpage-banner-desktop.jpg.webp?itok=MaTN2hEZ',
-  'Sosial':'https://www.insideindonesia.org/images/hoo1.jpg',
-  'Sosial & Budaya':'https://www.insideindonesia.org/images/hoo1.jpg'
+  'Infrastruktur':photoRoad,
+  'Bencana Alam':photoFlood,
+  'Lingkungan':photoFlood,
+  'Pendidikan':photoSchool,
+  'Kesehatan':photoHospital,
+  'Ekonomi':photoMeeting,
+  'Sosial':photoStudents,
+  'Sosial & Budaya':photoStudents
 };
 window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]));
 function publicIssueImages(x){
@@ -105,7 +113,8 @@ function publicIssueImages(x){
  if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
  else if(typeof raw==='string')arr=raw.split(/[,\\n]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
- return [...new Set(arr.map(String))].slice(0,10);
+ arr=[...new Set(arr.map(String))].slice(0,10);
+ return arr.map(u=>/^(https?:\\/\\/)(commons\\.wikimedia\\.org|upload\\.wikimedia\\.org)/i.test(u)?photoProxy(u):u);
 }
 function publicIssueImage(x){
  const urls=publicIssueImages(x);
