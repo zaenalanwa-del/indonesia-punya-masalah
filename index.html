@@ -24,7 +24,13 @@
 .cat:nth-child(6){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg")!important}
 .cat:nth-child(7){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg")!important}
 .cat:nth-child(8){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Istana_Garuda_IKN.png")!important}
-</style><style id="submenu-fix">.nav .group{width:100%}.nav .group>button{cursor:pointer;position:relative}.nav .group>button .chev{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;transition:transform .18s ease}.nav .group.open>button .chev{transform:rotate(180deg)}.nav .group .sub{display:none;visibility:hidden;opacity:0;max-height:0;overflow:hidden;pointer-events:none;padding:0 0 0 31px}.nav .group.open .sub{display:block;visibility:visible;opacity:1;max-height:500px;overflow:visible;pointer-events:auto;padding:3px 0 7px 31px}.nav .group .sub a{display:block!important;text-decoration:none!important;cursor:pointer;pointer-events:auto;padding:5px 8px 5px 0;border-radius:4px;font-size:8px;color:#526b83}.nav .group .sub a:hover{background:#eef6fc;color:#0875d8}.nav .group .sub a:before{content:'›';color:#9bbbd6;margin-right:7px}</style></head><body>
+</style><style id="submenu-fix">.nav .group{width:100%}.nav .group>button{cursor:pointer;position:relative}.nav .group>button .chev{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;transition:transform .18s ease}.nav .group.open>button .chev{transform:rotate(180deg)}.nav .group .sub{display:none;visibility:hidden;opacity:0;max-height:0;overflow:hidden;pointer-events:none;padding:0 0 0 31px}.nav .group.open .sub{display:block;visibility:visible;opacity:1;max-height:500px;overflow:visible;pointer-events:auto;padding:3px 0 7px 31px}.nav .group .sub a{display:block!important;text-decoration:none!important;cursor:pointer;pointer-events:auto;padding:5px 8px 5px 0;border-radius:4px;font-size:8px;color:#526b83}.nav .group .sub a:hover{background:#eef6fc;color:#0875d8}.nav .group .sub a:before{content:'›';color:#9bbbd6;margin-right:7px}</style><style id="submenu-hard-fix">
+.nav .group{position:relative!important}
+.nav .group>.sub{display:none!important;visibility:hidden!important;opacity:0!important;max-height:0!important;overflow:hidden!important;pointer-events:none!important;padding-left:31px!important}
+.nav .group.sub-open>.sub{display:block!important;visibility:visible!important;opacity:1!important;max-height:600px!important;overflow:visible!important;pointer-events:auto!important;padding:4px 0 8px 31px!important}
+.nav .group>.sub a{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;cursor:pointer!important;text-decoration:none!important;padding:5px 8px!important}
+.nav .group>.sub a:hover{background:#eef6fc!important;color:#0875d8!important}
+</style></head><body>
 <aside class="sidebar"><div class="brand"><img src="/assets/nuansa-kita-logo.svg" alt="NUANSA KITA — Aspirasi Publik Indonesia"></div><nav class="nav">
 <a class="active" href="#beranda"><span class="ico">⌂</span>Beranda</a><div class="group"><button type="button"><span class="ico">🌐</span>Jelajahi Indonesia <span class="chev" aria-hidden="true">⌄</span></button><div class="sub"><a href="#jelajah">Ringkasan Indonesia</a><a href="#jelajah">Provinsi</a><a href="#jelajah">Kabupaten/Kota</a><a href="#jelajah">Kecamatan</a><a href="#jelajah">Desa/Kelurahan</a><a href="#jelajah">Dusun</a></div></div>
 <div class="group"><button><span class="ico">⚠</span>Masalah <span class="chev">⌄</span></button><div class="sub"><a>Terkini</a><a>Berdasarkan Wilayah</a><a>Berdasarkan Kategori</a><a>Mendesak</a><a>Belum Terselesaikan</a></div></div>
@@ -69,4 +75,40 @@ document.querySelectorAll('.issueGrid .issue').forEach((card,i)=>{card.style.cur
 const id=location.hash.match(/^#laporan\/(.+)$/)?.[1];if(id){const r=reportData.find(x=>x.id===id);if(r)renderReport(r);}
 })();
 </script>
-</body></html>
+<script id="submenu-hard-js">
+(function(){
+function initSubmenus(){
+ document.querySelectorAll('.nav .group>button').forEach(function(btn){
+   if(btn.dataset.submenuBound)return;
+   btn.dataset.submenuBound='1';
+   btn.addEventListener('click',function(e){
+     e.preventDefault(); e.stopImmediatePropagation();
+     var g=btn.closest('.group');
+     document.querySelectorAll('.nav .group.sub-open').forEach(function(x){if(x!==g)x.classList.remove('sub-open');});
+     g.classList.toggle('sub-open');
+   },true);
+ });
+ document.querySelectorAll('.nav .group>.sub a').forEach(function(a){
+   if(a.dataset.submenuLinkBound)return;
+   a.dataset.submenuLinkBound='1';
+   a.addEventListener('click',function(e){
+     e.preventDefault(); e.stopPropagation();
+     var t=a.textContent.trim();
+     var map={};
+     map['Ringkasan Indonesia']='map'; map['Provinsi']='map'; map['Kabupaten/Kota']='map'; map['Kecamatan']='map'; map['Desa/Kelurahan']='map'; map['Dusun']='map';
+     map['Terkini']='monitor'; map['Berdasarkan Wilayah']='map'; map['Berdasarkan Kategori']='data'; map['Mendesak']='monitor'; map['Belum Terselesaikan']='monitor';
+     map['Sumber Data']='data'; map['Kumpulan Data']='data'; map['Indikator']='data'; map['Kualitas & Pembaruan Data']='data';
+     map['Laporkan Masalah']='report'; map['Cerita Warga']='report'; map['Keluhan']='report'; map['Usulan']='report'; map['Polling']='report'; map['Diskusi']='report';
+     map['Masalah Baru']='monitor'; map['Meningkat']='monitor'; map['Menurun']='monitor'; map['Ramai Dibicarakan']='monitor'; map['Peringatan']='monitor';
+     map['Pola']='insights'; map['Penyebab']='insights'; map['Tren']='insights'; map['Hubungan']='insights'; map['Ringkasan Wilayah']='insights';
+     map['Perkiraan']='forecast'; map['Perbandingan']='forecast'; map['Skenario']='forecast';
+     map['Solusi Warga']='solutions'; map['Solusi Pemerintah']='solutions'; map['Praktik Baik']='solutions'; map['Evaluasi Hasil']='solutions';
+     if(window.actions && window.actions[map[t]]) window.actions[map[t]]();
+   },true);
+ });
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSubmenus);else initSubmenus();
+setTimeout(initSubmenus,300);
+setTimeout(initSubmenus,1000);
+})();
+</script></body></html>
