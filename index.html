@@ -8,21 +8,21 @@
 .banner:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,42,75,.15),rgba(7,42,75,.45));pointer-events:none}
 .banner>*{position:relative;z-index:1}
 .issue img{background:#dfeaf2}
-.issue:nth-child(1) img{content:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg")}
-.issue:nth-child(2) img{content:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg")}
-.issue:nth-child(3) img{content:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg")}
-.issue:nth-child(4) img{content:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg")}
+.issue:nth-child(1) img{content:url("/assets/problem-road.svg")}
+.issue:nth-child(2) img{content:url("/assets/problem-flood.svg")}
+.issue:nth-child(3) img{content:url("/assets/problem-school.svg")}
+.issue:nth-child(4) img{content:url("/assets/problem-health.svg")}
 .cat{position:relative;overflow:hidden;background-size:cover!important;background-position:center!important;color:#fff;text-shadow:0 1px 4px #000;min-height:82px}
 .cat:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.62));z-index:0}
 .cat>*{position:relative;z-index:1}
 .cat i{box-shadow:0 2px 8px #0008}
-.cat:nth-child(1){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg")!important}
-.cat:nth-child(2){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg")!important}
-.cat:nth-child(3){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg")!important}
-.cat:nth-child(4){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg")!important}
-.cat:nth-child(5){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg")!important}
-.cat:nth-child(6){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg")!important}
-.cat:nth-child(7){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg")!important}
+.cat:nth-child(1){background-image:url("/assets/problem-road.svg")!important}
+.cat:nth-child(2){background-image:url("/assets/problem-school.svg")!important}
+.cat:nth-child(3){background-image:url("/assets/problem-health.svg")!important}
+.cat:nth-child(4){background-image:url("/assets/problem-flood.svg")!important}
+.cat:nth-child(5){background-image:url("/assets/problem-flood.svg")!important}
+.cat:nth-child(6){background-image:url("/assets/problem-school.svg")!important}
+.cat:nth-child(7){background-image:url("/assets/problem-road.svg")!important}
 .cat:nth-child(8){background-image:url("https://commons.wikimedia.org/wiki/Special:Redirect/file/Istana_Garuda_IKN.png")!important}
 </style><style id="submenu-fix">.nav .group{width:100%}.nav .group>button{cursor:pointer;position:relative}.nav .group>button .chev{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;transition:transform .18s ease}.nav .group.open>button .chev{transform:rotate(180deg)}.nav .group .sub{display:none;visibility:hidden;opacity:0;max-height:0;overflow:hidden;pointer-events:none;padding:0 0 0 31px}.nav .group.open .sub{display:block;visibility:visible;opacity:1;max-height:500px;overflow:visible;pointer-events:auto;padding:3px 0 7px 31px}.nav .group .sub a{display:block!important;text-decoration:none!important;cursor:pointer;pointer-events:auto;padding:5px 8px 5px 0;border-radius:4px;font-size:8px;color:#526b83}.nav .group .sub a:hover{background:#eef6fc;color:#0875d8}.nav .group .sub a:before{content:'›';color:#9bbbd6;margin-right:7px}</style><style id="submenu-hard-fix">
 .nav .group{position:relative!important}
@@ -188,25 +188,95 @@ body{font-size:var(--ui-font);line-height:1.5}
 .issue:nth-child(3) img,
 .issue:nth-child(4) img{content:normal!important}
 @media(max-width:700px){.issue img{height:165px!important}}
-</style></style></head><body>
+</style></style><style id="nuansa-kita-ui-v4">
+/* Larger master logo, working sidebar, image-first cards, and no blank report media. */
+.sidebar{width:285px!important;padding:16px 14px!important;overflow-y:auto!important}
+.main{margin-left:285px!important}
+.brand{height:104px!important;margin-bottom:12px!important;border-bottom:1px solid #e1ebf3!important;padding-bottom:10px!important}
+.brand img{width:268px!important;max-width:none!important;height:86px!important;max-height:86px!important;object-fit:contain!important;object-position:left center!important;transform:scale(1.12)!important;transform-origin:left center!important}
+.nav{gap:0!important}
+.nav>a,.nav .group>button{min-height:46px!important;width:100%!important;padding:10px 10px!important;border:0!important;border-bottom:1px solid #e4edf4!important;border-radius:0!important;background:#fff!important;color:#173b5e!important;font-size:14px!important;font-weight:800!important;text-align:left!important}
+.nav>a.active{background:#0875d8!important;color:#fff!important;border-radius:9px!important;margin-bottom:2px!important;border-bottom-color:#0875d8!important}
+.nav>a:hover,.nav .group>button:hover{background:#eef6fc!important;color:#0875d8!important}
+.nav .group>button{cursor:pointer!important;display:flex!important;align-items:center!important;gap:10px!important}
+.nav .group.open>button{background:#eaf4fc!important;color:#0875d8!important}
+.nav .group>button .chev{margin-left:auto!important;transition:transform .18s ease!important}
+.nav .group.open>button .chev{transform:rotate(180deg)!important}
+.nav .group .sub{display:none!important;visibility:hidden!important;opacity:0!important;max-height:0!important;overflow:hidden!important;pointer-events:none!important;padding:4px 6px 7px 43px!important;background:#f8fbfe!important;border-bottom:1px solid #dfeaf3!important}
+.nav .group.open .sub{display:block!important;visibility:visible!important;opacity:1!important;max-height:700px!important;overflow:visible!important;pointer-events:auto!important}
+.nav .group .sub a{display:block!important;padding:8px 8px!important;border-bottom:1px solid #e5edf4!important;color:#4d6b82!important;font-size:13px!important;line-height:1.3!important}
+.nav .group .sub a:last-child{border-bottom:0!important}
+.nav .group .sub a:before{content:'›'!important;margin-right:8px!important;color:#73a4c8!important}
+.user .avatar,.authBtn .avatar{width:40px!important;height:40px!important;border-radius:50%!important;display:grid!important;place-items:center!important;background:#eaf2fb!important;color:#0b3568!important;font-size:20px!important}
+.issue img{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;height:190px!important;object-fit:cover!important;content:normal!important;background:#edf3f7!important}
+.issueBody{min-height:128px!important}
+.issue{transition:transform .18s ease,box-shadow .18s ease!important}
+.issue:hover{transform:translateY(-2px)!important;box-shadow:0 8px 24px #0b35681a!important}
+.reportGallery{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;margin-bottom:10px!important}
+.reportGalleryItem{padding:0!important;border:1px solid #dbe7ef!important;border-radius:10px!important;background:#f7fafc!important;overflow:hidden!important;cursor:pointer!important}
+.reportGalleryItem img{display:block!important;width:100%!important;height:78px!important;object-fit:cover!important}
+.reportDetailImage{display:block!important;width:100%!important;height:380px!important;object-fit:cover!important;border-radius:14px!important;background:#edf3f7!important}
+.featureGrid,.serviceGrid{align-items:stretch!important}
+.featureCard,.serviceCard{overflow:hidden!important;text-align:left!important;padding:0!important;background:#fff!important}
+.featureCard.visualCard,.serviceCard.visualCard{display:flex!important;flex-direction:column!important}
+.featureVisual,.serviceVisual,.sourceVisual{width:100%!important;height:150px!important;overflow:hidden!important;background:#eef5fb!important;flex:0 0 auto!important}
+.featureVisual img,.serviceVisual img,.sourceVisual img{width:100%!important;height:100%!important;display:block!important;object-fit:cover!important}
+.featureCard>div:not(.featureVisual),.serviceCard>h3,.serviceCard>p,.serviceCard>b,.sourceCard>div:not(.sourceVisual){padding-left:18px!important;padding-right:18px!important}
+.featureCard>div:not(.featureVisual){padding-top:15px!important;padding-bottom:18px!important}
+.featureCard h3,.serviceCard h3{margin:0 0 7px!important}
+.featureCard p,.serviceCard p{margin:0 0 11px!important}
+.featureCard .featureIcon,.serviceCard>span{display:none!important}
+.sourceHub{background:linear-gradient(135deg,#f5f9fd,#fff)!important}
+.sourceGroup{margin-top:24px!important}
+.sourceGroup h3{font-size:19px!important;margin:0 0 12px!important;color:#173b5e!important}
+.sourceGrid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
+.sourceCard{display:flex!important;flex-direction:column!important;border:1px solid #dce8f2!important;border-radius:14px!important;background:#fff!important;overflow:hidden!important;box-shadow:0 6px 20px #123d630a!important}
+.sourceCard>div:not(.sourceVisual){padding-top:14px!important;padding-bottom:16px!important}
+.sourceCard h4{margin:0 0 6px!important;font-size:18px!important;color:#173b5e!important}
+.sourceCard p{margin:0 0 10px!important;color:#64798d!important;font-size:12px!important;line-height:1.5!important}
+.sourceCard b{color:#0875d8!important;font-size:12px!important}
+@media(max-width:1200px){.sourceGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:900px){.sidebar{width:100%!important;position:relative!important;height:auto!important}.main{margin-left:0!important}.brand{height:92px!important}.brand img{width:260px!important;height:78px!important}.sourceGrid{grid-template-columns:1fr!important}}
+@media(max-width:700px){.reportGallery{grid-template-columns:repeat(3,minmax(0,1fr))!important}.reportDetailImage{height:260px!important}.issue img{height:180px!important}}
+</style></head><body>
 <aside class="sidebar"><div class="brand"><img src="/assets/nuansa_kita_cutout.png" alt="NUANSA KITA — Aspirasi Publik Indonesia"></div><nav class="nav">
-<a class="active" href="#beranda"><span class="ico">⌂</span>Beranda</a><details class="group"><summary><span class="ico">🌐</span>Jelajahi Indonesia <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">⚠</span>Masalah <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">▥</span>Data & Statistik <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">♟</span>Suara Warga <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">◔</span>Pantau Perubahan <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">◈</span>Wawasan <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">♧</span>Kemungkinan <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">☘</span>Solusi <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details>
-<details class="group"><summary><span class="ico">•••</span>Lainnya <span class="chev" aria-hidden="true">⌄</span></summary><div class="sub">$4</div></details></nav></aside>
-<main class="main"><header class="top"><form class="search" id="searchForm">⌕<input id="q" placeholder="Cari masalah, wilayah, atau kata kunci..."></form><div class="user" id="authArea"><span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">●</span><span><strong>Halo, Pengunjung</strong><small>Masuk / Daftar</small></span></button></div></header>
+<a class="active" href="#beranda"><span class="ico">⌂</span><span>Beranda</span></a>
+<div class="group"><button type="button"><span class="ico">🌐</span><span>Jelajahi Indonesia</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Ringkasan Indonesia">Ringkasan Indonesia</a><a href="#" data-submenu="Provinsi">Provinsi</a><a href="#" data-submenu="Kabupaten/Kota">Kabupaten/Kota</a><a href="#" data-submenu="Kecamatan">Kecamatan</a><a href="#" data-submenu="Desa/Kelurahan">Desa/Kelurahan</a><a href="#" data-submenu="Dusun">Dusun</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">⚠</span><span>Masalah</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Terkini">Terkini</a><a href="#" data-submenu="Berdasarkan Wilayah">Berdasarkan Wilayah</a><a href="#" data-submenu="Berdasarkan Kategori">Berdasarkan Kategori</a><a href="#" data-submenu="Mendesak">Mendesak</a><a href="#" data-submenu="Belum Terselesaikan">Belum Terselesaikan</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">▥</span><span>Data &amp; Statistik</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Sumber Data">Sumber Data</a><a href="#" data-submenu="Kumpulan Data">Kumpulan Data</a><a href="#" data-submenu="Indikator">Indikator</a><a href="#" data-submenu="Kualitas &amp; Pembaruan Data">Kualitas &amp; Pembaruan Data</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">♟</span><span>Suara Warga</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Laporkan Masalah">Laporkan Masalah</a><a href="#" data-submenu="Cerita Warga">Cerita Warga</a><a href="#" data-submenu="Keluhan">Keluhan</a><a href="#" data-submenu="Usulan">Usulan</a><a href="#" data-submenu="Polling">Polling</a><a href="#" data-submenu="Diskusi">Diskusi</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">◔</span><span>Pantau Perubahan</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Masalah Baru">Masalah Baru</a><a href="#" data-submenu="Meningkat">Meningkat</a><a href="#" data-submenu="Menurun">Menurun</a><a href="#" data-submenu="Ramai Dibicarakan">Ramai Dibicarakan</a><a href="#" data-submenu="Peringatan">Peringatan</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">◈</span><span>Wawasan</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Pola">Pola</a><a href="#" data-submenu="Penyebab">Penyebab</a><a href="#" data-submenu="Tren">Tren</a><a href="#" data-submenu="Hubungan">Hubungan</a><a href="#" data-submenu="Ringkasan Wilayah">Ringkasan Wilayah</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">♧</span><span>Kemungkinan</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Perkiraan">Perkiraan</a><a href="#" data-submenu="Perbandingan">Perbandingan</a><a href="#" data-submenu="Skenario">Skenario</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">☘</span><span>Solusi</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Solusi Warga">Solusi Warga</a><a href="#" data-submenu="Solusi Pemerintah">Solusi Pemerintah</a><a href="#" data-submenu="Praktik Baik">Praktik Baik</a><a href="#" data-submenu="Evaluasi Hasil">Evaluasi Hasil</a>
+</div></div>
+<div class="group"><button type="button"><span class="ico">•••</span><span>Lainnya</span><span class="chev">⌄</span></button><div class="sub">
+<a href="#" data-submenu="Pusat Fitur">Pusat Fitur</a><a href="#" data-submenu="Sumber &amp; Media">Sumber &amp; Media</a><a href="#" data-submenu="Tentang Nuansa Kita">Tentang Nuansa Kita</a><a href="#" data-submenu="Bantuan">Bantuan</a><a href="#" data-submenu="Kontak">Kontak</a><a href="#" data-submenu="Kebijakan &amp; Privasi">Kebijakan &amp; Privasi</a>
+</div></div>
+</nav></aside>
+<main class="main"><header class="top"><form class="search" id="searchForm">⌕<input id="q" placeholder="Cari masalah, wilayah, atau kata kunci..."></form><div class="user" id="authArea"><span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>Halo, Pengunjung</strong><small>Masuk / Daftar</small></span></button></div></header>
 <div class="wrap" id="beranda">
 <section class="hero"><div class="heroGaruda"><img class="heroGarudaImage" src="https://upload.wikimedia.org/wikipedia/commons/2/21/Istana_Garuda_IKN.png" alt="Istana Garuda IKN"><div class="heroGarudaOverlay"></div><div class="heroGarudaCredit">Foto Istana Garuda IKN · Wikimedia Commons (CC0)</div></div><div class="heroCopy"><span class="pill">Suara Rakyat, Data Nyata, Solusi Bersama</span><h1>Bersama Kita Wujudkan<br><span>Indonesia yang Lebih Baik</span></h1><p>Temukan masalah di sekitar kita, pahami penyebabnya<br> dengan data, dan cari solusi bersama untuk masa depan<br> Indonesia yang lebih maju.</p><button class="cta" data-act="monitor">Jelajahi Masalah Indonesia &nbsp; →</button></div><div class="heroStats" style="position:absolute!important;inset:auto auto 0 0!important;left:0!important;right:auto!important;bottom:0!important;transform:none!important;margin:0!important;"><div class="heroStat"><i>🌐</i><div><b>38 Provinsi</b><small>di Indonesia</small></div></div><div class="heroStat"><i>▥</i><div><b>514 Kabupaten/Kota</b><small>di Indonesia</small></div></div><div class="heroStat"><i>⌖</i><div><b>7.282 Kecamatan</b><small>di Indonesia</small></div></div><div class="heroStat"><i>⌂</i><div><b>83.529 Desa/Kelurahan</b><small>di Indonesia</small></div></div></div></section>
 <section class="section issues" id="masalah"><div class="head"><h2>⚠ &nbsp;Pokok Masalah Terbaru</h2><a href="#masalah">Lihat Semua →</a></div><p class="muted">Masalah-masalah penting yang sedang terjadi di berbagai daerah di Indonesia.</p><div class="issueGrid">
-<article class="issue"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Kerusakan_Pada_Jalan_Beraspal.jpg" alt="Foto kondisi jalan rusak" onerror="this.onerror=null;this.src='/assets/problem-road.svg';"><div class="issueBody"><div class="badges"><span class="badge red">Infrastruktur</span><span class="badge red">Mendesak</span></div><h3>Jalan Provinsi di Purworejo Rusak Parah, Warga Resah</h3><p>⌖ Purworejo, Jawa Tengah &nbsp; · &nbsp; 2 jam yang lalu &nbsp; · &nbsp; 124</p></div></article>
-<article class="issue"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg" alt="Foto banjir" onerror="this.onerror=null;this.src='/assets/problem-flood.svg';"><div class="issueBody"><div class="badges"><span class="badge blue">Bencana Alam</span><span class="badge blue">Terkini</span></div><h3>Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi</h3><p>⌖ Demak, Jawa Tengah &nbsp; · &nbsp; 4 jam yang lalu &nbsp; · &nbsp; 98</p></div></article>
-<article class="issue"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/School_in_Indonesia.jpg" alt="Foto sekolah" onerror="this.onerror=null;this.src='/assets/problem-school.svg';"><div class="issueBody"><div class="badges"><span class="badge green">Pendidikan</span><span class="badge green">Belum Selesai</span></div><h3>Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift</h3><p>⌖ Wonogiri, Jawa Tengah &nbsp; · &nbsp; 6 jam yang lalu &nbsp; · &nbsp; 76</p></div></article>
-<article class="issue"><img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Goeteng_Hospital.jpg" alt="Foto fasilitas kesehatan" onerror="this.onerror=null;this.src='/assets/problem-health.svg';"><div class="issueBody"><div class="badges"><span class="badge blue">Kesehatan</span><span class="badge blue">Terkini</span></div><h3>Puskesmas di Lampung Kekurangan Tenaga Medis</h3><p>⌖ Lampung Selatan, Lampung &nbsp; · &nbsp; 8 jam yang lalu &nbsp; · &nbsp; 65</p></div></article>
+<article class="issue"><img src="/assets/problem-road.svg" alt="Foto kondisi jalan rusak" onerror="this.onerror=null;this.src='/assets/problem-road.svg';"><div class="issueBody"><div class="badges"><span class="badge red">Infrastruktur</span><span class="badge red">Mendesak</span></div><h3>Jalan Provinsi di Purworejo Rusak Parah, Warga Resah</h3><p>⌖ Purworejo, Jawa Tengah &nbsp; · &nbsp; 2 jam yang lalu &nbsp; · &nbsp; 124</p></div></article>
+<article class="issue"><img src="/assets/problem-flood.svg" alt="Foto banjir" onerror="this.onerror=null;this.src='/assets/problem-flood.svg';"><div class="issueBody"><div class="badges"><span class="badge blue">Bencana Alam</span><span class="badge blue">Terkini</span></div><h3>Banjir di Demak Rendam 5 Desa, Ratusan Warga Mengungsi</h3><p>⌖ Demak, Jawa Tengah &nbsp; · &nbsp; 4 jam yang lalu &nbsp; · &nbsp; 98</p></div></article>
+<article class="issue"><img src="/assets/problem-school.svg" alt="Foto sekolah" onerror="this.onerror=null;this.src='/assets/problem-school.svg';"><div class="issueBody"><div class="badges"><span class="badge green">Pendidikan</span><span class="badge green">Belum Selesai</span></div><h3>Ruang Kelas SD di Wonogiri Masih Kurang, Siswa Belajar Shift</h3><p>⌖ Wonogiri, Jawa Tengah &nbsp; · &nbsp; 6 jam yang lalu &nbsp; · &nbsp; 76</p></div></article>
+<article class="issue"><img src="/assets/problem-health.svg" alt="Foto fasilitas kesehatan" onerror="this.onerror=null;this.src='/assets/problem-health.svg';"><div class="issueBody"><div class="badges"><span class="badge blue">Kesehatan</span><span class="badge blue">Terkini</span></div><h3>Puskesmas di Lampung Kekurangan Tenaga Medis</h3><p>⌖ Lampung Selatan, Lampung &nbsp; · &nbsp; 8 jam yang lalu &nbsp; · &nbsp; 65</p></div></article>
 </div></section>
 <section class="section reportDetail" id="reportDetail" style="display:none"></section><section class="section categories" id="jelajah"><div class="head"><div><h2>▣ &nbsp;Jelajahi Berdasarkan Kategori</h2><p class="muted">Temukan masalah sesuai kategori yang Anda minati.</p></div></div><div class="catgrid"><button class="cat" data-act="monitor"><i>▣</i>Infrastruktur</button><button class="cat" data-act="data"><i>🎓</i>Pendidikan</button><button class="cat" data-act="data"><i>✚</i>Kesehatan</button><button class="cat" data-act="monitor"><i>♧</i>Lingkungan</button><button class="cat" data-act="data"><i>◉</i>Ekonomi</button><button class="cat" data-act="insights"><i>♟</i>Sosial & Budaya</button><button class="cat" data-act="monitor"><i>⬡</i>Keamanan</button><button class="cat" data-act="data"><i>•••</i>Lainnya</button></div></section>
 <section class="bodygrid"><div><div class="split"><section class="section map"><div class="head"><div><h2>⌖ &nbsp;Peta Indonesia</h2><p class="muted">Lihat sebaran masalah di seluruh wilayah Indonesia.</p></div><button class="outline" data-act="map">Buka Peta Lengkap →</button></div><div class="mapbox" id="problemMap"><div class="mapLoading">Memuat Peta Masalah & Kejadian…</div></div></section><section class="section rank"><div class="head"><div><h2>♟ &nbsp;Masalah Terbanyak</h2><p class="muted">Kategori masalah yang paling banyak dilaporkan.</p></div><a href="#masalah">Lihat Semua →</a></div><div class="rankrow"><span class="num">1</span><span>🔴 Infrastruktur</span><strong>342 masalah</strong></div><div class="rankrow"><span class="num">2</span><span>🟢 Lingkungan</span><strong>287 masalah</strong></div><div class="rankrow"><span class="num">3</span><span>🟣 Pendidikan</span><strong>198 masalah</strong></div><div class="rankrow"><span class="num">4</span><span>🔵 Kesehatan</span><strong>176 masalah</strong></div><div class="rankrow"><span class="num">5</span><span>🟦 Sosial & Budaya</span><strong>124 masalah</strong></div></section></div>
@@ -214,129 +284,55 @@ body{font-size:var(--ui-font);line-height:1.5}
 <aside class="rightcol"><section class="section sideCard"><div class="head"><div><h2>♟ &nbsp;Statistik Singkat</h2><p class="muted">Gambaran umum kondisi Indonesia.</p></div></div><div class="quickStats"><div class="q red"><b>1.248</b><small>Masalah Aktif<br>↑ 12%</small></div><div class="q blue"><b>892</b><small>Masalah Terselesaikan<br>↑ 8%</small></div><div class="q green"><b>386</b><small>Laporan Warga<br>↑ 15%</small></div><div class="q purple"><b>156</b><small>Solusi Diterapkan<br>↑ 10%</small></div></div><div class="mini"></div></section><section class="section sideCard" id="suara"><div class="head"><h2>💬 Suara Warga</h2><a href="#suara">Lihat Semua →</a></div><p class="muted">Hanya laporan warga yang sudah diverifikasi yang tampil sebagai suara publik.</p><div id="citizenVoice"><div class="rankrow"><span>◉</span><span>Belum ada suara warga terverifikasi.</span></div></div><button class="cta" data-act="report" style="width:100%">💬 Laporkan Masalah →</button></section></aside></section>
 <section class="publicPage" id="fitur">
   <div class="publicPageHead">
-    <div><span class="sectionKicker">PUSAT FITUR PUBLIK</span><h2>Semua Fitur dalam Satu Ruang</h2><p>Jelajahi data, laporan warga, peta kejadian, analisis, peringatan, dan solusi tanpa harus mencari-cari tombol.</p></div>
+    <div><span class="sectionKicker">PUSAT FITUR PUBLIK</span><h2>Semua Fitur dalam Satu Ruang</h2><p>Setiap fitur memakai gambar representasi agar fungsi mudah dikenali, tanpa ikon kecil di depan judul.</p></div>
     <button class="outline" data-act="about">Cara Kerja Nuansa Kita →</button>
   </div>
   <div class="featureGrid">
-    <button class="featureCard imageCard" data-act="map" style="--feature-img:url('/assets/map-reference.svg')"><span class="featureIcon">⌖</span><div><h3>Peta Masalah &amp; Kejadian LIVE</h3><p>Gabungkan masalah publik dengan sinyal kejadian seperti gempa dan bencana yang memiliki sumber.</p><b>Buka Peta →</b></div></button>
-    <button class="featureCard imageCard" data-act="data" style="--feature-img:url('/assets/map-reference.png')"><span class="featureIcon">▥</span><div><h3>Data &amp; Statistik</h3><p>Sumber data, indikator, kualitas data, periode, dan pembaruan dalam satu tempat.</p><b>Jelajahi Data →</b></div></button>
-    <button class="featureCard imageCard" data-act="report" style="--feature-img:url('/assets/problem-road.jpg')"><span class="featureIcon">♟</span><div><h3>Suara Warga</h3><p>Laporkan masalah, unggah media, lihat status verifikasi, dan pantau laporan Anda.</p><b>Laporkan Masalah →</b></div></button>
-    <button class="featureCard imageCard" data-act="monitor" style="--feature-img:url('/assets/problem-flood.jpg')"><span class="featureIcon">◔</span><div><h3>Pantau Perubahan</h3><p>Temukan masalah baru, perubahan tren, peringatan, dan sinyal yang sedang berkembang.</p><b>Pantau Perubahan →</b></div></button>
-    <button class="featureCard imageCard" data-act="insights" style="--feature-img:url('/assets/mini-map-reference.png')"><span class="featureIcon">◈</span><div><h3>Wawasan Intelligence</h3><p>Pola, hubungan, penyebab, tren, dan ringkasan wilayah dengan sumber serta konteksnya.</p><b>Buka Wawasan →</b></div></button>
-    <button class="featureCard imageCard" data-act="forecast" style="--feature-img:url('/assets/hero-reference.jpg')"><span class="featureIcon">♧</span><div><h3>Kemungkinan &amp; Skenario</h3><p>Perkiraan dan skenario ditampilkan bersama asumsi, horizon, sumber, dan ketidakpastian.</p><b>Buka Kemungkinan →</b></div></button>
-    <button class="featureCard imageCard" data-act="solutions" style="--feature-img:url('/assets/quote-reference.jpg')"><span class="featureIcon">☘</span><div><h3>Solusi &amp; Praktik Baik</h3><p>Kumpulan solusi warga, pemerintah, praktik baik, serta evaluasi hasil yang tersedia.</p><b>Jelajahi Solusi →</b></div></button>
-    <button class="featureCard imageCard" data-act="report" style="--feature-img:url('/assets/problem-school.jpg')"><span class="featureIcon">◉</span><div><h3>Partisipasi Digital</h3><p>Keluhan, usulan, cerita warga, polling, dan diskusi disiapkan untuk alur publik yang terstruktur.</p><b>Ikut Berpartisipasi →</b></div></button>
+    <button class="featureCard visualCard" data-act="map"><div class="featureVisual"><img src="/assets/map-reference.svg" alt="Representasi peta masalah dan kejadian"></div><div><h3>Peta Masalah &amp; Kejadian LIVE</h3><p>Gabungkan masalah publik dengan sinyal kejadian yang memiliki sumber.</p><b>Buka Peta →</b></div></button>
+    <button class="featureCard visualCard" data-act="data"><div class="featureVisual"><img src="/assets/feature-data.svg" alt="Representasi data dan statistik"></div><div><h3>Data &amp; Statistik</h3><p>Sumber data, indikator, kualitas, periode, dan pembaruan dalam satu tempat.</p><b>Jelajahi Data →</b></div></button>
+    <button class="featureCard visualCard" data-act="report"><div class="featureVisual"><img src="/assets/problem-road.svg" alt="Representasi laporan masalah warga"></div><div><h3>Suara Warga</h3><p>Laporkan masalah, unggah foto, lihat status verifikasi, dan pantau laporan Anda.</p><b>Laporkan Masalah →</b></div></button>
+    <button class="featureCard visualCard" data-act="monitor"><div class="featureVisual"><img src="/assets/feature-monitor.svg" alt="Representasi pemantauan perubahan"></div><div><h3>Pantau Perubahan</h3><p>Temukan masalah baru, perubahan tren, peringatan, dan sinyal yang berkembang.</p><b>Pantau Perubahan →</b></div></button>
+    <button class="featureCard visualCard" data-act="insights"><div class="featureVisual"><img src="/assets/feature-intelligence.svg" alt="Representasi wawasan dan hubungan data"></div><div><h3>Wawasan Intelligence</h3><p>Pola, hubungan, penyebab, tren, dan ringkasan wilayah berbasis sumber.</p><b>Buka Wawasan →</b></div></button>
+    <button class="featureCard visualCard" data-act="forecast"><div class="featureVisual"><img src="/assets/feature-scenario.svg" alt="Representasi kemungkinan dan skenario"></div><div><h3>Kemungkinan &amp; Skenario</h3><p>Perkiraan dan skenario ditampilkan bersama asumsi dan ketidakpastian.</p><b>Buka Kemungkinan →</b></div></button>
+    <button class="featureCard visualCard" data-act="solutions"><div class="featureVisual"><img src="/assets/feature-solutions.svg" alt="Representasi solusi dan tindak lanjut"></div><div><h3>Solusi &amp; Praktik Baik</h3><p>Kumpulan solusi warga, pemerintah, praktik baik, dan evaluasi hasil.</p><b>Jelajahi Solusi →</b></div></button>
+    <button class="featureCard visualCard" data-act="report"><div class="featureVisual"><img src="/assets/feature-participation.svg" alt="Representasi partisipasi digital"></div><div><h3>Partisipasi Digital</h3><p>Keluhan, usulan, cerita warga, polling, dan diskusi terstruktur.</p><b>Ikut Berpartisipasi →</b></div></button>
   </div>
   <div class="featureStrip">
-    <div><b>01 · Lihat</b><span>Peta, masalah, wilayah, dan data.</span></div>
-    <div><b>02 · Dengarkan</b><span>Suara dan laporan warga.</span></div>
-    <div><b>03 · Buktikan</b><span>Sumber, verifikasi, dan provenance.</span></div>
-    <div><b>04 · Pahami</b><span>Wawasan dan hubungan data.</span></div>
-    <div><b>05 · Antisipasi</b><span>Sinyal, peringatan, dan skenario.</span></div>
-    <div><b>06 · Bertindak</b><span>Solusi dan tindak lanjut.</span></div>
+    <div><b>01 · Lihat</b><span>Peta, masalah, wilayah, dan data.</span></div><div><b>02 · Dengarkan</b><span>Suara dan laporan warga.</span></div><div><b>03 · Buktikan</b><span>Sumber, verifikasi, dan provenance.</span></div><div><b>04 · Pahami</b><span>Wawasan dan hubungan data.</span></div><div><b>05 · Antisipasi</b><span>Sinyal, peringatan, dan skenario.</span></div><div><b>06 · Bertindak</b><span>Solusi dan tindak lanjut.</span></div>
   </div>
 </section>
 <section class="publicPage" id="layanan">
-  <div class="publicPageHead"><div><span class="sectionKicker">HALAMAN PUBLIK KEDUA</span><h2>Ruang Kerja Publik</h2><p>Bagian ini mengumpulkan kebutuhan utama pengguna agar alur dari menemukan masalah sampai melihat hasil tetap jelas.</p></div></div>
+  <div class="publicPageHead"><div><span class="sectionKicker">RUANG KERJA PUBLIK</span><h2>Alur Pendukung Pemantauan</h2><p>Ruang ini membantu pengguna menelusuri konteks dari wilayah, riwayat masalah, sumber data, perubahan, hingga tindak lanjut tanpa menggandakan pusat fitur.</p></div></div>
   <div class="serviceGrid">
-    <button class="serviceCard" data-act="map"><span>⌖</span><h3>Jelajahi Wilayah</h3><p>Indonesia → provinsi → kabupaten/kota → kecamatan → desa/kelurahan → dusun.</p><b>Mulai Jelajah →</b></button>
-    <button class="serviceCard" data-act="report"><span>♟</span><h3>Buat Laporan</h3><p>Kirim laporan warga dengan lokasi dan media. Data pribadi tidak menjadi data publik.</p><b>Laporkan →</b></button>
-    <button class="serviceCard" data-act="data"><span>▥</span><h3>Periksa Data</h3><p>Lihat sumber, periode, indikator, dan kualitas pembaruan sebelum menggunakan angka.</p><b>Periksa Data →</b></button>
-    <button class="serviceCard" data-act="monitor"><span>◔</span><h3>Monitor Sinyal</h3><p>Pantau perubahan dan peringatan yang tersedia dari sumber yang terdaftar.</p><b>Monitor →</b></button>
-    <button class="serviceCard" data-act="insights"><span>◈</span><h3>Analisis Wilayah</h3><p>Temukan pola dan hubungan berdasarkan data yang tersedia, bukan asumsi.</p><b>Analisis →</b></button>
-    <button class="serviceCard" data-act="solutions"><span>☘</span><h3>Cari Solusi</h3><p>Bandingkan solusi dan praktik baik yang memiliki informasi hasil atau sumber.</p><b>Cari Solusi →</b></button>
+    <button class="serviceCard visualCard" data-act="map"><div class="serviceVisual"><img src="/assets/map-reference.svg" alt="Profil dan jejak wilayah"></div><h3>Profil &amp; Jejak Wilayah</h3><p>Telusuri struktur wilayah dan konteks lokasi dari Indonesia sampai tingkat desa/kelurahan.</p><b>Telusuri Wilayah →</b></button>
+    <button class="serviceCard visualCard" data-act="monitor"><div class="serviceVisual"><img src="/assets/problem-road.svg" alt="Riwayat masalah wilayah"></div><h3>Riwayat Masalah</h3><p>Ikuti masalah yang muncul, berubah, diperbarui, atau sudah memiliki tindak lanjut.</p><b>Lihat Riwayat →</b></button>
+    <button class="serviceCard visualCard" data-act="data"><div class="serviceVisual"><img src="/assets/feature-data.svg" alt="Jejak sumber dan data"></div><h3>Jejak Sumber &amp; Data</h3><p>Periksa asal data, periode, indikator, dan informasi kualitas sebelum menarik kesimpulan.</p><b>Periksa Sumber →</b></button>
+    <button class="serviceCard visualCard" data-act="monitor"><div class="serviceVisual"><img src="/assets/feature-monitor.svg" alt="Pemantauan perubahan"></div><h3>Timeline Perubahan</h3><p>Susun perubahan penting dari waktu ke waktu agar perkembangan masalah mudah dipantau.</p><b>Pantau Timeline →</b></button>
+    <button class="serviceCard visualCard" data-act="insights"><div class="serviceVisual"><img src="/assets/feature-intelligence.svg" alt="Konteks dan hubungan data"></div><h3>Konteks &amp; Hubungan</h3><p>Hubungkan masalah dengan pola, wilayah, sumber, dan indikator yang tersedia.</p><b>Buka Konteks →</b></button>
+    <button class="serviceCard visualCard" data-act="solutions"><div class="serviceVisual"><img src="/assets/feature-solutions.svg" alt="Tindak lanjut dan solusi"></div><h3>Tindak Lanjut &amp; Solusi</h3><p>Lihat solusi, praktik baik, dan evaluasi hasil yang sudah tersedia untuk suatu masalah.</p><b>Lihat Tindak Lanjut →</b></button>
   </div>
-</section><section class="modules"><div class="section module" id="wawasan"><h2>◈ Wawasan</h2><p>Pola, tren, hubungan, penyebab, dan ringkasan wilayah berbasis sumber.</p><button class="outline" data-act="insights">Lihat Wawasan →</button></div><div class="section module" id="kemungkinan"><h2>♧ Kemungkinan</h2><p>Perkiraan, perbandingan, dan skenario dengan asumsi serta ketidakpastian.</p><button class="outline" data-act="forecast">Buka Future Radar →</button></div><div class="section module" id="solusi"><h2>☘ Solusi</h2><p>Solusi warga, pemerintah, praktik baik, rekomendasi, dan evaluasi hasil.</p><button class="outline" data-act="solutions">Jelajahi Solusi →</button></div></section>
-</div></main><section class="publicPage2" id="halaman-publik-2">
-<div class="page2Head"><span class="pill2">HALAMAN PUBLIK 2</span><h2>Jelajahi Data, Kejadian, Suara Warga & Solusi</h2><p>Semua modul publik disusun terpisah agar informasi mudah dibaca, tidak bertumpuk, dan setiap tombol memiliki fungsi yang jelas.</p></div>
-<div class="page2Grid">
-<article class="page2Card"><div class="page2Icon">⌖</div><h3>Peta & Kejadian Live</h3><p>Pantau sinyal kejadian dari sumber resmi yang tersedia dan lihat lokasi pada peta.</p><button class="cta" data-act="map">Buka Peta →</button></article>
-<article class="page2Card"><div class="page2Icon">▥</div><h3>Data & Statistik</h3><p>Jelajahi sumber data, dataset, indikator, periode, dan kualitas pembaruan data.</p><button class="outline" data-act="data">Buka Data →</button></article>
-<article class="page2Card"><div class="page2Icon">♟</div><h3>Suara Warga</h3><p>Lihat laporan warga yang memenuhi aturan publikasi dan laporkan masalah setelah login.</p><button class="outline" data-act="report">Laporkan Masalah →</button></article>
-<article class="page2Card"><div class="page2Icon">◈</div><h3>Wawasan</h3><p>Pahami pola, tren, hubungan, dan ringkasan wilayah berbasis data yang tersedia.</p><button class="outline" data-act="insights">Buka Wawasan →</button></article>
-<article class="page2Card"><div class="page2Icon">♧</div><h3>Kemungkinan</h3><p>Lihat perkiraan, perbandingan, dan skenario hanya ketika forecast tersedia beserta ketidakpastiannya.</p><button class="outline" data-act="forecast">Buka Kemungkinan →</button></article>
-<article class="page2Card"><div class="page2Icon">☘</div><h3>Solusi</h3><p>Jelajahi solusi warga, pemerintah, praktik baik, dan evaluasi hasil yang tersedia.</p><button class="outline" data-act="solutions">Buka Solusi →</button></article>
-</div>
-</section><footer><div class="foot"><div><b>NUANSA KITA</b><br><small>ASPIRASI PUBLIK INDONESIA · Dari Rakyat, Untuk Indonesia</small></div><nav><a href="#beranda">Beranda</a><a href="#masalah">Masalah</a><a href="#jelajah">Data & Statistik</a><a href="#suara">Suara Warga</a><a href="#wawasan">Wawasan</a><a href="#solusi">Solusi</a></nav><small>© 2026 Nuansa Kita</small></div></footer>
+</section>
+<section class="modules"><div class="section module" id="wawasan"><h2>◈ Wawasan</h2><p>Pola, tren, hubungan, penyebab, dan ringkasan wilayah berbasis sumber.</p><button class="outline" data-act="insights">Lihat Wawasan →</button></div><div class="section module" id="kemungkinan"><h2>♧ Kemungkinan</h2><p>Perkiraan, perbandingan, dan skenario dengan asumsi serta ketidakpastian.</p><button class="outline" data-act="forecast">Buka Future Radar →</button></div><div class="section module" id="solusi"><h2>☘ Solusi</h2><p>Solusi warga, pemerintah, praktik baik, rekomendasi, dan evaluasi hasil.</p><button class="outline" data-act="solutions">Jelajahi Solusi →</button></div></section>
+</div></main><section class="publicPage sourceHub" id="sumber-media">
+  <div class="publicPageHead">
+    <div><span class="sectionKicker">SUMBER &amp; REFERENSI PUBLIK</span><h2>Media Berita &amp; Sumber Resmi</h2><p>Ruang pendukung untuk menelusuri berita, kebijakan, data, dan kejadian dari sumber eksternal. Nuansa Kita tidak menggantikan sumber asli; setiap sumber dibuka pada situsnya.</p></div>
+  </div>
+  <div class="sourceGroup"><h3>Media Nasional</h3><div class="sourceGrid">
+    <a class="sourceCard" href="https://www.antaranews.com/tag/kebijakan-pemerintah" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-monitor.svg" alt="ANTARA — kebijakan pemerintah"></div><div><h4>ANTARA</h4><p>Kanal berita nasional dan topik kebijakan pemerintah.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.detik.com/tag/kebijakan-pemerintah/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-data.svg" alt="detikcom — kebijakan pemerintah"></div><div><h4>detikcom</h4><p>Telusuri berita kebijakan pemerintah dan isu aktual.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.kompas.com/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-intelligence.svg" alt="Kompas.com"></div><div><h4>Kompas.com</h4><p>Berita dan konteks publik dari berbagai bidang.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.tempo.co/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-scenario.svg" alt="Tempo"></div><div><h4>Tempo</h4><p>Berita dan liputan mendalam terkait isu publik.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.cnnindonesia.com/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/problem-school.svg" alt="CNN Indonesia"></div><div><h4>CNN Indonesia</h4><p>Berita nasional dan perkembangan isu publik.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.bisnis.com/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-solutions.svg" alt="Bisnis.com"></div><div><h4>Bisnis.com</h4><p>Ekonomi, fiskal, bisnis, dan kebijakan yang berdampak ke publik.</p><b>Buka sumber ↗</b></div></a>
+  </div></div>
+  <div class="sourceGroup"><h3>Sumber Resmi Pendamping Verifikasi</h3><div class="sourceGrid sourceGridOfficial">
+    <a class="sourceCard" href="https://www.bps.go.id/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-data.svg" alt="BPS"></div><div><h4>BPS</h4><p>Statistik resmi untuk indikator dan data sosial-ekonomi.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://www.bmkg.go.id/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-monitor.svg" alt="BMKG"></div><div><h4>BMKG</h4><p>Cuaca, iklim, gempa, dan informasi meteorologi.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://bnpb.go.id/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/problem-flood.svg" alt="BNPB"></div><div><h4>BNPB</h4><p>Informasi dan data kebencanaan Indonesia.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://data.go.id/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/feature-intelligence.svg" alt="Data.go.id"></div><div><h4>Data.go.id</h4><p>Portal data pemerintah untuk penelusuran dataset publik.</p><b>Buka sumber ↗</b></div></a>
+    <a class="sourceCard" href="https://tanahair.indonesia.go.id/" target="_blank" rel="noopener noreferrer"><div class="sourceVisual"><img src="/assets/map-reference.svg" alt="Badan Informasi Geospasial"></div><div><h4>BIG / TanahAir</h4><p>Referensi geospasial dan informasi wilayah Indonesia.</p><b>Buka sumber ↗</b></div></a>
+  </div></div>
+</section>
+<footer><div class="foot"><div><b>NUANSA KITA</b><br><small>ASPIRASI PUBLIK INDONESIA · Dari Rakyat, Untuk Indonesia</small></div><nav><a href="#beranda">Beranda</a><a href="#masalah">Masalah</a><a href="#jelajah">Data & Statistik</a><a href="#suara">Suara Warga</a><a href="#wawasan">Wawasan</a><a href="#solusi">Solusi</a></nav><small>© 2026 Nuansa Kita</small></div></footer>
 <div class="modal" id="modal"><div class="modal-box"><button class="close" id="close">×</button><div id="mb"></div></div></div><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script><script src="app.js?v=20260919-v7"></script><script id="legacy-report-script-disabled">/* Dynamic reports are rendered by app.js. */</script>
-<script id="submenu-hard-js">
-(function(){
-function initSubmenus(){
- document.querySelectorAll('.nav .group>button').forEach(function(btn){
-   if(btn.dataset.submenuBound)return;
-   btn.dataset.submenuBound='1';
-   btn.addEventListener('click',function(e){
-     e.preventDefault(); e.stopImmediatePropagation();
-     var g=btn.closest('.group');
-     document.querySelectorAll('.nav .group.sub-open').forEach(function(x){if(x!==g)x.classList.remove('sub-open');});
-     g.classList.toggle('sub-open');
-   },true);
- });
- document.querySelectorAll('.nav .group>.sub a').forEach(function(a){
-   if(a.dataset.submenuLinkBound)return;
-   a.dataset.submenuLinkBound='1';
-   a.addEventListener('click',function(e){
-     e.preventDefault(); e.stopPropagation();
-     var t=a.textContent.trim();
-     var map={};
-     map['Ringkasan Indonesia']='map'; map['Provinsi']='map'; map['Kabupaten/Kota']='map'; map['Kecamatan']='map'; map['Desa/Kelurahan']='map'; map['Dusun']='map';
-     map['Terkini']='monitor'; map['Berdasarkan Wilayah']='map'; map['Berdasarkan Kategori']='data'; map['Mendesak']='monitor'; map['Belum Terselesaikan']='monitor';
-     map['Sumber Data']='data'; map['Kumpulan Data']='data'; map['Indikator']='data'; map['Kualitas & Pembaruan Data']='data';
-     map['Laporkan Masalah']='report'; map['Cerita Warga']='report'; map['Keluhan']='report'; map['Usulan']='report'; map['Polling']='report'; map['Diskusi']='report';
-     map['Masalah Baru']='monitor'; map['Meningkat']='monitor'; map['Menurun']='monitor'; map['Ramai Dibicarakan']='monitor'; map['Peringatan']='monitor';
-     map['Pola']='insights'; map['Penyebab']='insights'; map['Tren']='insights'; map['Hubungan']='insights'; map['Ringkasan Wilayah']='insights';
-     map['Perkiraan']='forecast'; map['Perbandingan']='forecast'; map['Skenario']='forecast';
-     map['Solusi Warga']='solutions'; map['Solusi Pemerintah']='solutions'; map['Praktik Baik']='solutions'; map['Evaluasi Hasil']='solutions';
-     if(window.actions && window.actions[map[t]]) window.actions[map[t]]();
-   },true);
- });
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initSubmenus);else initSubmenus();
-setTimeout(initSubmenus,300);
-setTimeout(initSubmenus,1000);
-})();
-</script><script id="submenu-final-js">
-(function(){
-  function closeOthers(current){
-    document.querySelectorAll('.nav .group.sub-open').forEach(function(g){
-      if(g!==current) g.classList.remove('sub-open');
-    });
-  }
-  document.addEventListener('click',function(e){
-    const btn=e.target.closest('.nav .group>button');
-    if(btn){
-      e.preventDefault();
-      e.stopPropagation();
-      const g=btn.closest('.group');
-      closeOthers(g);
-      g.classList.toggle('sub-open');
-      return;
-    }
-    const link=e.target.closest('.nav .group>.sub a');
-    if(link){
-      e.preventDefault();
-      e.stopPropagation();
-      const t=link.textContent.trim();
-      const map={
-        'Ringkasan Indonesia':'map','Provinsi':'map','Kabupaten/Kota':'map','Kecamatan':'map','Desa/Kelurahan':'map','Dusun':'map',
-        'Terkini':'monitor','Berdasarkan Wilayah':'map','Berdasarkan Kategori':'data','Mendesak':'monitor','Belum Terselesaikan':'monitor',
-        'Sumber Data':'data','Kumpulan Data':'data','Indikator':'data','Kualitas & Pembaruan Data':'data',
-        'Laporkan Masalah':'report','Cerita Warga':'report','Keluhan':'report','Usulan':'report','Polling':'report','Diskusi':'report',
-        'Masalah Baru':'monitor','Meningkat':'monitor','Menurun':'monitor','Ramai Dibicarakan':'monitor','Peringatan':'monitor',
-        'Pola':'insights','Penyebab':'insights','Tren':'insights','Hubungan':'insights','Ringkasan Wilayah':'insights',
-        'Perkiraan':'forecast','Perbandingan':'forecast','Skenario':'forecast',
-        'Solusi Warga':'solutions','Solusi Pemerintah':'solutions','Praktik Baik':'solutions','Evaluasi Hasil':'solutions'
-      };
-      const act=map[t];
-      if(act==='map') document.querySelector('[data-act="map"]')?.click();
-      else if(act==='data') document.querySelector('[data-act="data"]')?.click();
-      else if(act==='report') document.querySelector('[data-act="report"]')?.click();
-      else if(act==='monitor') document.querySelector('[data-act="monitor"]')?.click();
-      else if(act==='insights') document.querySelector('[data-act="insights"]')?.click();
-      else if(act==='forecast') document.querySelector('[data-act="forecast"]')?.click();
-      else if(act==='solutions') document.querySelector('[data-act="solutions"]')?.click();
-      return;
-    }
-  },true);
-})();
-</script></body></html>
+</body></html>
