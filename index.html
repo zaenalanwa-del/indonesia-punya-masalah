@@ -182,8 +182,14 @@ setTimeout(initSubmenus,1000);
         'Perkiraan':'forecast','Perbandingan':'forecast','Skenario':'forecast',
         'Solusi Warga':'solutions','Solusi Pemerintah':'solutions','Praktik Baik':'solutions','Evaluasi Hasil':'solutions'
       };
-      if(window.actions && typeof window.actions[map[t]]==='function') window.actions[map[t]]();
-      else if(typeof window.show==='function') window.show(map[t]);
+      const act=map[t];
+      if(act==='map') document.querySelector('[data-act="map"]')?.click();
+      else if(act==='data') document.querySelector('[data-act="data"]')?.click();
+      else if(act==='report') document.querySelector('[data-act="report"]')?.click();
+      else if(act==='monitor') document.querySelector('[data-act="monitor"]')?.click();
+      else if(act==='insights') document.querySelector('[data-act="insights"]')?.click();
+      else if(act==='forecast') document.querySelector('[data-act="forecast"]')?.click();
+      else if(act==='solutions') document.querySelector('[data-act="solutions"]')?.click();
       return;
     }
   },true);
