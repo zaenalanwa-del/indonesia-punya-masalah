@@ -2,6 +2,19 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('id-ID');
+function applyLocalHeroAsset(){
+ const heroUrl='/assets/IKN%202026.png';
+ document.querySelectorAll('.heroGaruda').forEach(el=>{
+   el.style.backgroundImage="url('"+heroUrl+"')";
+   el.style.backgroundSize='cover';
+   el.style.backgroundPosition='center center';
+   el.style.opacity='1';
+ });
+ document.querySelectorAll('.heroGarudaImage').forEach(img=>{img.src=heroUrl;img.removeAttribute('srcset');});
+ document.querySelectorAll('.heroGarudaCredit').forEach(el=>{el.style.display='none';});
+}
+applyLocalHeroAsset();
+
 function openModal(title,html){if(!modal||!mb)return;mb.innerHTML='<h2>'+esc(title)+'</h2>'+html;modal.classList.add('open')}
 function closeModal(){modal?.classList.remove('open')}
 $('#close')?.addEventListener('click',closeModal);modal?.addEventListener('click',e=>{if(e.target===modal)closeModal()});
