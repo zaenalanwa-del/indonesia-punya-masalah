@@ -111,7 +111,7 @@ function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
  let arr=[];
  if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
- else if(typeof raw==='string')arr=raw.split(/[,\\n]/).map(v=>v.trim()).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,\n]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
  arr=[...new Set(arr.map(String))].slice(0,10);
  return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
@@ -129,10 +129,10 @@ function publicIssueTime(x){
 function openPublicIssue(x){
  const el=document.getElementById('reportDetail');const list=document.getElementById('masalah');if(!el||!list)return;
  const im=publicIssueImage(x);const urls=im.urls.length?im.urls:[im.fallback];const isReal=im.urls.length>0&&!x.is_demo;
- const gallery='<div class="reportGallery">'+urls.map((u,i)=>'<button type="button" class="reportGalleryItem" data-src="'+esc(u)+'"><img src="'+esc(u)+'" alt="Foto laporan '+esc(x.title||'')+' '+(i+1)+'" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src=\\''+esc(im.fallback)+'\\'"></button>').join('')+'</div>';
+ const gallery='<div class="reportGallery">'+urls.map((u,i)=>'<button type="button" class="reportGalleryItem" data-src="'+esc(u)+'" data-fallback="'+esc(im.fallback)+'"><img src="'+esc(u)+'" alt="Foto laporan '+esc(x.title||'')+' '+(i+1)+'" referrerpolicy="no-referrer"></button>').join('')+'</div>';
  el.innerHTML='<div class="head"><div><h2>Detail Laporan</h2><p class="muted">Foto, wilayah, isi laporan, dan status ditampilkan jelas.</p></div><button class="outline" id="backReports">← Kembali ke daftar</button></div><div class="reportDetailGrid"><div>'+gallery+'<img id="reportDetailMainImage" class="reportDetailImage" src="'+esc(urls[0])+'" alt="Foto utama '+esc(x.title||'laporan')+'" referrerpolicy="no-referrer" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"></div><div class="reportDetailBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h1>'+esc(x.title||'Tanpa judul')+'</h1><p class="reportMeta">⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p><h3>Isi Laporan</h3><p>'+esc(x.description||x.narrative||'Belum ada uraian laporan.')+'</p><div class="reportInfo"><b>Daerah</b><span>'+esc(publicIssueRegion(x))+'</span><b>Kategori</b><span>'+esc(x.category||'Umum')+'</span><b>Status</b><span>'+esc(x.status||x.verification_status||'Terbit')+'</span><b>Media</b><span>'+esc(isReal?(x.source||('Foto laporan · '+urls.length+' foto')):'Foto ilustrasi kategori — laporan belum menyediakan foto yang dapat ditampilkan.')+'</span></div></div></div>';
  el.style.display='block';list.style.display='none';history.replaceState(null,'','#laporan/'+encodeURIComponent(x.id||'item'));el.scrollIntoView({behavior:'smooth',block:'start'});
- document.querySelectorAll('.reportGalleryItem').forEach(btn=>btn.addEventListener('click',()=>{const main=document.getElementById('reportDetailMainImage');if(main){main.src=btn.dataset.src;main.removeAttribute('data-fallback')}}));
+ document.querySelectorAll('.reportGalleryItem').forEach(btn=>{const pic=btn.querySelector('img');pic?.addEventListener('error',()=>{pic.src=btn.dataset.fallback||im.fallback},{once:true});btn.addEventListener('click',()=>{const main=document.getElementById('reportDetailMainImage');if(main){main.src=btn.dataset.src;main.dataset.fallback=btn.dataset.fallback||im.fallback}})});
  document.getElementById('backReports')?.addEventListener('click',()=>{el.style.display='none';list.style.display='block';history.replaceState(null,'','#masalah');list.scrollIntoView({behavior:'smooth',block:'start'})});
 }
 function renderPublicIssueCards(rows){
@@ -158,7 +158,7 @@ async function report(){
      const media_urls=[];
      for(const file of files){
        if(file.size>10*1024*1024)throw Error('Ukuran foto melebihi 10 MB: '+file.name);
-       if(!/^image\\/(jpeg|png|webp)$/.test(file.type))throw Error('Format foto tidak didukung: '+file.name);
+       if(!/^image\/(jpeg|png|webp)$/.test(file.type))throw Error('Format foto tidak didukung: '+file.name);
        const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
        const up=await sb.storage.from('citizen-report-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
        if(up.error)throw up.error;
