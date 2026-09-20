@@ -21,12 +21,12 @@ $('#close')?.addEventListener('click',closeModal);modal?.addEventListener('click
 let portal=null;
 const SUPABASE_URL='https://gfggmkeucgqkkyvummpu.supabase.co';
 const SUPABASE_KEY='sb_publishable_ptCVbq9h15prKhT0OO5Zmg_LkE3cbw0';
-const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+let sb=null; function initSupabase(){try{if(!sb&&window.supabase?.createClient)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){console.warn('Supabase init failed',e)} return sb;} initSupabase();
 let session=null;
-async function getSession(){if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
+async function getSession(){initSupabase();if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
 function authHeaders(){return session?.access_token?{Authorization:'Bearer '+session.access_token}:{} }
 function renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const sub=session?'Akun aktif · Laporan Saya':'Masuk / Daftar';a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',authPanel)}
-function authPanel(mode='login'){
+function authPanel(mode='login'){ initSupabase();
 if(session){
 openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
 $('#logoutBtn')?.addEventListener('click',async()=>{await sb.auth.signOut();session=null;renderAuth();closeModal();loadPortal()});
@@ -546,8 +546,8 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();if(session){adFetch('admin_dashboard').then(d=>{if(d?.is_admin)syncAdminNav(true)}).catch(()=>syncAdminNav(false))}else syncAdminNav(false);});}
-const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
+initSupabase(); if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();if(session){adFetch('admin_dashboard').then(d=>{if(d?.is_admin)syncAdminNav(true)}).catch(()=>syncAdminNav(false))}else syncAdminNav(false);});}
+document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
 defer(()=>loadPortal(),800);
