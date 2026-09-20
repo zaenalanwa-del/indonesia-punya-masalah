@@ -156,7 +156,7 @@ function renderPublicIssueCards(rows){
  }).join('');
 }
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
-async function report(){
+async async function report(){
  await getSession();
  if(!session){
    openModal('Login Diperlukan','<p>Untuk menjaga agar setiap laporan dapat diawasi dan ditelusuri oleh admin, silakan masuk atau daftar terlebih dahulu.</p><button class="cta" id="goLogin">Masuk / Daftar →</button>');
