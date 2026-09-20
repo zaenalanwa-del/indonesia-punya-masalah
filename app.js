@@ -55,7 +55,8 @@ m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda
 if(f.identifier.includes('@')){
 const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
 session=r.data.session;
-try{const admin=await adFetch('admin_dashboard');if(admin?.is_admin){renderAuth();closeModal();superAdminDashboard(admin);return}}catch{}\nrenderAuth();closeModal();loadPortal();
+try{const admin=await adFetch('admin_dashboard');if(admin?.is_admin){renderAuth();closeModal();superAdminDashboard(admin);return}}catch{}
+renderAuth();closeModal();loadPortal();
 }else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
 }});
 }
@@ -121,7 +122,8 @@ function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
  let arr=[];
  if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
- else if(typeof raw==='string')arr=raw.split(/[,\n]/).map(v=>v.trim()).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,
+]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
  arr=[...new Set(arr.map(String))].slice(0,10);
  return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
