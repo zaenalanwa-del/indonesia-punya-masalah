@@ -321,7 +321,17 @@ body{font-size:var(--ui-font);line-height:1.5}
 .sidebar{width:100%!important}.main{margin-left:0!important}
 .brand{height:120px!important}.brand img{width:100%!important;height:88px!important;max-width:100%!important;max-height:88px!important;transform:scale(1.18)!important;left:-7px!important;top:-10px!important}
 }
-</style></head><body>
+</style><style id="click-safety-fix">
+/* CLICK SAFETY: lapisan dekoratif tidak boleh menutup tombol/menu. */
+.heroGarudaOverlay,.heroGarudaCredit,.cat:before,.banner:after{pointer-events:none!important}
+.sidebar,.nav,.nav a,.nav button,.nav .group,.nav .group>button,.nav .group>.sub,.nav .group>.sub a,
+button,a,[role="button"],input,select,textarea,.issue,.cat,.map-switch button{pointer-events:auto!important}
+.sidebar{z-index:10000!important}
+.nav{position:relative!important;z-index:10001!important}
+.nav .group>.sub a{position:relative!important;z-index:10002!important}
+.hero>*:not(.heroGaruda){position:relative;z-index:2}
+.hero .heroGarudaOverlay{z-index:0!important}
+</style><!-- CLICK-SAFETY-FIX --></head><body>
 <aside class="sidebar"><div class="brand"><img src="/assets/nuansa_kita_cutout.png" alt="NUANSA KITA — Aspirasi Publik Indonesia"></div><nav class="nav">
 <a class="active" href="#beranda"><span>Beranda</span></a>
 <div class="group"><button type="button"><span>Jelajahi Indonesia</span><span class="chev">⌄</span></button><div class="sub">
