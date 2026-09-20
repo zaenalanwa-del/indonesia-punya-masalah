@@ -31,6 +31,7 @@ if(session){
 openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
 $('#logoutBtn')?.addEventListener('click',async()=>{await sb.auth.signOut();session=null;renderAuth();closeModal();loadPortal()});
 $('#myReportsBtn')?.addEventListener('click',()=>{const rows=portal?.tables?.my_citizen_reports||[];openModal('Laporan Saya',rows.length?rows.map(x=>'<div class="rankrow"><span>●</span><span><b>'+esc(x.title||'Tanpa judul')+'</b><br><small>'+esc(x.category||'')+' · '+esc(x.verification_status||'unverified')+'</small></span><strong>'+esc(x.reported_at||'')+'</strong></div>').join(''):'<p>Belum ada laporan dari akun ini.</p>')});
+adFetch('admin_dashboard').then(d=>{if(d?.is_admin){const h=document.querySelector('.authLinks');if(h&&!document.getElementById('openSuperAdmin')){h.insertAdjacentHTML('afterbegin','<button class="cta" id="openSuperAdmin">Super Admin Control Center</button>');$('#openSuperAdmin')?.addEventListener('click',()=>{closeModal();superAdminDashboard(d)})}syncAdminNav(true)}}).catch(()=>syncAdminNav(false));
 return;
 }
 const isSignup=mode==='signup';
@@ -483,9 +484,11 @@ async function saSecurity(x){
 }
 async function saAI(x){
  const rows=x.changes.filter(a=>a.entity_type==='ai' || a.action==='ai_draft').map(a=>'<tr><td>'+esc(a.action)+'</td><td>'+esc(JSON.stringify(a.payload||{}))+'</td><td>'+adStatusBadge(a.status)+'</td></tr>').join('');
- openModal('NUANSA KITA AI WORKSPACE','<div class="adCard"><p><b>Workflow aman:</b> AI hanya membuat draft. Tidak ada publish otomatis.</p><p class="adHint">Provider AI eksternal belum dikonfigurasi pada environment produksi.</p><form id="aiDraftForm"><input name="title" required placeholder="Tujuan perubahan AI"><textarea name="prompt" required rows="7" placeholder="Instruksi / brief untuk AI"></textarea><button class="cta" type="submit">Buat Draft Change Request</button></form></div>'+saTable(rows||'<tr><td colspan="3">Belum ada draft AI.</td></tr>',['Aksi','Payload','Status'])+'<button class="outline" id="backSA">← Control Center</button>');
+ let status='Memeriksa konfigurasi…';
+ try{const st=await adFetch('ai_status');status=st.configured?('Provider aktif · '+esc(st.model||'model default')):'Provider belum aktif · tambahkan OPENAI_API_KEY pada Supabase Edge Function';}catch(e){status='Status AI tidak dapat diperiksa.'}
+ openModal('NUANSA KITA AI WORKSPACE','<div class="adCard"><p><b>Workflow aman:</b> AI membuat draft. Tidak ada publish otomatis.</p><p class="adHint" id="aiStatus">'+status+'</p><form id="aiDraftForm"><input name="title" required placeholder="Tujuan perubahan AI"><textarea name="prompt" required rows="7" placeholder="Instruksi / brief untuk AI"></textarea><button class="cta" type="submit">Jalankan AI & Buat Draft</button></form></div>'+saTable(rows||'<tr><td colspan="3">Belum ada draft AI.</td></tr>',['Aksi','Payload','Status'])+'<button class="outline" id="backSA">← Control Center</button>');
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
- $('#aiDraftForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const r=await sb.from('cms_change_requests').insert({entity_type:'ai',action:'ai_draft',payload:{title:f.title,prompt:f.prompt,created_by:session?.user?.id},status:'draft',requested_by:session?.user?.id});if(r.error)openModal('AI Workspace','<p>'+esc(r.error.message)+'</p>');else saAI(await cmsAdminData())})
+ $('#aiDraftForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const btn=e.target.querySelector('button');btn.disabled=true;btn.textContent='AI memproses…';try{const r=await adFetch('ai_generate',{method:'POST',body:{title:f.title,prompt:f.prompt}});await sb.from('cms_change_requests').insert({entity_type:'ai',action:'ai_draft',payload:{title:f.title,prompt:f.prompt,result:r.text||'',model:r.model||null,created_by:session?.user?.id},status:'draft',requested_by:session?.user?.id});openModal('AI Draft Berhasil','<div class="adCard"><h3>'+esc(f.title)+'</h3><p>'+esc(r.text||'AI tidak mengembalikan teks.')+'</p><button class="cta" id="backAI">Kembali ke AI Workspace</button></div>');$('#backAI')?.addEventListener('click',()=>saAI(x));}catch(e){openModal('AI Workspace','<p>'+esc(e.message||'AI belum aktif')+'</p><button class="outline" id="retryAI">Kembali</button>');$('#retryAI')?.addEventListener('click',()=>saAI(x))}finally{btn.disabled=false;btn.textContent='Jalankan AI & Buat Draft'}})
 }
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 $$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
@@ -541,7 +544,7 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();});}
+if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();if(session){adFetch('admin_dashboard').then(d=>{if(d?.is_admin)syncAdminNav(true)}).catch(()=>syncAdminNav(false))}else syncAdminNav(false);});}
 trackSiteVisit();
 loadPublicAds();
 loadPortal();
