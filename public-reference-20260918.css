@@ -130,3 +130,10 @@ footer{margin-top:18px;padding:25px 18px}.foot b{font-size:14px}.foot small,.foo
 .heroGarudaCredit{position:absolute!important;right:14px!important;bottom:10px!important;z-index:2!important;color:#fff!important;background:rgba(3,25,45,.58)!important;padding:4px 7px!important;border-radius:5px!important;font-size:9px!important}
 .hero>*:not(.heroGaruda){position:relative!important;z-index:3!important}
 @media(max-width:700px){.heroGarudaImage{object-position:center center!important}}
+
+/* CLICK SAFETY / INTERACTION RESCUE — 2026-09-20 */
+.heroGaruda,.heroGarudaImage,.heroGarudaOverlay,.heroGarudaCredit,.banner:after,.cat:before,.featureCard:before{pointer-events:none!important}
+.sidebar,.sidebar *,.top,.top *,.wrap,.wrap button,.wrap a,.wrap input,.wrap select,.wrap textarea,.authBtn,.modal-box{pointer-events:auto}
+button,a,[role="button"],input,select,textarea{position:relative}
+.nav{position:relative;z-index:10001!important}.top{z-index:10000!important}.sidebar{z-index:10002!important}
+.modal{pointer-events:none!important}.modal.open{pointer-events:auto!important}.modal-box{pointer-events:auto!important}
