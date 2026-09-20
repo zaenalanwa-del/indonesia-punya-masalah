@@ -53,7 +53,8 @@ m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda
 }else{
 if(f.identifier.includes('@')){
 const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
-session=r.data.session;\ntry{const admin=await adFetch('admin_dashboard');if(admin?.is_admin){renderAuth();closeModal();superAdminDashboard(admin);return}}catch{}\nrenderAuth();closeModal();loadPortal();
+session=r.data.session;
+try{const admin=await adFetch('admin_dashboard');if(admin?.is_admin){renderAuth();closeModal();superAdminDashboard(admin);return}}catch{}\nrenderAuth();closeModal();loadPortal();
 }else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
 }});
 }
