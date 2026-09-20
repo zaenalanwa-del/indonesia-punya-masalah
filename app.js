@@ -62,10 +62,12 @@ openModal('Lupa Kata Sandi','<form class="authForm" id="resetForm"><input id="re
 $('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://indonesia-punya-masalah.vercel.app/#reset-password'});m.textContent=r.error?r.error.message:'Tautan reset sudah dikirim. Periksa email Anda.'});
 }
 
-function initLiveProblemMap(rows=[]){
- const el=$('.mapbox'); if(!el||!window.L)return;
+function initLiveProblemMap(rows=[],targetEl=null){
+ const el=targetEl||$('.mapbox'); if(!el||!window.L)return;
+ if(el.__problemMap){try{el.__problemMap.remove()}catch{}}
  el.innerHTML='<div class="mapTools"><button class="mapLayer active" data-layer="street">Peta</button><button class="mapLayer" data-layer="satellite">Satelit</button><span class="mapLive">● LIVE</span></div><div class="mapLegend"><b>Peta Masalah & Kejadian</b><span>🔴 Resmi</span><span>🟠 Berita</span><span>🔵 Laporan</span></div>';
  const map=L.map(el,{scrollWheelZoom:false}).setView([-2.5,118],4.6);
+ el.__problemMap=map;
  const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors'}).addTo(map);
  const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri'});
  const layer=L.layerGroup().addTo(map);
@@ -81,7 +83,13 @@ function initLiveProblemMap(rows=[]){
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
-async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}hydrate(portal);return portal}catch(e){console.warn(e);return null}}
+async function loadPortal(){try{await getSession();renderAuth();const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}
+   const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));
+   if(window.L){
+     const mainMap=document.querySelector('#problemMap');
+     if(mainMap)initLiveProblemMap(mapRows,mainMap);
+   }
+   return portal}catch(e){console.warn(e);return portal||null}}
 function photoProxy(url){return '/api/image?src='+encodeURIComponent(url)}
 const photoRoad=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Ubud-Jalan_Raya-Pothole-2009.jpeg');
 const photoFlood=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg');
@@ -174,7 +182,17 @@ async function report(){
  };
 }
 const content={map:['Peta Indonesia','<p>Peta publik menggunakan geografi nasional dari database dan dapat diperluas dengan filter wilayah, kategori, periode, dan sumber.</p><div class="mapbox"></div>'],data:['Data & Statistik','<p>Modul ini membaca dataset, indikator, periode, kualitas, dan sumber dari portal data.</p><div class="rankrow"><span>Dataset terdaftar</span><strong>'+fmt(portal?.tables?.data_sources?.length)+'</strong></div>'],monitor:['Pantau Perubahan','<p>Modul membaca early signals yang telah dipublikasikan. Sinyal tanpa data tidak dibuat-buat.</p><div class="rankrow"><span>Sinyal tersedia</span><strong>'+fmt(portal?.tables?.early_signals?.length)+'</strong></div>'],insights:['Wawasan & Intelligence','<p>Analisis berbasis claims, evidence, observations, dan sumber. Hasil hanya ditampilkan bila tersedia di sistem.</p>'],forecast:['Kemungkinan / Future Radar','<p>Forecast publik ditampilkan dengan horizon, model, confidence, faktor, dan ketidakpastian ketika data tersedia.</p><div class="rankrow"><span>Forecast tersedia</span><strong>'+fmt(portal?.tables?.forecasts?.length)+'</strong></div>'],solutions:['Solusi','<p>Solusi publik berasal dari tabel solusi dan dapat memuat tipe, dampak, risiko, kelayakan, asumsi, serta outcome.</p><div class="rankrow"><span>Solusi tersedia</span><strong>'+fmt(portal?.tables?.solutions?.length)+'</strong></div>'],about:['Tentang Nuansa Kita','<p>NUANSA KITA — ASPIRASI PUBLIK INDONESIA adalah portal untuk melihat masalah, mendengar suara warga, memahami data, memantau perubahan, mengantisipasi kemungkinan, dan mencari solusi secara transparan.</p>']};
-function show(k){const v=content[k]||content.about;openModal(v[0],v[1])}
+function show(k){
+ const v=content[k]||content.about;
+ openModal(v[0],v[1]);
+ if(k==='map'&&window.L){
+   const modalMap=mb?.querySelector('.mapbox');
+   if(modalMap){
+     const rows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));
+     setTimeout(()=>initLiveProblemMap(rows,modalMap),50);
+   }
+ }
+}
 
 async function adFetch(action,options={}){
  const method=options.method||'GET';
