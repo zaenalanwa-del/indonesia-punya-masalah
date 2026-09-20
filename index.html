@@ -308,15 +308,20 @@ body{font-size:var(--ui-font);line-height:1.5}
 .brand img{width:292px!important;height:96px!important;max-width:none!important;max-height:96px!important;transform:scale(1.08)!important;transform-origin:left center!important}
 @media(max-width:900px){.brand{height:108px!important}.brand img{width:286px!important;height:92px!important;max-height:92px!important;transform:scale(1.05)!important}}
 @media(max-width:560px){.brand{height:96px!important}.brand img{width:270px!important;height:84px!important;max-height:84px!important;transform:scale(1.02)!important}}
-</style><style id="logo-size-safe-balanced">
-/* Restore known-good layout; sidebar compact, logo tetap besar dan utuh. */
+</style><style id="logo-size-fixed-sidebar-large-logo">
+/* Logo dibesarkan, tetapi lebar sidebar tetap 270px. */
 .sidebar{width:270px!important}
 .main{margin-left:270px!important}
-.brand{height:132px!important;margin-bottom:14px!important;padding-bottom:10px!important;display:flex!important;align-items:flex-start!important;overflow:visible!important}
-.brand img{width:285px!important;height:108px!important;max-width:none!important;max-height:108px!important;transform:none!important;object-fit:contain!important;object-position:left center!important}
-html,body{visibility:visible!important;opacity:1!important}
-@media(max-width:900px){.sidebar{width:240px!important}.main{margin-left:240px!important}.brand{height:120px!important}.brand img{width:260px!important;height:98px!important}}
-@media(max-width:560px){.sidebar{width:100%!important}.main{margin-left:0!important}.brand{height:108px!important}.brand img{width:100%!important;height:88px!important;max-width:100%!important;max-height:88px!important}}
+.brand{height:165px!important;margin-bottom:14px!important;padding-bottom:10px!important;display:flex!important;align-items:flex-start!important;overflow:visible!important;position:relative!important}
+.brand img{width:285px!important;height:108px!important;max-width:none!important;max-height:108px!important;transform:scale(1.75)!important;transform-origin:left top!important;object-fit:contain!important;object-position:left top!important}
+@media(max-width:900px){
+.sidebar{width:240px!important}.main{margin-left:240px!important}
+.brand{height:150px!important}.brand img{width:260px!important;height:98px!important;transform:scale(1.55)!important}
+}
+@media(max-width:560px){
+.sidebar{width:100%!important}.main{margin-left:0!important}
+.brand{height:120px!important}.brand img{width:100%!important;height:88px!important;max-width:100%!important;max-height:88px!important;transform:scale(1.18)!important;transform-origin:left top!important}
+}
 </style></head><body>
 <aside class="sidebar"><div class="brand"><img src="/assets/nuansa_kita_cutout.png" alt="NUANSA KITA — Aspirasi Publik Indonesia"></div><nav class="nav">
 <a class="active" href="#beranda"><span>Beranda</span></a>
