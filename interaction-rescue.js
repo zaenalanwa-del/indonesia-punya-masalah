@@ -40,7 +40,7 @@ const boot=()=>{
     console.warn('NuansaKita interaction rescue:',err.message);
     document.documentElement.classList.add('nk-js-error');
   });
-  ensureSupabase().then(()=>{try{window.NK_INTERACTIONS?.authPanel&&window.NK_INTERACTIONS.authPanel('login')}catch{}}).catch(()=>{});
+  ensureSupabase().catch(()=>{});
   ensureLeaflet().then(()=>{try{window.loadPortal?.()}catch{}}).catch(()=>{});
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
