@@ -355,7 +355,138 @@ async function redcard(){
    }));
  }catch(e){openModal('REDCARD Administrasi','<p>'+esc(e.message||'Akses RedCard ditolak')+'</p>')}
 }
-function superAdminDashboard(d={}){\n const t=d.traffic||{},p=d.pricing||{},c=d.campaigns||[];\n const body='<div class="adCard"><h3>NUANSA KITA · SUPER ADMIN</h3><p class="adHint">Control Center untuk mengelola portal, data, fitur, pengguna, media, pengiklan, REDCARD, dan alur AI.</p><div class="redcardTop"><div class="redcardMetric"><b>'+fmt(t.today_pageviews||0)+'</b><small>Pageview hari ini</small></div><div class="redcardMetric"><b>'+fmt(t.today_unique||0)+'</b><small>Pengunjung unik</small></div><div class="redcardMetric"><b>'+fmt(t.traffic_30d||0)+'</b><small>Pengunjung 30 hari</small></div><div class="redcardMetric"><b>'+fmt(c.length)+'</b><small>Kampanye iklan</small></div></div></div><div class="adCard" style="margin-top:14px"><h3>Control Center</h3><div class="tierGrid"><div class="tierBox"><h4>Konten & Media</h4><p class="adHint">Kelola berita, laporan, foto, halaman, dan sumber data.</p><button class="outline" id="saContent">Kelola Konten</button></div><div class="tierBox"><h4>Fitur & Menu</h4><p class="adHint">Atur menu publik, modul, dan tampilan portal.</p><button class="outline" id="saFeatures">Kelola Fitur</button></div><div class="tierBox"><h4>Pengguna & Akses</h4><p class="adHint">Pantau akun dan role sesuai kewenangan.</p><button class="outline" id="saUsers">Pengguna & Role</button></div><div class="tierBox"><h4>Pengiklan & REDCARD</h4><p class="adHint">Review kampanye, slot, dan mesin harga trafik.</p><button class="outline" id="saAds">Buka REDCARD</button></div><div class="tierBox"><h4>AI Workspace</h4><p class="adHint">AI menyiapkan draft; publikasi tetap melalui persetujuan admin.</p><button class="outline" id="saAI">AI Workspace</button></div><div class="tierBox"><h4>Keamanan</h4><p class="adHint">Audit dan kontrol perubahan administratif.</p><button class="outline" id="saSecurity">Pusat Keamanan</button></div></div></div><div class="adCard" style="margin-top:14px"><h3>Aksi Cepat</h3><button class="cta" id="saPublic">Kembali ke Portal Publik</button><button class="outline" id="saRed" style="margin-left:6px">REDCARD Administrasi</button></div>';\n openModal('SUPER ADMIN CONTROL CENTER',body);\n $('#saPublic')?.addEventListener('click',()=>{closeModal();window.scrollTo({top:0,behavior:'smooth'})});\n $('#saRed')?.addEventListener('click',redcard);\n $('#saContent')?.addEventListener('click',()=>openModal('Konten & Media','<p>Ruang pengelolaan konten dan media sedang disiapkan sebagai modul admin. Tidak ada perubahan publik yang dilakukan tanpa persetujuan.</p>'));\n $('#saFeatures')?.addEventListener('click',()=>openModal('Fitur & Menu','<p>Modul ini akan mengatur menu, fitur, urutan, visibilitas, dan konfigurasi tampilan portal.</p>'));\n $('#saUsers')?.addEventListener('click',()=>openModal('Pengguna & Role','<p>Role Super Admin aktif untuk akun ini. Pengelolaan role lain akan mengikuti kewenangan dan audit log.</p>'));\n $('#saAds')?.addEventListener('click',redcard);\n $('#saAI')?.addEventListener('click',()=>openModal('NUANSA KITA AI','<p>AI Workspace menggunakan alur aman: <b>Draft → Preview → Persetujuan Super Admin → Publish</b>. Koneksi provider AI belum diaktifkan pada tahap ini.</p>'));\n $('#saSecurity')?.addEventListener('click',()=>openModal('Pusat Keamanan','<p>Perubahan administratif harus dapat diaudit. Data pribadi dan kredensial tidak ditampilkan sebagai konten publik.</p>'));\n}\nconst actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
+async function cmsAdminData(){
+  const [content,media,menu,settings,changes,profiles,roles,userRoles,audit]=await Promise.all([
+    sb.from('cms_content').select('*').order('updated_at',{ascending:false}),
+    sb.from('cms_media').select('*').order('created_at',{ascending:false}).limit(100),
+    sb.from('cms_menu_items').select('*').order('parent_key').order('sort_order'),
+    sb.from('cms_settings').select('*').order('key'),
+    sb.from('cms_change_requests').select('*').order('created_at',{ascending:false}).limit(100),
+    sb.from('profiles').select('id,full_name,display_name,account_type,is_active,created_at').order('created_at',{ascending:false}).limit(100),
+    sb.from('roles').select('id,name,description').order('name'),
+    sb.from('user_roles').select('user_id,role_id,created_at'),
+    sb.from('audit_logs').select('id,user_id,action,entity_type,entity_id,created_at').order('created_at',{ascending:false}).limit(100)
+  ]);
+  for(const r of [content,media,menu,settings,changes,profiles,roles,userRoles,audit]) if(r.error) throw r.error;
+  return {content:content.data||[],media:media.data||[],menu:menu.data||[],settings:settings.data||[],changes:changes.data||[],profiles:profiles.data||[],roles:roles.data||[],userRoles:userRoles.data||[],audit:audit.data||[]};
+}
+function saCard(title,desc,id,action){
+ return '<div class="tierBox"><h4>'+esc(title)+'</h4><p class="adHint">'+esc(desc)+'</p><button class="outline" id="'+id+'">'+esc(action)+'</button></div>';
+}
+function saTable(rows,headers){
+ return '<div style="overflow:auto"><table class="adTable"><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+async function superAdminDashboard(d={}){
+ try{
+   const x=await cmsAdminData();
+   const t=d.traffic||{},c=d.campaigns||[];
+   const body='<div class="adCard"><h3>NUANSA KITA · SUPER ADMIN CONTROL CENTER</h3><p class="adHint">Pusat kendali produksi: konten, media, menu, tampilan, data, wilayah, pengguna, iklan, keamanan, dan workflow AI. Perubahan konten memakai Draft → Review → Publish.</p><div class="redcardTop"><div class="redcardMetric"><b>'+fmt(t.today_pageviews||0)+'</b><small>Pageview hari ini</small></div><div class="redcardMetric"><b>'+fmt(t.today_unique||0)+'</b><small>Pengunjung unik</small></div><div class="redcardMetric"><b>'+fmt(t.traffic_30d||0)+'</b><small>Pengunjung 30 hari</small></div><div class="redcardMetric"><b>'+fmt(c.length)+'</b><small>Kampanye iklan</small></div></div></div><div class="adCard" style="margin-top:14px"><div class="tierGrid">'+
+   saCard('Konten & Halaman','Buat, edit, preview, publish, arsip, dan versioning konten.','saContent','Buka Konten')+
+   saCard('Media Library','Kelola URL media, alt text, status, dan metadata.','saMedia','Buka Media')+
+   saCard('Fitur & Menu','Atur item menu, urutan, parent, dan visibilitas.','saMenu','Buka Menu')+
+   saCard('Tampilan & Pengaturan','Kelola judul, tagline, hero, dan konfigurasi publik.','saSettings','Buka Pengaturan')+
+   saCard('Data & Wilayah','Pantau dataset portal, sinyal LIVE, dan statistik wilayah.','saData','Buka Data')+
+   saCard('Pengguna & Role','Lihat akun, role, status, dan kelola role administratif.','saUsers','Buka Pengguna')+
+   saCard('Pengiklan & REDCARD','Review kampanye, trafik, tier harga, dan administrasi iklan.','saAds','Buka REDCARD')+
+   saCard('Audit & Keamanan','Lihat jejak administratif dan change requests.','saSecurity','Buka Audit')+
+   saCard('NUANSA KITA AI','Buat draft AI change request. Provider AI eksternal belum terhubung.','saAI','Buka AI Workspace')+
+   '</div></div><div class="adCard" style="margin-top:14px"><h3>Status Control Center</h3>'+saTable(
+    '<tr><td>Konten</td><td>'+fmt(x.content.length)+'</td><td>draft/review/published</td></tr>'+
+    '<tr><td>Media</td><td>'+fmt(x.media.length)+'</td><td>library</td></tr>'+
+    '<tr><td>Menu</td><td>'+fmt(x.menu.length)+'</td><td>visible/hidden</td></tr>'+
+    '<tr><td>Change Requests</td><td>'+fmt(x.changes.length)+'</td><td>approval workflow</td></tr>'+
+    '<tr><td>Pengguna</td><td>'+fmt(x.profiles.length)+'</td><td>profile directory</td></tr>'+
+    '<tr><td>Audit</td><td>'+fmt(x.audit.length)+'</td><td>administrative trail</td></tr>',
+    ['Modul','Jumlah','Status'])+'</div><div class="adCard" style="margin-top:14px"><button class="cta" id="saPublic">Kembali ke Portal Publik</button><button class="outline" id="saRefresh" style="margin-left:6px">Refresh Control Center</button></div>';
+   openModal('SUPER ADMIN CONTROL CENTER',body);
+   $('#saPublic')?.addEventListener('click',()=>{closeModal();window.scrollTo({top:0,behavior:'smooth'})});
+   $('#saRefresh')?.addEventListener('click',()=>superAdminDashboard(d));
+   $('#saContent')?.addEventListener('click',()=>saContent(x));
+   $('#saMedia')?.addEventListener('click',()=>saMedia(x));
+   $('#saMenu')?.addEventListener('click',()=>saMenu(x));
+   $('#saSettings')?.addEventListener('click',()=>saSettings(x));
+   $('#saData')?.addEventListener('click',()=>saData(x,d));
+   $('#saUsers')?.addEventListener('click',()=>saUsers(x));
+   $('#saAds')?.addEventListener('click',redcard);
+   $('#saSecurity')?.addEventListener('click',()=>saSecurity(x));
+   $('#saAI')?.addEventListener('click',()=>saAI(x));
+ }catch(e){openModal('SUPER ADMIN CONTROL CENTER','<p>'+esc(e.message||'Control Center gagal dimuat')+'</p><button class="outline" id="saRetry">Coba Lagi</button>');$('#saRetry')?.addEventListener('click',()=>superAdminDashboard(d))}
+}
+async function saContent(x){
+ const rows=x.content.map(v=>'<tr><td><b>'+esc(v.title)+'</b><br><small>'+esc(v.slug)+'</small></td><td>'+esc(v.content_type)+'</td><td>'+adStatusBadge(v.status)+'</td><td><button class="outline saEditContent" data-id="'+v.id+'">Edit</button></td></tr>').join('');
+ openModal('CMS · Konten & Halaman','<div class="adCard"><button class="cta" id="newContent">+ Konten Baru</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="4">Belum ada konten.</td></tr>',['Judul','Tipe','Status','Aksi']));
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $('#newContent')?.addEventListener('click',()=>saContentForm());
+ $$('.saEditContent').forEach(b=>b.addEventListener('click',()=>saContentForm(x.content.find(v=>v.id===b.dataset.id))));
+}
+function saContentForm(item=null){
+ const v=item||{title:'',slug:'',content_type:'page',status:'draft',body:{}};
+ openModal(item?'Edit Konten':'Konten Baru','<form class="adForm" id="cmsContentForm"><div class="adCard"><input name="title" required maxlength="200" placeholder="Judul" value="'+esc(v.title)+'"><input name="slug" required maxlength="200" placeholder="slug" value="'+esc(v.slug)+'"><div class="adTwo"><select name="content_type"><option value="page" '+(v.content_type==='page'?'selected':'')+'>Page</option><option value="article" '+(v.content_type==='article'?'selected':'')+'>Article</option><option value="announcement" '+(v.content_type==='announcement'?'selected':'')+'>Announcement</option></select><select name="status"><option value="draft" '+(v.status==='draft'?'selected':'')+'>Draft</option><option value="review" '+(v.status==='review'?'selected':'')+'>Review</option><option value="published" '+(v.status==='published'?'selected':'')+'>Published</option><option value="archived" '+(v.status==='archived'?'selected':'')+'>Archived</option></select></div><textarea name="body" rows="12" placeholder="JSON body konten">'+esc(JSON.stringify(v.body||{},null,2))+'</textarea><button class="cta" type="submit">Simpan Konten</button><button class="outline" type="button" id="cancelContent">Batal</button></div></form>');
+ $('#cancelContent')?.addEventListener('click',()=>saContentForm(item));
+ $('#cmsContentForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));let body={};try{body=JSON.parse(f.body||'{}')}catch{openModal('CMS','<p>Body harus JSON yang valid.</p>');return}const payload={title:f.title,slug:f.slug,content_type:f.content_type,status:f.status,body,author_id:session?.user?.id,published_at:f.status==='published'?new Date().toISOString():null,version:Number(v.version||0)+(item?1:1)};try{const r=item?await sb.from('cms_content').update(payload).eq('id',item.id):await sb.from('cms_content').insert(payload);if(r.error)throw r.error;await sb.from('cms_change_requests').insert({entity_type:'cms_content',entity_id:item?.id||null,action:item?'update':'create',payload,status:'published'===f.status?'published':'pending',requested_by:session?.user?.id});await saContent((await cmsAdminData()));}catch(err){openModal('CMS Konten','<p>'+esc(err.message)+'</p>')}})
+}
+async function saMedia(x){
+ const rows=x.media.map(v=>'<tr><td><b>'+esc(v.name)+'</b><br><small>'+esc(v.alt_text||'')}</small></td><td><a href="'+esc(v.url)+'" target="_blank" rel="noopener">Buka media ↗</a></td><td>'+adStatusBadge(v.status)+'</td><td><button class="outline saEditMedia" data-id="'+v.id+'">Edit</button></td></tr>').join('');
+ openModal('CMS · Media Library','<div class="adCard"><button class="cta" id="newMedia">+ Tambah Media URL</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="4">Belum ada media.</td></tr>',['Media','URL','Status','Aksi']));
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $('#newMedia')?.addEventListener('click',()=>saMediaForm());
+ $$('.saEditMedia').forEach(b=>b.addEventListener('click',()=>saMediaForm(x.media.find(v=>v.id===b.dataset.id))));
+}
+function saMediaForm(item=null){
+ const v=item||{name:'',url:'',alt_text:'',media_type:'image',status:'active'};
+ openModal(item?'Edit Media':'Tambah Media','<form class="adForm" id="cmsMediaForm"><div class="adCard"><input name="name" required maxlength="200" placeholder="Nama media" value="'+esc(v.name)+'"><input name="url" required type="url" maxlength="2000" placeholder="https://..." value="'+esc(v.url)+'"><input name="alt_text" maxlength="300" placeholder="Alt text" value="'+esc(v.alt_text||'')+'"><select name="status"><option value="active" '+(v.status==='active'?'selected':'')+'>Aktif</option><option value="archived" '+(v.status==='archived'?'selected':'')+'>Arsip</option></select><button class="cta" type="submit">Simpan Media</button></div></form>');
+ $('#cmsMediaForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const payload={name:f.name,url:f.url,alt_text:f.alt_text,media_type:'image',status:f.status,uploaded_by:session?.user?.id};try{const r=item?await sb.from('cms_media').update(payload).eq('id',item.id):await sb.from('cms_media').insert(payload);if(r.error)throw r.error;await saMedia(await cmsAdminData())}catch(err){openModal('CMS Media','<p>'+esc(err.message)+'</p>')}})
+}
+async function saMenu(x){
+ const rows=x.menu.map(v=>'<tr><td><input class="saMenuLabel" data-id="'+v.id+'" value="'+esc(v.label)+'"></td><td><input class="saMenuParent" data-id="'+v.id+'" value="'+esc(v.parent_key||'')+'"></td><td><input class="saMenuOrder" data-id="'+v.id+'" type="number" value="'+esc(v.sort_order)+'"></td><td><label><input type="checkbox" class="saMenuVisible" data-id="'+v.id+'" '+(v.visible?'checked':'')+'> tampil</label></td><td><button class="outline saSaveMenu" data-id="'+v.id+'">Simpan</button></td></tr>').join('');
+ openModal('CMS · Fitur & Menu','<div class="adCard"><button class="cta" id="newMenu">+ Menu Baru</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="5">Belum ada item menu.</td></tr>',['Label','Parent','Urutan','Visibilitas','Aksi']));
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $('#newMenu')?.addEventListener('click',()=>saMenuForm());
+ $$('.saSaveMenu').forEach(b=>b.addEventListener('click',async()=>{const id=b.dataset.id;const label=document.querySelector('.saMenuLabel[data-id="'+CSS.escape(id)+'"]')?.value||'';const parent_key=document.querySelector('.saMenuParent[data-id="'+CSS.escape(id)+'"]')?.value||null;const sort_order=Number(document.querySelector('.saMenuOrder[data-id="'+CSS.escape(id)+'"]')?.value||0);const visible=!!document.querySelector('.saMenuVisible[data-id="'+CSS.escape(id)+'"]')?.checked;const r=await sb.from('cms_menu_items').update({label,parent_key,sort_order,visible,updated_by:session?.user?.id}).eq('id',id);if(r.error)openModal('Menu','<p>'+esc(r.error.message)+'</p>');else saMenu(await cmsAdminData())}));
+}
+function saMenuForm(){
+ openModal('Menu Baru','<form class="adForm" id="newMenuForm"><input name="label" required placeholder="Nama menu"><input name="href" placeholder="#tujuan"><input name="parent_key" placeholder="Parent key (opsional)"><input name="sort_order" type="number" value="0"><label><input name="visible" type="checkbox" checked> Tampilkan</label><button class="cta" type="submit">Simpan Menu</button></form>');
+ $('#newMenuForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const r=await sb.from('cms_menu_items').insert({label:f.label,href:f.href||null,parent_key:f.parent_key||null,sort_order:Number(f.sort_order||0),visible:f.visible==='on',updated_by:session?.user?.id});if(r.error)openModal('Menu','<p>'+esc(r.error.message)+'</p>');else saMenu(await cmsAdminData())})
+}
+async function saSettings(x){
+ const get=k=>x.settings.find(v=>v.key===k)?.value||{};
+ const site=get('site_title'),tag=get('site_tagline');
+ openModal('CMS · Tampilan & Pengaturan','<form class="adForm" id="settingsForm"><div class="adCard"><input name="site_title" placeholder="Judul situs" value="'+esc(site.title||'NUANSA KITA')+'"><input name="site_tagline" placeholder="Tagline" value="'+esc(tag.text||'ASPIRASI PUBLIK INDONESIA')+'"><textarea name="hero_config" rows="8" placeholder="JSON hero">'+esc(JSON.stringify(get('hero_config'),null,2))+'</textarea><textarea name="public_theme" rows="8" placeholder="JSON theme">'+esc(JSON.stringify(get('public_theme'),null,2))+'</textarea><button class="cta" type="submit">Simpan Pengaturan</button><button class="outline" type="button" id="backSA">← Control Center</button></div></form>');
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $('#settingsForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));for(const [key,value] of [['site_title',{title:f.site_title}],['site_tagline',{text:f.site_tagline}],['hero_config',JSON.parse(f.hero_config||'{}')],['public_theme',JSON.parse(f.public_theme||'{}')]]){const r=await sb.from('cms_settings').upsert({key,value,updated_by:session?.user?.id});if(r.error){openModal('Pengaturan','<p>'+esc(r.error.message)+'</p>');return}}await saSettings(await cmsAdminData())})
+}
+async function saData(x,d){
+ const tables=portal?.tables||{};const rows=Object.entries(tables).map(([k,v])=>'<tr><td>'+esc(k)+'</td><td>'+fmt(Array.isArray(v)?v.length:0)+'</td><td>Portal data</td></tr>').join('');
+ openModal('Data & Wilayah','<div class="adCard"><p>Data portal aktif dipisahkan dari CMS. Modul ini memonitor jumlah record yang sudah tersedia.</p>'+saTable(rows,['Tabel','Record','Sumber'])+'</div><div class="adCard" style="margin-top:14px"><p><b>LIVE incidents:</b> '+fmt(portal?.live_incidents?.length||0)+' sinyal dari BMKG/BNPB yang berhasil dimuat.</p><p><b>Wilayah:</b> '+fmt(tables.regions?.length||0)+' record pada payload portal.</p><button class="outline" id="refreshData">Refresh data portal</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>');
+ $('#refreshData')?.addEventListener('click',async()=>{await loadPortal();saData(await cmsAdminData(),d)});
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard(d));
+}
+async function saUsers(x){
+ const roleMap=Object.fromEntries(x.roles.map(r=>[r.id,r.name]));
+ const rows=x.profiles.map(p=>{const rs=x.userRoles.filter(u=>u.user_id===p.id).map(u=>roleMap[u.role_id]||'unknown');return '<tr><td><b>'+esc(p.display_name||p.full_name||'Tanpa nama')+'</b><br><small>'+esc(p.id)+'</small></td><td>'+esc(p.account_type||'user')+'</td><td>'+esc(rs.join(', ')||'user')+'</td><td>'+ (p.is_active===false?'Nonaktif':'Aktif') +'</td><td><button class="outline saRole" data-user="'+p.id+'">Kelola Role</button></td></tr>'}).join('');
+ openModal('Pengguna & Role',saTable(rows||'<tr><td colspan="5">Belum ada profile.</td></tr>',['Pengguna','Tipe','Role','Status','Aksi'])+'<button class="outline" id="backSA">← Control Center</button>');
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $$('.saRole').forEach(b=>b.addEventListener('click',()=>saRoleForm(x,b.dataset.user)));
+}
+function saRoleForm(x,userId){
+ const roleMap=Object.fromEntries(x.roles.map(r=>[r.id,r.name]));const current=new Set(x.userRoles.filter(u=>u.user_id===userId).map(u=>u.role_id));
+ openModal('Kelola Role','<p>User: <code>'+esc(userId)+'</code></p><div class="adCard">'+x.roles.map(r=>'<label style="display:block;margin:8px 0"><input type="checkbox" class="saRoleCheck" data-role="'+r.id+'" '+(current.has(r.id)?'checked':'')+'> '+esc(r.name)+' — '+esc(r.description||'')+'</label>').join('')+'</div><button class="cta" id="saveRoles">Simpan Role</button><button class="outline" id="cancelRoles">Batal</button>');
+ $('#cancelRoles')?.addEventListener('click',()=>saUsers(x));
+ $('#saveRoles')?.addEventListener('click',async()=>{if(!confirm('Simpan perubahan role pengguna ini?'))return;const selected=$$('.saRoleCheck').filter(z=>z.checked).map(z=>z.dataset.role);const old=[...current];for(const id of old.filter(id=>!selected.includes(id))){const r=await sb.from('user_roles').delete().eq('user_id',userId).eq('role_id',id);if(r.error){openModal('Role','<p>'+esc(r.error.message)+'</p>');return}}for(const id of selected.filter(id=>!old.includes(id))){const r=await sb.from('user_roles').insert({user_id:userId,role_id:id});if(r.error){openModal('Role','<p>'+esc(r.error.message)+'</p>');return}}await sb.from('audit_logs').insert({user_id:session?.user?.id,action:'change_role',entity_type:'user',entity_id:userId,new_data:{role_ids:selected}});await saUsers(await cmsAdminData())});
+}
+async function saSecurity(x){
+ const rows=x.audit.map(a=>'<tr><td>'+esc(new Date(a.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(a.action)+'</td><td>'+esc(a.entity_type||'')+'</td><td><small>'+esc(a.user_id||'')+'</small></td></tr>').join('');
+ const ch=x.changes.map(a=>'<tr><td>'+esc(new Date(a.created_at).toLocaleString('id-ID'))+'</td><td>'+esc(a.entity_type)+'</td><td>'+esc(a.action)+'</td><td>'+adStatusBadge(a.status)+'</td></tr>').join('');
+ openModal('Audit & Keamanan','<div class="adCard"><h3>Audit Log</h3>'+saTable(rows||'<tr><td colspan="4">Belum ada audit.</td></tr>',['Waktu','Aksi','Entitas','User'])+'</div><div class="adCard" style="margin-top:14px"><h3>Change Requests</h3>'+saTable(ch||'<tr><td colspan="4">Belum ada request.</td></tr>',['Waktu','Entitas','Aksi','Status'])+'</div><button class="outline" id="backSA">← Control Center</button>');
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+}
+async function saAI(x){
+ const rows=x.changes.filter(a=>a.entity_type==='ai' || a.action==='ai_draft').map(a=>'<tr><td>'+esc(a.action)+'</td><td>'+esc(JSON.stringify(a.payload||{}))+'</td><td>'+adStatusBadge(a.status)+'</td></tr>').join('');
+ openModal('NUANSA KITA AI WORKSPACE','<div class="adCard"><p><b>Workflow aman:</b> AI hanya membuat draft. Tidak ada publish otomatis.</p><p class="adHint">Provider AI eksternal belum dikonfigurasi pada environment produksi.</p><form id="aiDraftForm"><input name="title" required placeholder="Tujuan perubahan AI"><textarea name="prompt" required rows="7" placeholder="Instruksi / brief untuk AI"></textarea><button class="cta" type="submit">Buat Draft Change Request</button></form></div>'+saTable(rows||'<tr><td colspan="3">Belum ada draft AI.</td></tr>',['Aksi','Payload','Status'])+'<button class="outline" id="backSA">← Control Center</button>');
+ $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
+ $('#aiDraftForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const r=await sb.from('cms_change_requests').insert({entity_type:'ai',action:'ai_draft',payload:{title:f.title,prompt:f.prompt,created_by:session?.user?.id},status:'draft',requested_by:session?.user?.id});if(r.error)openModal('AI Workspace','<p>'+esc(r.error.message)+'</p>');else saAI(await cmsAdminData())})
+}
+const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 $$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
 function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
