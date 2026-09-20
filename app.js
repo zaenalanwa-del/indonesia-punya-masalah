@@ -545,9 +545,10 @@ $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
 if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();if(session){adFetch('admin_dashboard').then(d=>{if(d?.is_admin)syncAdminNav(true)}).catch(()=>syncAdminNav(false))}else syncAdminNav(false);});}
-trackSiteVisit();
-loadPublicAds();
-loadPortal();
-if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),60000)}
+const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
+defer(()=>trackSiteVisit(),2200);
+defer(()=>loadPublicAds(),1400);
+defer(()=>loadPortal(),800);
+if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),300000)}
 setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
 })();
