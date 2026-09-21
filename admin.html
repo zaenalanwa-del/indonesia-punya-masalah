@@ -27,7 +27,21 @@
 @media(max-width:1550px){.admin{grid-template-columns:220px minmax(500px,1fr) minmax(500px,43vw)!important}.side{min-width:220px}.preview{min-width:500px!important}.grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 @media(max-width:1200px){.admin{grid-template-columns:210px minmax(0,1fr)!important}.preview{display:flex!important;grid-column:1/-1;height:760px;border-top:1px solid #c6d5de}.frameshell{height:680px;min-height:680px}.center{min-height:720px}}
 @media(max-width:760px){.admin{display:block!important;height:auto!important}.preview{height:700px!important;min-width:0!important}.framewrap{padding:10px!important}.frameshell{height:610px!important;min-height:610px!important}.frameshell.tablet{width:90%!important}.frameshell.mobile{width:310px!important;max-width:80%!important}.grid{grid-template-columns:1fr!important}.devices{width:100%;margin-left:0!important}.devices button{flex:1}}
-</style></head><body><div class="admin">
+<style id="nk-monitor-only-v4">
+/* Super Admin: tampilkan hanya layar monitor publik di sisi kanan. */
+.admin{display:block!important;min-height:100vh;height:100vh!important;overflow:hidden!important;background:#dbe5eb!important}
+.side,.center{display:none!important}
+.preview{display:flex!important;position:fixed!important;top:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;min-width:0!important;background:#dbe5eb!important;border:0!important}
+.previewhead{height:62px!important;flex:0 0 62px!important;padding:10px 16px!important}
+.framewrap{padding:12px!important;align-items:stretch!important;justify-content:stretch!important}
+.frameshell{width:100%!important;max-width:none!important;height:calc(100vh - 86px)!important;min-height:0!important;border-radius:10px!important}
+.frameshell iframe{width:100%!important;height:100%!important}
+@media(max-width:760px){
+ .previewhead{height:58px!important;flex-basis:58px!important}
+ .framewrap{padding:8px!important}
+ .frameshell{height:calc(100vh - 74px)!important}
+}
+</style></style></head><body><div class="admin">
 <aside class="side"><div class="brand"><b>NUANSA KITA</b><small>SUPER ADMIN · CONTROL CENTER</small></div><nav class="nav">
 <button data-view="overview" class="active">⌂ Ikhtisar</button><button data-view="content">▣ Konten & Halaman</button><button data-view="theme">◉ Tema & Visual</button><button data-view="menu">☰ Menu & Navigasi</button><button data-view="media">▧ Media Library</button><button data-view="users">♙ Pengguna & Role</button><button data-view="ads">▤ Iklan & REDCARD</button><button data-view="audit">⌁ Audit & Keamanan</button><button data-view="ai">✦ AI Workspace</button></nav><div class="sidefoot"><span id="adminUser">Memeriksa akun…</span><br><span id="access">Memeriksa akses…</span><button id="publicBtn">← Halaman Publik</button><button id="logoutBtn">Keluar</button></div></aside>
 <main class="center"><div class="top"><div><h1 id="title">Ikhtisar Control Center</h1><p id="desc">Ruang kerja admin terpisah dari halaman publik.</p></div><div class="actions"><button class="btn" id="refreshBtn">↻ Refresh</button><button class="btn primary" id="openPublic">↗ Buka Publik</button></div></div><div id="app"><div class="notice">Memuat…</div></div></main>
