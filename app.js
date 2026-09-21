@@ -43,7 +43,8 @@ let sb=null; function initSupabase(){try{if(!sb&&window.supabase?.createClient)s
 let session=null;
 async function getSession(){initSupabase();if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
 function authHeaders(){return session?.access_token?{Authorization:'Bearer '+session.access_token}:{} }
-function isKnownAdminRoute(){return String(session?.user?.email||'').toLowerCase()==='zaenalanwa@gmail.com' && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}\nfunction renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const sub=session?'Akun aktif · Laporan Saya':'Masuk / Daftar';a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',authPanel)}
+function isKnownAdmin(){return String(session?.user?.email||'').trim().toLowerCase()==='zaenalanwa@gmail.com'}
+function isKnownAdminRoute(){return isKnownAdmin() && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}\nfunction renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const sub=session?'Akun aktif · Laporan Saya':'Masuk / Daftar';a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',authPanel)}
 function authPanel(mode='login'){ initSupabase();
 if(session){
 openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
@@ -73,6 +74,7 @@ m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda
 if(f.identifier.includes('@')){
 const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
 session=r.data.session;
+if(isKnownAdmin()){location.replace('/admin.html');return}
 if(session?.access_token&&session?.refresh_token){try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){console.warn('[auth-set-session]',e)}}
 try{const u=await sb.auth.getUser(session?.access_token);if(u?.data?.user)session={...session,user:u.data.user}}catch(e){console.warn('[auth-user]',e)}
 if(await openAdminIfAllowed(true))return;
@@ -106,13 +108,8 @@ function initLiveProblemMap(rows=[],targetEl=null){
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
-async function loadPortal(){try{await getSession();if(isKnownAdminRoute()){location.replace('/admin.html');return}renderAuth();if(session){if(await openAdminIfAllowed(true))return;syncAdminNav(false)}else syncAdminNav(false);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}
-   const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));
-   if(window.L){
-     const mainMap=document.querySelector('#problemMap');
-     if(mainMap)initLiveProblemMap(mapRows,mainMap);
-   }
-   return portal}catch(e){console.warn(e);return portal||null}}
+async function loadPortal(){try{await getSession();if(isKnownAdminRoute()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));if(window.L){const mainMap=document.querySelector('#problemMap');if(mainMap)initLiveProblemMap(mapRows,mainMap)}setTimeout(()=>loadLiveIncidents(),50);return portal}catch(e){console.warn('[portal]',e);return portal||null}}
+async function loadLiveIncidents(){try{if(!portal)return;const [lj,bj]=await Promise.all([fetch('/api/bmkg?mode=incidents',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))]);portal.live_incidents=[...(lj.incidents||[])];(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})});const mainMap=document.querySelector('#problemMap');if(mainMap&&window.L){const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));initLiveProblemMap(mapRows,mainMap)}}catch(e){console.warn('[live]',e)}}
 function photoProxy(url){return '/api/image?src='+encodeURIComponent(url)}
 const photoRoad=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Ubud-Jalan_Raya-Pothole-2009.jpeg');
 const photoFlood=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg');
@@ -581,11 +578,11 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;renderAuth();if(session){if(await openAdminIfAllowed(true))return;syncAdminNav(false)}else syncAdminNav(false);});}
+initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;if(session&&isKnownAdmin()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);});}
 document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
-defer(()=>loadPortal(),150);
+defer(()=>loadPortal(),50);
 if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),300000)}
 setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
 })();
