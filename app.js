@@ -122,8 +122,7 @@ function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
  let arr=[];
  if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
- else if(typeof raw==='string')arr=raw.split(/[,
-]/).map(v=>v.trim()).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,\n]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
  arr=[...new Set(arr.map(String))].slice(0,10);
  return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
@@ -156,7 +155,7 @@ function renderPublicIssueCards(rows){
  }).join('');
 }
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
-async async function report(){
+async function report(){
  await getSession();
  if(!session){
    openModal('Login Diperlukan','<p>Untuk menjaga agar setiap laporan dapat diawasi dan ditelusuri oleh admin, silakan masuk atau daftar terlebih dahulu.</p><button class="cta" id="goLogin">Masuk / Daftar →</button>');
@@ -430,7 +429,7 @@ function saContentForm(item=null){
  $('#cmsContentForm')?.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));let body={};try{body=JSON.parse(f.body||'{}')}catch{openModal('CMS','<p>Body harus JSON yang valid.</p>');return}const payload={title:f.title,slug:f.slug,content_type:f.content_type,status:f.status,body,author_id:session?.user?.id,published_at:f.status==='published'?new Date().toISOString():null,version:Number(v.version||0)+(item?1:1)};try{const r=item?await sb.from('cms_content').update(payload).eq('id',item.id):await sb.from('cms_content').insert(payload);if(r.error)throw r.error;await sb.from('cms_change_requests').insert({entity_type:'cms_content',entity_id:item?.id||null,action:item?'update':'create',payload,status:'published'===f.status?'published':'pending',requested_by:session?.user?.id});await saContent((await cmsAdminData()));}catch(err){openModal('CMS Konten','<p>'+esc(err.message)+'</p>')}})
 }
 async function saMedia(x){
- const rows=x.media.map(v=>'<tr><td><b>'+esc(v.name)+'</b><br><small>'+esc(v.alt_text||'')}</small></td><td><a href="'+esc(v.url)+'" target="_blank" rel="noopener">Buka media ↗</a></td><td>'+adStatusBadge(v.status)+'</td><td><button class="outline saEditMedia" data-id="'+v.id+'">Edit</button></td></tr>').join('');
+ const rows=x.media.map(v=>'<tr><td><b>'+esc(v.name)+'</b><br><small>'+esc(v.alt_text||'')+'</small></td><td><a href="'+esc(v.url)+'" target="_blank" rel="noopener">Buka media ↗</a></td><td>'+adStatusBadge(v.status)+'</td><td><button class="outline saEditMedia" data-id="'+v.id+'">Edit</button></td></tr>').join('');
  openModal('CMS · Media Library','<div class="adCard"><button class="cta" id="newMedia">+ Tambah Media URL</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="4">Belum ada media.</td></tr>',['Media','URL','Status','Aksi']));
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
  $('#newMedia')?.addEventListener('click',()=>saMediaForm());
