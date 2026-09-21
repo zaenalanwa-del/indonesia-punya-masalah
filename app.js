@@ -78,7 +78,6 @@ session=r.data.session;
 if(isKnownAdmin()){location.replace('/admin.html');return}
 if(session?.access_token&&session?.refresh_token){try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){console.warn('[auth-set-session]',e)}}
 try{const u=await sb.auth.getUser(session?.access_token);if(u?.data?.user)session={...session,user:u.data.user}}catch(e){console.warn('[auth-user]',e)}
-if(await openAdminIfAllowed(true))return;
 renderAuth();closeModal();loadPortal();
 }else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
 }});
