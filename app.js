@@ -55,7 +55,7 @@ m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda
 if(f.identifier.includes('@')){
 const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
 session=r.data.session;
-try{const admin=await adFetch('admin_dashboard');if(admin?.is_admin){renderAuth();closeModal();superAdminDashboard(admin);return}}catch{}
+if(await openAdminIfAllowed(true))return;
 renderAuth();closeModal();loadPortal();
 }else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
 }});
@@ -86,7 +86,7 @@ function initLiveProblemMap(rows=[],targetEl=null){
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
-async function loadPortal(){try{await getSession();renderAuth();if(session){try{const admin=await adFetch('admin_dashboard');if(admin?.is_admin===true){syncAdminNav(true);if(!window.__nuansaAdminOpened){window.__nuansaAdminOpened=true;closeModal();await superAdminDashboard(admin);}}else syncAdminNav(false)}catch{syncAdminNav(false)}}else syncAdminNav(false);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}
+async function loadPortal(){try{await getSession();renderAuth();if(session){if(await openAdminIfAllowed(true))return;syncAdminNav(false)}else syncAdminNav(false);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders()});if(!r.ok)throw Error();portal=await r.json();portal.live_incidents=[];try{const lr=await fetch('/api/bmkg?mode=incidents',{cache:'no-store'});const lj=lr.ok?await lr.json():{};portal.live_incidents.push(...(lj.incidents||[]))}catch{}try{const br=await fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'});const bj=br.ok?await br.json():{};(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})})}catch{}
    const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));
    if(window.L){
      const mainMap=document.querySelector('#problemMap');
@@ -207,6 +207,28 @@ async function adFetch(action,options={}){
  if(!r.ok)throw Error(d.error||d.message||'Layanan iklan tidak tersedia');
  return d;
 }
+async function openAdminIfAllowed(redirect=true){
+  try{
+    if(!session) return false;
+    let d=null;
+    try{d=await adFetch('admin_dashboard')}catch{}
+    if(!d?.is_admin){
+      try{
+        const rr=await sb.rpc('ad_admin_dashboard');
+        if(!rr.error && rr.data?.is_admin===true)d=rr.data;
+      }catch{}
+    }
+    if(d?.is_admin===true){
+      syncAdminNav(true);
+      if(redirect && !location.pathname.endsWith('/admin.html')){
+        location.replace('/admin.html');
+      }
+      return true;
+    }
+  }catch(e){console.warn('[admin-access]',e)}
+  return false;
+}
+
 function visitorKey(){
  try{
    let k=localStorage.getItem('nuansa_ad_visitor_key');
@@ -546,7 +568,7 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;renderAuth();if(session){try{const d=await adFetch('admin_dashboard');if(d?.is_admin===true){syncAdminNav(true);if((_event==='SIGNED_IN'||_event==='INITIAL_SESSION')&&!window.__nuansaAdminOpened){window.__nuansaAdminOpened=true;closeModal();await superAdminDashboard(d);return}}syncAdminNav(false)}catch(e){syncAdminNav(false)}}else syncAdminNav(false);});}
+initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;renderAuth();if(session){if(await openAdminIfAllowed(true))return;syncAdminNav(false)}else syncAdminNav(false);});}
 document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
