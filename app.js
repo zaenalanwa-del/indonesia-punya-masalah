@@ -227,22 +227,16 @@ async function adFetch(action,options={}){
 }
 async function openAdminIfAllowed(redirect=true){
   try{
-    if(!session) return false;
+    if(!session||!sb) return false;
     let d=null;
-    try{d=await adFetch('admin_dashboard')}catch{}
+    try{
+      const rr=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin check timeout')),3500))]);
+      if(!rr.error && rr.data?.is_admin===true)d=rr.data;
+    }catch(e){console.warn('[admin-rpc]',e?.message||e)}
     if(!d?.is_admin){
-      try{
-        const rr=await sb.rpc('ad_admin_dashboard');
-        if(!rr.error && rr.data?.is_admin===true)d=rr.data;
-      }catch{}
+      try{d=await Promise.race([adFetch('admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin API timeout')),3500))])}catch(e){console.warn('[admin-api]',e?.message||e)}
     }
-    if(d?.is_admin===true){
-      syncAdminNav(true);
-      if(redirect && !location.pathname.endsWith('/admin.html')){
-        location.replace('/admin.html');
-      }
-      return true;
-    }
+    if(d?.is_admin===true){syncAdminNav(true);if(redirect && !location.pathname.endsWith('/admin.html'))location.replace('/admin.html');return true;}
   }catch(e){console.warn('[admin-access]',e)}
   return false;
 }
