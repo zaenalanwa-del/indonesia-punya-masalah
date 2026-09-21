@@ -45,7 +45,7 @@ let session=null;
 async function getSession(){initSupabase();if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
 function authHeaders(){return session?.access_token?{Authorization:'Bearer '+session.access_token}:{} }
 function isKnownAdmin(){return String(session?.user?.email||'').trim().toLowerCase()==='zaenalanwa@gmail.com'}
-function isKnownAdminRoute(){return isKnownAdmin() && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}\nfunction renderAuth(){const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const admin=isKnownAdmin();const sub=admin?'SUPER ADMIN · Buka Dashboard':(session?'Akun aktif · Laporan Saya':'Masuk / Daftar');a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn'+(admin?' adminAuthBtn':'')+'" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',()=>{if(admin){location.replace('/admin.html');return}authPanel()})}
+function isKnownAdminRoute(){return isKnownAdmin() && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}\nfunction renderAuth(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){location.replace('/admin.html');return}const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const admin=isKnownAdmin();const sub=admin?'SUPER ADMIN · Buka Dashboard':(session?'Akun aktif · Laporan Saya':'Masuk / Daftar');a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn'+(admin?' adminAuthBtn':'')+'" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',()=>{if(admin){location.replace('/admin.html');return}authPanel()})}
 function authPanel(mode='login'){ initSupabase();
 if(session){
 openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
@@ -582,7 +582,7 @@ initSupabase(); if(sb){loadSavedPublicTheme();sb.auth.onAuthStateChange(async (_
 document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
-defer(()=>loadPortal(),50);
+defer(()=>loadPortal(),0);
 if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),300000)}
 setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
 })();
