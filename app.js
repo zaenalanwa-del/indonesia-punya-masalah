@@ -546,7 +546,7 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-initSupabase(); if(sb){sb.auth.onAuthStateChange((_event,s)=>{session=s||null;renderAuth();if(session){adFetch('admin_dashboard').then(d=>{if(d?.is_admin)syncAdminNav(true)}).catch(()=>syncAdminNav(false))}else syncAdminNav(false);});}
+initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;renderAuth();if(session){try{const d=await adFetch('admin_dashboard');if(d?.is_admin){syncAdminNav(true);if(_event==='SIGNED_IN'||_event==='INITIAL_SESSION'){closeModal();superAdminDashboard(d);return}}syncAdminNav(false)}catch(e){syncAdminNav(false)}}else syncAdminNav(false);});}
 document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
