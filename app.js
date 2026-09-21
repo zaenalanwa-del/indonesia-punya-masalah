@@ -16,8 +16,9 @@ function applyPublicTheme(theme={}){
   }catch(e){console.warn('[theme]',e)}
 }
 window.addEventListener('message',e=>{if(e.data?.type==='NUANSA_THEME_PREVIEW')applyPublicTheme(e.data.theme||{})});
+function themeForToday(base,schedule){const now=new Date();const iso=now.toISOString().slice(0,10);const month=String(now.getMonth()+1);let active={...(base||{})};const monthly=schedule?.monthly||{};if(monthly[month])active={...active,...monthly[month]};for(const x of (schedule?.dates||[])){if(x?.start&&x?.end&&iso>=x.start&&iso<=x.end&&x.theme)active={...active,...x.theme}}return active}
 async function loadSavedPublicTheme(){
-  try{const r=await sb.from('cms_settings').select('value').eq('key','public_theme').maybeSingle();if(!r.error&&r.data?.value)applyPublicTheme(r.data.value)}catch(e){}
+  try{const [a,b]=await Promise.all([sb.from('cms_settings').select('value').eq('key','public_theme').maybeSingle(),sb.from('cms_settings').select('value').eq('key','public_theme_schedule').maybeSingle()]);const base=a.data?.value||{};const schedule=b.data?.value||{};applyPublicTheme(themeForToday(base,schedule))}catch(e){}
 }
 
 function applyLocalHeroAsset(){
@@ -578,7 +579,7 @@ document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
-initSupabase(); if(sb){sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;if(session&&isKnownAdmin()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);});}
+initSupabase(); if(sb){loadSavedPublicTheme();sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;if(session&&isKnownAdmin()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);});}
 document.documentElement.classList.add('nk-js-ready'); const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
 defer(()=>trackSiteVisit(),2200);
 defer(()=>loadPublicAds(),1400);
