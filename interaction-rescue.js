@@ -33,7 +33,8 @@ async function rescueLogin(){
     document.querySelector('#rescueLoginForm').onsubmit=async ev=>{ev.preventDefault();const f=Object.fromEntries(new FormData(ev.currentTarget));const m=document.querySelector('#rescueLoginMsg');m.textContent='Memproses login…';const r=await c.auth.signInWithPassword({email:f.email.trim(),password:f.password});if(r.error){m.textContent=r.error.message;return}sessionStorage.setItem('nk-login-ok','1');if(String(r.data?.user?.email||'').toLowerCase()===NK_ADMIN_EMAIL){location.replace('/admin.html');return}location.reload();};
   }catch(e){alert('Login gagal dimuat: '+(e.message||e));}
 }
-\nconst boot=()=>{
+
+const boot=()=>{
   if(window.__nkInteractionRescue)return;
   window.__nkInteractionRescue=true;
   document.addEventListener('click',async e=>{
@@ -63,7 +64,9 @@ async function rescueLogin(){
     console.warn('NuansaKita interaction rescue:',err.message);
     document.documentElement.classList.add('nk-js-error');
   });
-  ensureSupabase().catch(()=>{});\n  setTimeout(()=>forceAdminRedirect(),350);\n  window.addEventListener('load',()=>setTimeout(()=>forceAdminRedirect(),250));
+  ensureSupabase().catch(()=>{});
+  setTimeout(()=>forceAdminRedirect(),350);
+  window.addEventListener('load',()=>setTimeout(()=>forceAdminRedirect(),250));
   ensureLeaflet().then(()=>{try{window.loadPortal?.()}catch{}}).catch(()=>{});
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
