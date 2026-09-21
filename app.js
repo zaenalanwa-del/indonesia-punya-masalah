@@ -73,6 +73,8 @@ m.textContent=r.data.session?'Akun aktif.':'Pendaftaran berhasil. Cek email Anda
 if(f.identifier.includes('@')){
 const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
 session=r.data.session;
+if(session?.access_token&&session?.refresh_token){try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){console.warn('[auth-set-session]',e)}}
+try{const u=await sb.auth.getUser(session?.access_token);if(u?.data?.user)session={...session,user:u.data.user}}catch(e){console.warn('[auth-user]',e)}
 if(await openAdminIfAllowed(true))return;
 renderAuth();closeModal();loadPortal();
 }else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
@@ -227,17 +229,16 @@ async function adFetch(action,options={}){
 }
 async function openAdminIfAllowed(redirect=true){
   try{
-    if(!session||!sb) return false;
+    if(!sb)return false;
+    const s=session||(await sb.auth.getSession()).data.session;
+    if(!s?.access_token)return false;
+    session=s;
     let d=null;
-    try{
-      const rr=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin check timeout')),3500))]);
-      if(!rr.error && rr.data?.is_admin===true)d=rr.data;
-    }catch(e){console.warn('[admin-rpc]',e?.message||e)}
-    if(!d?.is_admin){
-      try{d=await Promise.race([adFetch('admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin API timeout')),3500))])}catch(e){console.warn('[admin-api]',e?.message||e)}
-    }
-    if(d?.is_admin===true){syncAdminNav(true);if(redirect && !location.pathname.endsWith('/admin.html'))location.replace('/admin.html');return true;}
-  }catch(e){console.warn('[admin-access]',e)}
+    try{const u=await sb.auth.getUser(s.access_token);if(u.error)throw u.error;session={...s,user:u.data.user};}catch(e){console.warn('[admin-user]',e?.message||e)}
+    try{const rr=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin check timeout')),5000))]);if(!rr.error&&rr.data?.is_admin===true)d=rr.data;else if(rr?.error)console.warn('[admin-rpc]',rr.error.message)}catch(e){console.warn('[admin-rpc]',e?.message||e)}
+    if(!d?.is_admin){try{d=await Promise.race([adFetch('admin_dashboard'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('admin API timeout')),5000))])}catch(e){console.warn('[admin-api]',e?.message||e)}}
+    if(d?.is_admin===true){syncAdminNav(true);if(redirect&&!location.pathname.endsWith('/admin.html')){location.replace('/admin.html');}return true;}
+  }catch(e){console.warn('[admin-access]',e?.message||e)}
   return false;
 }
 
