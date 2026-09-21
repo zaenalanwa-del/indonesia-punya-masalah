@@ -227,7 +227,7 @@ async function adFetch(action,options={}){
  if(!r.ok)throw Error(d.error||d.message||'Layanan iklan tidak tersedia');
  return d;
 }
-async function openAdminIfAllowed(redirect=true){
+async async function openAdminIfAllowed(redirect=true){
   try{
     if(!sb)return false;
     const s=session||(await sb.auth.getSession()).data.session;
