@@ -2,6 +2,24 @@
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('id-ID');
+function applyPublicTheme(theme={}){
+  try{
+    if(theme.primary)document.documentElement.style.setProperty('--nk-primary',theme.primary);
+    if(theme.background)document.documentElement.style.setProperty('--nk-background',theme.background);
+    if(theme.ink)document.documentElement.style.setProperty('--nk-ink',theme.ink);
+    if(theme.radius!=null)document.documentElement.style.setProperty('--nk-radius',Math.max(0,Number(theme.radius))+'px');
+    if(theme.heroOverlay!=null)document.documentElement.style.setProperty('--nk-hero-overlay',Math.max(0,Math.min(90,Number(theme.heroOverlay)))/100);
+    document.body.dataset.nkDensity=theme.density||'comfortable';
+    const s=document.getElementById('nk-live-theme')||document.createElement('style');s.id='nk-live-theme';
+    s.textContent=':root{--nk-primary:'+esc(theme.primary||'#0875d8')+';--nk-background:'+esc(theme.background||'#eef4f8')+';--nk-ink:'+esc(theme.ink||'#123b60')+';--nk-radius:'+Math.max(0,Number(theme.radius??14))+'px;--nk-hero-overlay:'+Math.max(0,Math.min(90,Number(theme.heroOverlay??50)))/100+'}body{background:var(--nk-background)!important;color:var(--nk-ink)}button.cta,.nav>a.active,.nav .group.open>button{background:var(--nk-primary)!important;border-color:var(--nk-primary)!important}.card,.section,.publicPage,.adSection,.issue,.featureCard,.serviceCard{border-radius:var(--nk-radius)!important}.heroGarudaOverlay{background:linear-gradient(90deg,rgba(5,25,55,var(--nk-hero-overlay)),rgba(5,25,55,calc(var(--nk-hero-overlay)*.65)),rgba(5,25,55,calc(var(--nk-hero-overlay)*.25)))!important}';
+    if(!s.parentNode)document.head.appendChild(s);
+  }catch(e){console.warn('[theme]',e)}
+}
+window.addEventListener('message',e=>{if(e.data?.type==='NUANSA_THEME_PREVIEW')applyPublicTheme(e.data.theme||{})});
+async function loadSavedPublicTheme(){
+  try{const r=await sb.from('cms_settings').select('value').eq('key','public_theme').maybeSingle();if(!r.error&&r.data?.value)applyPublicTheme(r.data.value)}catch(e){}
+}
+
 function applyLocalHeroAsset(){
  const heroUrl='/assets/IKN%202026.png';
  document.querySelectorAll('.heroGaruda').forEach(el=>{
