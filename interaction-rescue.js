@@ -65,9 +65,9 @@ const boot=()=>{
     document.documentElement.classList.add('nk-js-error');
   });
   ensureSupabase().catch(()=>{});
-  setTimeout(()=>forceAdminRedirect(),350);
-  window.addEventListener('load',()=>setTimeout(()=>forceAdminRedirect(),250));
-  ensureLeaflet().then(()=>{try{window.loadPortal?.()}catch{}}).catch(()=>{});
+  setTimeout(()=>forceAdminRedirect(),120);
+  window.addEventListener('load',()=>setTimeout(()=>forceAdminRedirect(),180));
+  setTimeout(()=>ensureLeaflet().catch(()=>{}),2200);
 };
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
