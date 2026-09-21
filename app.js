@@ -104,7 +104,7 @@ function initLiveProblemMap(rows=[],targetEl=null){
    const popup='<div class="incidentPopup"><b>'+esc(r.title)+'</b><br><span>'+esc(r.incident_type||'Peristiwa')+' · '+esc(r.status||'unverified')+'</span><hr><b>Lokasi</b><br>'+esc(r.location_text||'Tidak tersedia')+'<br><b>Koordinat</b><br>'+Number(r.latitude).toFixed(5)+', '+Number(r.longitude).toFixed(5)+'<br><small>'+esc(precision)+' · Sumber: '+esc(r.source_name)+'</small>'+(r.source_url?'<br><a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">Buka sumber →</a>':'')+'</div>';
    L.marker([Number(r.latitude),Number(r.longitude)],{icon}).addTo(layer).bindPopup(popup);
  });
- $'.mapLayer'.forEach(b=>b.addEventListener('click',()=>{$'.mapLayer'.forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.layer==='satellite'){map.removeLayer(street);satellite.addTo(map)}else{map.removeLayer(satellite);street.addTo(map)}}));
+ $('.mapLayer').forEach(b=>b.addEventListener('click',()=>{$('.mapLayer').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(b.dataset.layer==='satellite'){map.removeLayer(street);satellite.addTo(map)}else{map.removeLayer(satellite);street.addTo(map)}}));
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
@@ -380,11 +380,11 @@ async function redcard(){
    const tierHtml='<div class="tierGrid">'+tiers.map(x=>'<div class="tierBox"><h4>'+esc(x.label)+'</h4><input data-tier="'+esc(x.tier_name)+'" data-k="min" type="number" min="0" value="'+esc(x.min_unique_visitors_30d)+'" placeholder="Min 30d"><input data-tier="'+esc(x.tier_name)+'" data-k="max" type="number" min="0" value="'+esc(x.max_unique_visitors_30d??'')+'" placeholder="Max 30d (kosong = tanpa batas)"><input data-tier="'+esc(x.tier_name)+'" data-k="factor" type="number" min=".1" step=".05" value="'+esc(x.factor)+'" placeholder="Faktor harga"><button class="outline saveTier" data-tier="'+esc(x.tier_name)+'">Simpan tier</button></div>').join('')+'</div>';
    const rows=campaigns.length?campaigns.map(c=>'<div class="redcardRow"><span><strong>'+esc(c.business_name||'Tanpa nama')+'</strong><br>'+esc(c.campaign_name)+'<br><small>'+esc(c.placement||'')+'</small></span><span>'+adStatusBadge(c.status)+'</span><span>'+money(c.quoted_price||0)+'<br><small>'+fmt(c.impressions||0)+' tayang / '+fmt(c.clicks||0)+' klik</small></span><span class="redcardBtns"><button data-review="approved" data-id="'+esc(c.id)+'">Approve</button><button data-review="active" data-id="'+esc(c.id)+'">Aktifkan</button><button data-review="paused" data-id="'+esc(c.id)+'">Jeda</button><button data-review="rejected" data-id="'+esc(c.id)+'">Tolak</button></span></div>').join(''):'<p class="adHint">Belum ada kampanye.</p>';
    openModal('REDCARD · Administrasi Iklan',metrics+'<div class="adCard"><h3>Mesin Harga Otomatis</h3><p class="adHint">Faktor harga dibaca dari trafik pengunjung unik 30 hari. Perubahan tier hanya memengaruhi pesanan baru; quote kampanye lama tetap terkunci.</p>'+tierHtml+'</div><div class="adCard" style="margin-top:14px"><h3>Antrean Kampanye</h3><div class="redcardRows">'+rows+'</div></div>');
-   $'.saveTier'.forEach(b=>b.addEventListener('click',async()=>{
+   $('.saveTier').forEach(b=>b.addEventListener('click',async()=>{
      const tier=b.dataset.tier;const min=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="min"]')?.value||0;const max=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="max"]')?.value||null;const factor=document.querySelector('[data-tier="'+CSS.escape(tier)+'"][data-k="factor"]')?.value||1;
      try{await adFetch('admin_tier',{method:'POST',body:{tier_name:tier,min_unique_visitors_30d:Number(min),max_unique_visitors_30d:max===''?null:Number(max),factor:Number(factor),label:tiers.find(x=>x.tier_name===tier)?.label||tier}});await redcard()}catch(e){openModal('REDCARD','<p>'+esc(e.message)+'</p>')}
    }));
-   $'[data-review]'.forEach(b=>b.addEventListener('click',async()=>{
+   $('[data-review]').forEach(b=>b.addEventListener('click',async()=>{
      const status=b.dataset.review,id=b.dataset.id,note=window.prompt('Catatan admin (opsional):','')||'';
      try{await adFetch('admin_review',{method:'POST',body:{campaign_id:id,status,note}});await redcard()}catch(e){openModal('REDCARD','<p>'+esc(e.message)+'</p>')}
    }));
@@ -452,7 +452,7 @@ async function saContent(x){
  openModal('CMS · Konten & Halaman','<div class="adCard"><button class="cta" id="newContent">+ Konten Baru</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="4">Belum ada konten.</td></tr>',['Judul','Tipe','Status','Aksi']));
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
  $('#newContent')?.addEventListener('click',()=>saContentForm());
- $$'.saEditContent'.forEach(b=>b.addEventListener('click',()=>saContentForm(x.content.find(v=>v.id===b.dataset.id))));
+ $('.saEditContent').forEach(b=>b.addEventListener('click',()=>saContentForm(x.content.find(v=>v.id===b.dataset.id))));
 }
 function saContentForm(item=null){
  const v=item||{title:'',slug:'',content_type:'page',status:'draft',body:{}};
@@ -465,7 +465,7 @@ async function saMedia(x){
  openModal('CMS · Media Library','<div class="adCard"><button class="cta" id="newMedia">+ Tambah Media URL</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="4">Belum ada media.</td></tr>',['Media','URL','Status','Aksi']));
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
  $('#newMedia')?.addEventListener('click',()=>saMediaForm());
- $$'.saEditMedia'.forEach(b=>b.addEventListener('click',()=>saMediaForm(x.media.find(v=>v.id===b.dataset.id))));
+ $('.saEditMedia').forEach(b=>b.addEventListener('click',()=>saMediaForm(x.media.find(v=>v.id===b.dataset.id))));
 }
 function saMediaForm(item=null){
  const v=item||{name:'',url:'',alt_text:'',media_type:'image',status:'active'};
@@ -477,7 +477,7 @@ async function saMenu(x){
  openModal('CMS · Fitur & Menu','<div class="adCard"><button class="cta" id="newMenu">+ Menu Baru</button><button class="outline" id="backSA" style="margin-left:6px">← Control Center</button></div>'+saTable(rows||'<tr><td colspan="5">Belum ada item menu.</td></tr>',['Label','Parent','Urutan','Visibilitas','Aksi']));
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
  $('#newMenu')?.addEventListener('click',()=>saMenuForm());
- $$'.saSaveMenu'.forEach(b=>b.addEventListener('click',async()=>{const id=b.dataset.id;const label=document.querySelector('.saMenuLabel[data-id="'+CSS.escape(id)+'"]')?.value||'';const parent_key=document.querySelector('.saMenuParent[data-id="'+CSS.escape(id)+'"]')?.value||null;const sort_order=Number(document.querySelector('.saMenuOrder[data-id="'+CSS.escape(id)+'"]')?.value||0);const visible=!!document.querySelector('.saMenuVisible[data-id="'+CSS.escape(id)+'"]')?.checked;const r=await sb.from('cms_menu_items').update({label,parent_key,sort_order,visible,updated_by:session?.user?.id}).eq('id',id);if(r.error)openModal('Menu','<p>'+esc(r.error.message)+'</p>');else saMenu(await cmsAdminData())}));
+ $('.saSaveMenu').forEach(b=>b.addEventListener('click',async()=>{const id=b.dataset.id;const label=document.querySelector('.saMenuLabel[data-id="'+CSS.escape(id)+'"]')?.value||'';const parent_key=document.querySelector('.saMenuParent[data-id="'+CSS.escape(id)+'"]')?.value||null;const sort_order=Number(document.querySelector('.saMenuOrder[data-id="'+CSS.escape(id)+'"]')?.value||0);const visible=!!document.querySelector('.saMenuVisible[data-id="'+CSS.escape(id)+'"]')?.checked;const r=await sb.from('cms_menu_items').update({label,parent_key,sort_order,visible,updated_by:session?.user?.id}).eq('id',id);if(r.error)openModal('Menu','<p>'+esc(r.error.message)+'</p>');else saMenu(await cmsAdminData())}));
 }
 function saMenuForm(){
  openModal('Menu Baru','<form class="adForm" id="newMenuForm"><input name="label" required placeholder="Nama menu"><input name="href" placeholder="#tujuan"><input name="parent_key" placeholder="Parent key (opsional)"><input name="sort_order" type="number" value="0"><label><input name="visible" type="checkbox" checked> Tampilkan</label><button class="cta" type="submit">Simpan Menu</button></form>');
@@ -501,7 +501,7 @@ async function saUsers(x){
  const rows=x.profiles.map(p=>{const rs=x.userRoles.filter(u=>u.user_id===p.id).map(u=>roleMap[u.role_id]||'unknown');return '<tr><td><b>'+esc(p.display_name||p.full_name||'Tanpa nama')+'</b><br><small>'+esc(p.id)+'</small></td><td>'+esc(p.account_type||'user')+'</td><td>'+esc(rs.join(', ')||'user')+'</td><td>'+ (p.is_active===false?'Nonaktif':'Aktif') +'</td><td><button class="outline saRole" data-user="'+p.id+'">Kelola Role</button></td></tr>'}).join('');
  openModal('Pengguna & Role',saTable(rows||'<tr><td colspan="5">Belum ada profile.</td></tr>',['Pengguna','Tipe','Role','Status','Aksi'])+'<button class="outline" id="backSA">← Control Center</button>');
  $('#backSA')?.addEventListener('click',()=>superAdminDashboard());
- $$'.saRole'.forEach(b=>b.addEventListener('click',()=>saRoleForm(x,b.dataset.user)));
+ $('.saRole').forEach(b=>b.addEventListener('click',()=>saRoleForm(x,b.dataset.user)));
 }
 function saRoleForm(x,userId){
  const roleMap=Object.fromEntries(x.roles.map(r=>[r.id,r.name]));const current=new Set(x.userRoles.filter(u=>u.user_id===userId).map(u=>u.role_id));
@@ -525,7 +525,7 @@ async function saAI(x){
 }
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 window.NK_INTERACTIONS={authPanel,show,report,advertise,advertiserDashboard,showAdPricing,redcard,handleSubmenu,actions};
-$$'[data-act]'.forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
+$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
 function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
  openModal(title,body);
@@ -575,9 +575,9 @@ document.addEventListener('click',e=>{
  if(sub){e.preventDefault();e.stopPropagation();handleSubmenu(sub.textContent.trim());return false}
 },true);
 document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
-$$'.cat'.forEach(b=>b.addEventListener('click',()=>show('data')));
+$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
-$$'.map-switch button'.forEach(b=>b.addEventListener('click',()=>{$$'.map-switch button'.forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
+$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
 initSupabase();
 function goAdminIfNeeded(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.assign('/admin.html');return true}return false}
 if(sb){
