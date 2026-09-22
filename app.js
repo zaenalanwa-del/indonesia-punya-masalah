@@ -38,15 +38,16 @@ function openModal(title,html){if(!modal||!mb)return;mb.innerHTML='<h2>'+esc(tit
 function closeModal(){modal?.classList.remove('open')}
 $('#close')?.addEventListener('click',closeModal);modal?.addEventListener('click',e=>{if(e.target===modal)closeModal()});
 let portal=null;
+const NK_ADMIN_EMAIL='zaenalanwa@gmail.com';
 const SUPABASE_URL='https://gfggmkeucgqkkyvummpu.supabase.co';
 const SUPABASE_KEY='sb_publishable_ptCVbq9h15prKhT0OO5Zmg_LkE3cbw0';
 let sb=null; function initSupabase(){try{if(!sb&&window.supabase?.createClient)sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){console.warn('Supabase init failed',e)} return sb;} initSupabase();
 let session=null;
 async function getSession(){initSupabase();if(!sb)return null;const r=await sb.auth.getSession();session=r.data.session||null;return session}
 function authHeaders(){return session?.access_token?{Authorization:'Bearer '+session.access_token}:{} }
-function isKnownAdmin(){return String(session?.user?.email||'').trim().toLowerCase()==='zaenalanwa@gmail.com'}
+function isKnownAdmin(){return String(session?.user?.email||'').trim().toLowerCase()===NK_ADMIN_EMAIL}
 function isKnownAdminRoute(){return isKnownAdmin() && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}
-async function forceAdminRedirect(){try{if(location.pathname==='/admin.html'||location.search.includes('admin_preview'))return false;initSupabase();if(!sb)return false;const r=await sb.auth.getSession();const s=r.data?.session||null;if(s?.user?.email&&String(s.user.email).trim().toLowerCase()==='zaenalanwa@gmail.com'){session=s;window.location.href='/admin.html';return true}}catch(e){console.warn('[admin-redirect]',e)}return false}
+async function forceAdminRedirect(){try{if(location.pathname==='/admin.html'||location.search.includes('admin_preview'))return false;initSupabase();if(!sb)return false;const r=await sb.auth.getSession();const s=r.data?.session||null;if(s?.user?.email&&String(s.user.email).trim().toLowerCase()===NK_ADMIN_EMAIL){session=s;window.location.replace('/admin.html');return true}}catch(e){console.warn('[admin-redirect]',e)}return false}
 function renderAuth(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){location.replace('/admin.html');return}const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const admin=isKnownAdmin();const sub=admin?'SUPER ADMIN · Buka Dashboard':(session?'Akun aktif · Laporan Saya':'Masuk / Daftar');a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn'+(admin?' adminAuthBtn':'')+'" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',()=>{if(admin){location.replace('/admin.html');return}authPanel()})}
 function authPanel(mode='login'){ initSupabase();
 if(session){
@@ -581,15 +582,16 @@ $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
 initSupabase();
-function goAdminIfNeeded(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.assign('/admin.html');return true}return false}
+function goAdminIfNeeded(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.replace('/admin.html');return true}return false}
 if(sb){
   loadSavedPublicTheme();
-  sb.auth.onAuthStateChange((_event,s)=>{session=s||null;if(!goAdminIfNeeded()){renderAuth();syncAdminNav(false)}});
-  forceAdminRedirect();
+  sb.auth.onAuthStateChange((_event,s)=>{session=s||null;if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.replace('/admin.html');return}renderAuth();syncAdminNav(false)});
+  setTimeout(()=>forceAdminRedirect(),250);
+  setTimeout(()=>forceAdminRedirect(),1200);
 }
 document.documentElement.classList.add('nk-js-ready');
 const defer=(fn,ms=1200)=>('requestIdleCallback' in window?requestIdleCallback(fn,{timeout:ms}):setTimeout(fn,ms));
-defer(async()=>{try{await getSession();if(await forceAdminRedirect())return;if(goAdminIfNeeded())return;renderAuth()}catch(e){console.warn('[auth-boot]',e)}},50);
+setTimeout(async()=>{try{await getSession();if(await forceAdminRedirect())return;if(goAdminIfNeeded())return;renderAuth()}catch(e){console.warn('[auth-boot]',e)}},80);
 defer(()=>trackSiteVisit(),2500);
 defer(()=>loadPublicAds(),1800);
 defer(()=>loadPortal(),1100);
