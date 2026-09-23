@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const API='/api/public-news.js';
+const API='https://gfggmkeucgqkkyvummpu.supabase.co/functions/v1/public-portal-api?action=news';
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const img=(el)=>el.querySelector('img')?.getAttribute('src')||'';
 const mediaGrid=()=>document.querySelector('#sumber-media .sourceGroup .sourceGrid:not(.sourceGridOfficial)');
