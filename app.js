@@ -111,7 +111,22 @@ function initLiveProblemMap(rows=[],targetEl=null){
  setTimeout(()=>map.invalidateSize(),300); window.problemMap=map;
 }
 
-async function loadPortal(){try{await Promise.race([getSession(),new Promise(r=>setTimeout(r,2500))]);if(isKnownAdminRoute()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),6000);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=30',{cache:'no-store',headers:authHeaders(),signal:ctl.signal});clearTimeout(timer);if(!r.ok)throw Error('Portal data HTTP '+r.status);portal=await r.json();portal.live_incidents=[];const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));if(window.L){const mainMap=document.querySelector('#problemMap');if(mainMap)initLiveProblemMap(mapRows,mainMap)}setTimeout(()=>loadLiveIncidents(),150);return portal}catch(e){console.warn('[portal]',e);return portal||null}}
+function publicProblemRows(){
+ const tables=portal?.tables||{};
+ const problems=(tables.problems||[]).filter(x=>!['draft','archived','hidden','rejected'].includes(String(x.status||'').toLowerCase()));
+ const verified=(tables.citizen_reports||[]).filter(x=>String(x.verification_status||'').toLowerCase()==='verified');
+ const all=[...problems,...verified];
+ const seen=new Set();
+ return all
+   .filter(x=>{const k=String(x.id||x.title||'').trim();if(!k||seen.has(k))return false;seen.add(k);return true})
+   .sort((a,b)=>new Date(b.updated_at||b.reported_at||b.created_at||b.published_at||0).getTime()-new Date(a.updated_at||a.reported_at||a.created_at||a.published_at||0).getTime())
+   .slice(0,24);
+}
+function refreshPublicProblems(){
+ const rows=publicProblemRows();
+ if(rows.length) renderPublicIssueCards(rows);
+}
+async function loadPortal(){try{await Promise.race([getSession(),new Promise(r=>setTimeout(r,2500))]);if(isKnownAdminRoute()){location.replace('/admin.html');return}renderAuth();syncAdminNav(false);const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),6000);const r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=50',{cache:'no-store',headers:authHeaders(),signal:ctl.signal});clearTimeout(timer);if(!r.ok)throw Error('Portal data HTTP '+r.status);portal=await r.json();portal.live_incidents=[];refreshPublicProblems();const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));if(window.L){const mainMap=document.querySelector('#problemMap');if(mainMap)initLiveProblemMap(mapRows,mainMap)}setTimeout(()=>loadLiveIncidents(),150);return portal}catch(e){console.warn('[portal]',e);return portal||null}}
 async function loadLiveIncidents(){try{if(!portal)return;const [lj,bj]=await Promise.all([fetch('/api/bmkg?mode=incidents',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),fetch('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({}))]);portal.live_incidents=[...(lj.incidents||[])];(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})});const mainMap=document.querySelector('#problemMap');if(mainMap&&window.L){const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));initLiveProblemMap(mapRows,mainMap);const officialCards=(portal.live_incidents||[]).slice(0,12).map((x,i)=>({id:'official-'+i,title:x.title||'Kejadian resmi',description:x.description||'',category:x.incident_type||'Bencana Alam',status:'Sinyal Resmi',region_name:x.location_text||'Lokasi kejadian',reported_at:x.observed_at||new Date().toISOString(),latitude:x.latitude,longitude:x.longitude,source:x.source_name||'Sumber resmi',source_type:x.source_type||'official',is_official:true}));const existing=(portal.tables?.citizen_reports||[]).filter(x=>x.verification_status==='verified');const cards=existing.length?existing:officialCards;if(cards.length)renderPublicIssueCards(cards)}catch(e){console.warn('[live]',e)}}
 function photoProxy(url){return '/api/image?src='+encodeURIComponent(url)}
 const photoRoad=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Ubud-Jalan_Raya-Pothole-2009.jpeg');
@@ -168,8 +183,10 @@ function openPublicIssue(x){
 }
 function renderPublicIssueCards(rows){
  const issueGrid=document.querySelector('.issueGrid');if(!issueGrid)return;
- window.publicIssueIndex=Object.fromEntries(rows.map((x,i)=>[String(x.id||('issue-'+i)),x]));
- issueGrid.innerHTML=rows.map((x,i)=>{
+ const clean=(rows||[]).filter(Boolean);
+ window.publicIssueIndex=Object.fromEntries(clean.map((x,i)=>[String(x.id||('issue-'+i)),x]));
+ issueGrid.dataset.autoRotator='';
+ issueGrid.innerHTML=clean.map((x,i)=>{
    const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=(im.urls.length&&!x.is_demo)?'Foto laporan':'Foto kategori';
    return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" referrerpolicy="no-referrer" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
  }).join('');
@@ -595,6 +612,6 @@ setTimeout(async()=>{try{await getSession();if(await forceAdminRedirect())return
 defer(()=>trackSiteVisit(),2500);
 defer(()=>loadPublicAds(),1800);
 defer(()=>loadPortal(),1100);
-if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),300000)}
+if(!window.__nuansaPortalRefresh){window.__nuansaPortalRefresh=setInterval(()=>loadPortal(),30000)}
 setTimeout(()=>{const m=location.hash.match(/^#laporan\/(.+)$/);if(m){const x=window.publicIssueIndex?.[decodeURIComponent(m[1])];if(x)openPublicIssue(x)}},900);
 })();
