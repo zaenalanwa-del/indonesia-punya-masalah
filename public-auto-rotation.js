@@ -10,7 +10,7 @@ function visibleCount(){
   return 4;
 }
 function makeRotator(container,opts={}){
-  if(!container||container.dataset.autoRotator==='1')return;
+  if(!container)return;
   const items=[...container.children].filter(el=>el.matches(opts.itemSelector||':scope > *'));
   if(items.length<=1)return;
   container.dataset.autoRotator='1';
