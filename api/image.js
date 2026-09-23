@@ -1,6 +1,7 @@
 export default async function handler(req, res) {
   try {
-    const src = Array.isArray(req.query?.src) ? req.query.src[0] : req.query?.src;
+    const requestUrl = new URL(req.url || '/', `https://${req.headers?.host || 'indonesia-punya-masalah.vercel.app'}`);
+    const src = requestUrl.searchParams.get('src');
     if (!src) return res.status(400).send('Missing src');
 
     const target = new URL(String(src));
