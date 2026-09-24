@@ -1,51 +1,12 @@
 (()=>{'use strict';
-const ROTATE_MS=8000;
-const ISSUE_SELECTOR='.issueGrid';
-const SOURCE_SELECTOR='.sourceGrid';
-
-function visibleCount(){
-  const w=window.innerWidth||1200;
-  if(w<=560)return 1;
-  if(w<=900)return 2;
-  return 4;
-}
-function makeRotator(container,opts={}){
-  if(!container)return;
-  const items=[...container.children].filter(el=>el.matches(opts.itemSelector||':scope > *'));
-  if(items.length<=1)return;
-  container.dataset.autoRotator='1';
-  let index=0,timer=null,paused=false;
-  const render=()=>{
-    if(paused)return;
-    const n=Math.min(opts.count?opts.count():items.length,items.length);
-    const ordered=[];
-    for(let i=0;i<items.length;i++)ordered.push(items[(index+i)%items.length]);
-    ordered.forEach(el=>el.style.display='none');
-    ordered.slice(0,n).forEach(el=>el.style.display='');
-    index=(index+1)%items.length;
-  };
-  const start=()=>{
-    clearInterval(timer);
-    if(items.length> (opts.count?opts.count():items.length))timer=setInterval(render,ROTATE_MS);
-  };
-  container.addEventListener('mouseenter',()=>{paused=true});
-  container.addEventListener('mouseleave',()=>{paused=false});
-  container.addEventListener('focusin',()=>{paused=true});
-  container.addEventListener('focusout',()=>{paused=false});
-  render();start();
-  window.addEventListener('resize',()=>{render();start()},{passive:true});
-}
-
-function init(){
-  const issue=document.querySelector(ISSUE_SELECTOR);
-  if(issue)makeRotator(issue,{count:visibleCount,itemSelector:'.issue'});
-  document.querySelectorAll(SOURCE_SELECTOR).forEach(grid=>{
-    makeRotator(grid,{count:visibleCount,itemSelector:'.sourceCard'});
-  });
-}
-const observer=new MutationObserver(()=>init());
-observer.observe(document.body,{childList:true,subtree:true});
-init();
-window.setTimeout(init,1200);
-window.setTimeout(init,3500);
+const ROTATE_MS=8000,ISSUE_SELECTOR='.issueGrid',SOURCE_SELECTOR='.sourceGrid',DATA_URL='/api/portal-data?tables=problems,citizen_reports,early_signals,forecasts,solutions&limit=100';
+function visibleCount(){const w=window.innerWidth||1200;if(w<=560)return 1;if(w<=900)return 2;return 4}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function mediaUrl(x){const u=String(x||'');if(!u)return '';if(/^https?:\/\//i.test(u)||u.startsWith('/'))return u;return ''}
+function renderLiveIssues(payload){const grid=document.querySelector(ISSUE_SELECTOR);if(!grid)return;const problems=Array.isArray(payload?.tables?.problems)?payload.tables.problems:[],reports=Array.isArray(payload?.tables?.citizen_reports)?payload.tables.citizen_reports:[];const rows=[...problems.map(x=>({...x,_kind:'problem'})),...reports.map(x=>({...x,_kind:'report'}))].sort((a,b)=>new Date(b.updated_at||b.reported_at||b.created_at||0)-new Date(a.updated_at||a.reported_at||a.created_at||0));if(!rows.length){grid.innerHTML='<div class="public-live-empty"><div class="public-live-empty-icon">✓</div><div><strong>Belum ada masalah publik terverifikasi</strong><p>Belum ada laporan warga atau masalah yang lolos verifikasi dan aturan publikasi. Data akan muncul otomatis setelah tersedia.</p></div></div>';return}grid.innerHTML=rows.slice(0,12).map(x=>{const media=Array.isArray(x.media_urls)?x.media_urls.map(mediaUrl).find(Boolean):mediaUrl(x.media_url||x.image_url||x.image);const title=x.title||'Masalah publik';const region=x.region_name||x.location_text||x.region||'Wilayah belum diisi';const status=x.verification_status||x.status||'published';const cat=x.category||'Umum';const when=x.updated_at||x.reported_at||x.created_at||'';return '<article class="issue" data-live-report="'+esc(x.id||'')+'">'+(media?'<img src="'+esc(media)+'" alt="'+esc(title)+'" loading="lazy">':'<div class="issueNoPhoto">Tidak ada foto publik untuk laporan ini.</div>')+'<div class="issueBody"><div class="badges"><span class="badge blue">'+esc(cat)+'</span><span class="badge green">'+esc(status)+'</span></div><h3>'+esc(title)+'</h3><p>⌖ '+esc(region)+(when?' · '+esc(new Date(when).toLocaleString('id-ID',{dateStyle:'short',timeStyle:'short'})):'')+'</p></div></article>'}).join('')}
+async function syncLivePublicData(){try{const r=await fetch(DATA_URL,{cache:'no-store'});if(!r.ok)throw Error('portal data '+r.status);const d=await r.json();renderLiveIssues(d);updateStats(d);init();}catch(e){console.warn('[public-live-data]',e)}}
+function updateStats(payload){const rc=payload?.region_counts||{};const vals=[rc.province,rc.regency,rc.district,rc.village];document.querySelectorAll('.heroStat b').forEach((el,i)=>{if(Number.isFinite(Number(vals[i])))el.textContent=Number(vals[i]).toLocaleString('id-ID')+' '+['Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan'][i]});const reports=Array.isArray(payload?.tables?.citizen_reports)?payload.tables.citizen_reports:[],problems=Array.isArray(payload?.tables?.problems)?payload.tables.problems:[],signals=Array.isArray(payload?.tables?.early_signals)?payload.tables.early_signals:[],solutions=Array.isArray(payload?.tables?.solutions)?payload.tables.solutions:[];const rank=document.querySelector('.rank');if(rank){const rows=[...problems,...reports].reduce((m,x)=>{const k=x.category||'Lainnya';m[k]=(m[k]||0)+1;return m},{});const top=Object.entries(rows).sort((a,b)=>b[1]-a[1]).slice(0,5);rank.querySelectorAll('.rankrow').forEach((el,i)=>{const x=top[i];if(x){el.querySelectorAll('span')[0].textContent=String(i+1);const spans=el.querySelectorAll('span');if(spans[1])spans[1].textContent=x[0];const strong=el.querySelector('strong');if(strong)strong.textContent=x[1].toLocaleString('id-ID')+' masalah'}else el.style.display='none'});if(!top.length)rank.querySelectorAll('.rankrow').forEach(el=>{el.style.display='none'});const p=rank.querySelector('.muted');if(p)p.textContent='Ringkasan kategori berdasarkan data publik yang tersedia saat ini.'}const qs=document.querySelectorAll('.quickStats .q');const nums=[problems.length+reports.length,0,reports.length,solutions.length];qs.forEach((q,i)=>{const b=q.querySelector('b'),s=q.querySelector('small');if(b)b.textContent=Number(nums[i]||0).toLocaleString('id-ID');if(s)s.innerHTML=['Masalah Publik','Masalah Terselesaikan','Laporan Warga','Solusi Tersedia'][i]})}
+function makeRotator(container,opts={}){if(!container)return;const items=[...container.children].filter(el=>el.matches(opts.itemSelector||':scope > *'));if(items.length<=1)return;container.dataset.autoRotator='1';let index=0,timer=null,paused=false;const render=()=>{if(paused)return;const n=Math.min(opts.count?opts.count():items.length,items.length),ordered=[];for(let i=0;i<items.length;i++)ordered.push(items[(index+i)%items.length]);ordered.forEach(el=>el.style.display='none');ordered.slice(0,n).forEach(el=>el.style.display='');index=(index+1)%items.length};const start=()=>{clearInterval(timer);if(items.length>(opts.count?opts.count():items.length))timer=setInterval(render,ROTATE_MS)};container.addEventListener('mouseenter',()=>{paused=true});container.addEventListener('mouseleave',()=>{paused=false});container.addEventListener('focusin',()=>{paused=true});container.addEventListener('focusout',()=>{paused=false});render();start();window.addEventListener('resize',()=>{render();start()},{passive:true})}
+function init(){const issue=document.querySelector(ISSUE_SELECTOR);if(issue)makeRotator(issue,{count:visibleCount,itemSelector:'.issue'});document.querySelectorAll(SOURCE_SELECTOR).forEach(grid=>makeRotator(grid,{count:visibleCount,itemSelector:'.sourceCard'}))}
+const observer=new MutationObserver(()=>init());if(document.body)observer.observe(document.body,{childList:true,subtree:true});init();window.setTimeout(init,1200);window.setTimeout(init,3500);window.setTimeout(syncLivePublicData,500);window.setTimeout(syncLivePublicData,2500);
 })();
