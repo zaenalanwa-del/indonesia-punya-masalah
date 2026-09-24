@@ -157,7 +157,8 @@ function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
  let arr=[];
  if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
- else if(typeof raw==='string')arr=raw.split(/[,\n]/).map(v=>v.trim()).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,
+]/).map(v=>v.trim()).filter(Boolean);
  else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
  arr=[...new Set(arr.map(String))].slice(0,10);
  return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
@@ -546,7 +547,8 @@ async function saAI(x){
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 window.NK_INTERACTIONS={authPanel,show,report,advertise,advertiserDashboard,showAdPricing,redcard,handleSubmenu,actions};
 $$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
-function navListHtml(rows){return '<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||'Wilayah')+'</b><br><small>'+esc(r.meta||'')+'</small></span></div>').join('')+'</div>'}\nfunction navList(title, rows, emptyText){
+function navListHtml(rows){return '<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||'Wilayah')+'</b><br><small>'+esc(r.meta||'')+'</small></span></div>').join('')+'</div>'}
+function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
  openModal(title,body);
 }
