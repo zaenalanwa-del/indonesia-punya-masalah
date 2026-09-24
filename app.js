@@ -161,12 +161,28 @@ window.publicIssueIndex=Object.fromEntries(fallbackPublicReports.map(x=>[x.id,x]
 function publicIssueImages(x){
  const raw=x.media_urls??x.metadata?.media_urls??x.metadata?.image_urls??x.metadata?.images??x.metadata?.image_url??x.cover_image_url??x.image_url??x.photo_url??x.image??x.thumbnail_url??'';
  let arr=[];
- if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||'')).filter(Boolean);
- else if(typeof raw==='string')arr=raw.split(/[,
-]/).map(v=>v.trim()).filter(Boolean);
- else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href))arr=[raw.url||raw.publicUrl||raw.href];
+ if(Array.isArray(raw))arr=raw.map(v=>typeof v==='string'?v:(v?.url||v?.publicUrl||v?.href||v?.path||'')).filter(Boolean);
+ else if(typeof raw==='string')arr=raw.split(/[,\n]/).map(v=>v.trim()).filter(Boolean);
+ else if(raw&&typeof raw==='object' && (raw.url||raw.publicUrl||raw.href||raw.path))arr=[raw.url||raw.publicUrl||raw.href||raw.path];
  arr=[...new Set(arr.map(String))].slice(0,10);
  return arr.map(u=>/^(https?:\/\/)(commons\.wikimedia\.org|upload\.wikimedia\.org)/i.test(u)?photoProxy(u):u);
+}
+function storageMediaPath(u){
+ const s=String(u||'');
+ const m=s.match(/\/storage\/v1\/object\/public\/citizen-report-media\/(.+)$/);
+ return m?decodeURIComponent(m[1]):(s.startsWith('citizen-report-media/')?s.replace(/^citizen-report-media\//,''):null);
+}
+async function resolvePublicIssueMedia(x){
+ const urls=publicIssueImages(x);
+ if(!urls.length)return [];
+ if(!sb)initSupabase();
+ const out=[];
+ for(const u of urls){
+   const path=storageMediaPath(u);
+   if(path&&sb){const r=await sb.storage.from('citizen-report-media').createSignedUrl(path,3600);if(r.data?.signedUrl)out.push(r.data.signedUrl);}
+   else if(/^https?:\/\//i.test(u))out.push(u);
+ }
+ return [...new Set(out)];
 }
 function publicIssueImage(x){
  const urls=publicIssueImages(x);
@@ -196,6 +212,7 @@ function renderPublicIssueCards(rows){
    const id=String(x.id||('issue-'+i));const im=publicIssueImage(x);const src=im.url||im.fallback;const photoLabel=(im.urls.length&&!x.is_demo)?'Foto laporan':'Foto kategori';
    return '<article class="issue" tabindex="0" role="button" data-issue-id="'+esc(id)+'"><img src="'+esc(src)+'" alt="'+esc(photoLabel+' '+(x.title||''))+'" loading="eager" decoding="async" referrerpolicy="no-referrer" data-fallback="'+esc(im.fallback)+'" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="issueBody"><div class="badges"><span class="badge blue">'+esc(x.category||'Umum')+'</span><span class="badge">'+esc(x.status||x.verification_status||'Terbit')+'</span></div><h3>'+esc(x.title||'Tanpa judul')+'</h3><p>⌖ '+esc(publicIssueRegion(x))+' · '+esc(publicIssueTime(x))+'</p></div></article>';
  }).join('');
+ clean.forEach(async x=>{const urls=await resolvePublicIssueMedia(x);if(!urls.length)return;const id=String(x.id||'');const card=issueGrid.querySelector('[data-issue-id="'+CSS.escape(id)+'"] img');if(card){card.src=urls[0];card.alt='Foto laporan '+(x.title||'');card.dataset.fallback=issueFallbackImage[String(x.category||'')]||'/assets/hero-reference.svg';}});
 }
 async function search(q){openModal('Mencari…','<p>Mengambil hasil dari database publik.</p>');try{const r=await fetch('/api/search?q='+encodeURIComponent(q),{cache:'no-store'}),d=await r.json();if(!r.ok)throw Error();const all=[...(d.results?.regions||[]).map(x=>['Wilayah',x.name,x.level]),...(d.results?.problems||[]).map(x=>['Masalah',x.title,x.category]),...(d.results?.verified_reports||[]).map(x=>['Suara Warga',x.title,x.category])];openModal('Hasil Pencarian','<p>Kata kunci: <b>'+esc(q)+'</b></p>'+(all.length?'<div>'+all.map(x=>'<div class="rankrow"><span>'+esc(x[0])+'</span><span>'+esc(x[1])+'</span><strong>'+esc(x[2]||'')+'</strong></div>').join('')+'</div>':'<p>Tidak ada hasil publik yang cocok.</p>'))}catch{openModal('Pencarian','<p>Pencarian database sedang tidak tersedia. Silakan coba lagi.</p>')}}
 async function report(){
@@ -216,7 +233,7 @@ async function report(){
        const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
        const up=await sb.storage.from('citizen-report-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
        if(up.error)throw up.error;
-       const pub=sb.storage.from('citizen-report-media').getPublicUrl(path);if(pub.data?.publicUrl)media_urls.push(pub.data.publicUrl);
+       media_urls.push(path);
      }
      f.media_urls=media_urls;delete f.media_files;btn.textContent='Menyimpan...';
      const r=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify(f)}),j=await r.json();
