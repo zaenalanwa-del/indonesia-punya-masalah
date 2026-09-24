@@ -53,7 +53,7 @@ const boot=()=>{
       return;
     }
     const sub=e.target.closest('.nav .group .sub a');
-    if(sub&&window.NK_INTERACTIONS?.handleSubmenu){e.preventDefault();e.stopImmediatePropagation();window.NK_INTERACTIONS.handleSubmenu(sub.textContent.trim());return;}
+    if(sub){e.preventDefault();e.stopImmediatePropagation();const label=sub.dataset.submenu||sub.textContent.trim();try{if(window.NK_INTERACTIONS?.handleSubmenu){window.NK_INTERACTIONS.handleSubmenu(label);return;}const box=document.querySelector('#modal'),body=document.querySelector('#mb');if(box&&body){body.innerHTML='<h2>'+label.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</h2><div class="adCard"><b>Nuansa Kita</b><p>Fitur sedang memuat data publik. Silakan tunggu beberapa detik lalu buka kembali menu ini.</p></div>';box.classList.add('open');}}catch(err){console.warn('[submenu-rescue]',err);const box=document.querySelector('#modal'),body=document.querySelector('#mb');if(box&&body){body.innerHTML='<h2>'+label.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))+'</h2><p>Fitur publik tidak gagal dibuka. Data sedang disiapkan.</p>';box.classList.add('open');}}return;}
     const act=e.target.closest('[data-act]');
     if(act&&window.NK_INTERACTIONS?.actions){
       const fn=window.NK_INTERACTIONS.actions[act.dataset.act];
