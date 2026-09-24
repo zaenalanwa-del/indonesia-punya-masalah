@@ -36,6 +36,11 @@ applyLocalHeroAsset();
 
 function openModal(title,html){if(!modal||!mb)return;mb.innerHTML='<h2>'+esc(title)+'</h2>'+html;modal.classList.add('open')}
 function closeModal(){modal?.classList.remove('open')}
+window.NK_INTERACTIONS=window.NK_INTERACTIONS||{};
+window.NK_INTERACTIONS.handleSubmenu=(label)=>{
+  try{return handleSubmenu(String(label||'').trim())}
+  catch(e){console.warn('[submenu]',e);openModal(String(label||'Menu'),'<div class="adCard"><b>Nuansa Kita</b><p>Menu berhasil dibuka, tetapi data belum dapat ditampilkan. Silakan coba lagi.</p></div>')}
+};
 $('#close')?.addEventListener('click',closeModal);modal?.addEventListener('click',e=>{if(e.target===modal)closeModal()});
 let portal=null;
 const NK_ADMIN_EMAIL='zaenalanwa@gmail.com';
