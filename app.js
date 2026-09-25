@@ -574,18 +574,41 @@ function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
  openModal(title,body);
 }
-function handleSubmenu(t){
+async function handleSubmenu(t){
  const tables=portal?.tables||{}, problems=tables.problems||[], reports=tables.citizen_reports||[], signals=tables.early_signals||[], forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
- if(['Ringkasan Indonesia','Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan','Dusun','Pulau & Kawasan','Wilayah Prioritas'].includes(t)){
- const regions=tables.regions||[];
- const norm=v=>String(v||'').toLowerCase();
- const levelMap={'Provinsi':['province','provinsi'],'Kabupaten/Kota':['regency','city','kabupaten','kota'],'Kecamatan':['district','kecamatan'],'Desa/Kelurahan':['village','desa','kelurahan'],'Dusun':['hamlet','dusun'],'Pulau & Kawasan':['island','region','pulau','kawasan'],'Wilayah Prioritas':['priority','prioritas']};
- const keys=levelMap[t]||[];
- const picked=keys.length?regions.filter(r=>keys.includes(norm(r.level||r.region_type||r.type||r.admin_level))):regions;
- const rows=picked.slice(0,60).map(r=>({title:r.name||r.region_name||r.title||'Wilayah',meta:[r.level||r.region_type||'',r.parent_name||r.parent_region_name||''].filter(Boolean).join(' · ')}));
- if(t==='Ringkasan Indonesia') return openModal('Ringkasan Indonesia','<div class="adCard"><p><b>Indonesia</b> · 38 provinsi · 514 kabupaten/kota · 7.282 kecamatan · 83.529 desa/kelurahan.</p><p>Gunakan submenu wilayah untuk menelusuri tingkat administrasi. Data yang ditampilkan mengikuti data wilayah yang tersedia di portal.</p></div>'+navListHtml(rows.length?rows: [{title:'Struktur wilayah Indonesia',meta:fmt(regions.length)+' record tersedia pada portal'}]));
- return navList(t,rows,'Data '+t+' belum tersedia pada payload publik saat ini.');
-}
+ const regionMenus=['Ringkasan Indonesia','Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan','Dusun','Pulau & Kawasan','Wilayah Prioritas'];
+ if(regionMenus.includes(t)){
+   const counts={province:38000?38:38,regency:514,district:7282,village:83529};
+   const levelMap={'Provinsi':'province','Kabupaten/Kota':'regency','Kecamatan':'district','Desa/Kelurahan':'village','Dusun':'hamlet'};
+   const labels={'province':'Provinsi','regency':'Kabupaten/Kota','district':'Kecamatan','village':'Desa/Kelurahan','hamlet':'Dusun'};
+   if(t==='Ringkasan Indonesia'){
+     openModal('Ringkasan Indonesia','<div class="adCard"><p><b>Data wilayah Indonesia</b></p><div class="navResultList">'+[['province','38'],['regency','514'],['district','7.282'],['village','83.529']].map(x=>'<div class="rankrow"><span>●</span><span><b>'+x[1]+' '+labels[x[0]]+'</b><br><small>Data aktif pada database wilayah publik</small></span></div>').join('')+'</div><p class="muted">Pilih submenu wilayah untuk membuka daftar data sebenarnya dari database.</p></div>');
+     return;
+   }
+   if(t==='Wilayah Prioritas'){
+     return navList('Wilayah Prioritas',[], 'Belum ada wilayah prioritas yang dipublikasikan. Data akan muncul setelah tersedia dan memenuhi aturan publikasi.');
+   }
+   let level=levelMap[t];
+   if(t==='Pulau & Kawasan') level='province';
+   const sbx=initSupabase();
+   if(!sbx){ openModal(t,'<div class="navEmpty"><b>Koneksi data belum siap.</b><p>Silakan coba kembali beberapa detik lagi.</p></div>'); return; }
+   openModal(t,'<div class="navEmpty"><b>Memuat data '+esc(t)+'…</b><p>Mengambil data langsung dari database wilayah publik.</p></div>');
+   try{
+     const q=await sbx.from('regions').select('code,parent_code,name,level,official_name,is_active').eq('is_active',true).eq('level',level).order('name',{ascending:true}).limit(200);
+     if(q.error) throw q.error;
+     const rows=(q.data||[]).map(r=>({title:r.official_name||r.name||'Wilayah',meta:[labels[r.level]||r.level,r.code?'Kode '+r.code:''].filter(Boolean).join(' · ')}));
+     const total=counts[level]||rows.length;
+     const title=t==='Pulau & Kawasan'?'Pulau & Kawasan — wilayah provinsi':t;
+     const body=rows.length
+       ? '<div class="adCard"><p><b>'+Number(total).toLocaleString('id-ID')+' data tersedia</b> · menampilkan '+rows.length+' data pertama.</p></div>'+navListHtml(rows)
+       : '<div class="navEmpty"><b>Belum ada data '+esc(t)+' yang aktif.</b><p>Database belum memiliki data publik aktif untuk menu ini.</p></div>';
+     openModal(title,body);
+   }catch(e){
+     console.warn('[region-menu]',e);
+     openModal(t,'<div class="navEmpty"><b>Data gagal dimuat.</b><p>Silakan coba lagi. Koneksi database tidak mengubah data yang tersimpan.</p></div>');
+   }
+   return;
+ }
  if(t==='Terkini') return navList('Masalah Terkini',[...problems,...reports].sort((a,b)=>new Date(b.updated_at||b.reported_at||0)-new Date(a.updated_at||a.reported_at||0)).slice(0,10).map(x=>({title:x.title,meta:x.category||x.verification_status})), 'Belum ada masalah terbit/terverifikasi.');
  if(t==='Berdasarkan Wilayah') return navList('Masalah Berdasarkan Wilayah',problems.slice(0,10).map(x=>({title:x.region_name||x.location_text||'Wilayah belum diisi',meta:x.title})), 'Belum ada masalah dengan wilayah publik.');
  if(t==='Berdasarkan Kategori'){const c={};problems.forEach(x=>{const k=x.category||'Lainnya';c[k]=(c[k]||0)+1});return navList('Masalah Berdasarkan Kategori',Object.entries(c).sort((a,b)=>b[1]-a[1]).map(x=>({title:x[0],meta:x[1]+' masalah'})),'Belum ada kategori masalah.')}
