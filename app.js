@@ -578,7 +578,7 @@ async function handleSubmenu(t){
  const tables=portal?.tables||{}, problems=tables.problems||[], reports=tables.citizen_reports||[], signals=tables.early_signals||[], forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
  const regionMenus=['Ringkasan Indonesia','Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan','Dusun','Pulau & Kawasan','Wilayah Prioritas'];
  if(regionMenus.includes(t)){
-   const counts={province:38000?38:38,regency:514,district:7282,village:83529};
+   const counts={province:38,regency:514,district:7282,village:83529};
    const levelMap={'Provinsi':'province','Kabupaten/Kota':'regency','Kecamatan':'district','Desa/Kelurahan':'village','Dusun':'hamlet'};
    const labels={'province':'Provinsi','regency':'Kabupaten/Kota','district':'Kecamatan','village':'Desa/Kelurahan','hamlet':'Dusun'};
    if(t==='Ringkasan Indonesia'){
