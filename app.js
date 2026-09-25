@@ -65,32 +65,36 @@ return;
 const isSignup=mode==='signup';
 const title=isSignup?'Buat Akun Baru / Sign Up':'Masuk / Sign In';
 const html=isSignup?'<form class="authForm" id="authForm"><div class="authTwo"><input name="first_name" required maxlength="80" placeholder="Nama Depan"><input name="last_name" maxlength="80" placeholder="Nama Belakang"></div><input name="identifier" type="text" required autocomplete="username" placeholder="Email (wajib untuk Daftar)"><div class="passwordWrap"><input id="authPassword" type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Kata Sandi Baru" style="padding-right:48px"><button type="button" id="togglePassword" aria-label="Tampilkan password" title="Tampilkan password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:20px;line-height:1">👁️</button></div><div class="authThree"><select name="birth_day" required><option value="">Hari</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')+'</select><select name="birth_month" required><option value="">Bulan</option>'+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('')+'</select><select name="birth_year" required><option value="">Tahun</option>'+Array.from({length:100},(_,i)=>{const y=new Date().getFullYear()-i;return '<option value="'+y+'">'+y+'</option>'}).join('')+'</select></div><div class="gender"><span>Jenis Kelamin:</span><label><input type="radio" name="gender" value="female" required> Perempuan</label><label><input type="radio" name="gender" value="male"> Laki-laki</label><label><input type="radio" name="gender" value="custom"> Khusus (Custom)</label></div><p class="privacy">Dengan mengklik Daftar, Anda menyetujui Ketentuan, Kebijakan Privasi, dan Kebijakan Cookie kami.</p><button class="cta" type="submit">Daftar</button><button class="outline" type="button" id="switchAuth">Sudah punya akun? Login / Masuk</button><p class="authNote" id="authMsg">Gunakan email untuk pendaftaran agar konfirmasi akun dapat dikirim melalui email.</p></form>'
-:'<form class="authForm" id="authForm"><input name="identifier" type="text" required autocomplete="username" placeholder="Email atau Nomor Telepon"><div class="passwordWrap"><input id="authPassword" type="password" name="password" required minlength="6" autocomplete="current-password" placeholder="Kata Sandi" style="padding-right:48px"><button type="button" id="togglePassword" aria-label="Tampilkan password" title="Tampilkan password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:20px;line-height:1">👁️</button></div><button class="cta" type="submit">Login / Masuk</button><button class="outline" type="button" id="forgotBtn">Lupa Kata Sandi?</button><button class="outline" type="button" id="switchAuth">Buat Akun Baru</button><p class="authNote" id="authMsg">Masuk menggunakan email atau nomor telepon yang terdaftar.</p></form>';
+:'<form class="authForm" id="authForm"><input name="identifier" type="text" required autocomplete="username" placeholder="Email"><div class="passwordWrap"><input id="authPassword" type="password" name="password" required minlength="6" autocomplete="current-password" placeholder="Kata Sandi" style="padding-right:48px"><button type="button" id="togglePassword" aria-label="Tampilkan password" title="Tampilkan password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:20px;line-height:1">👁️</button></div><button class="cta" type="submit">Login / Masuk</button><button class="outline" type="button" id="forgotBtn">Lupa Kata Sandi?</button><button class="outline" type="button" id="switchAuth">Buat Akun Baru</button><p class="authNote" id="authMsg">Masuk menggunakan email atau nomor telepon yang terdaftar.</p></form>';
 openModal(title,html);
 const pw=$('#authPassword'),tp=$('#togglePassword');
 tp?.addEventListener('click',()=>{const show=pw?.type==='password';if(pw)pw.type=show?'text':'password';if(tp){tp.textContent=show?'🙈':'👁️';tp.setAttribute('aria-label',show?'Sembunyikan password':'Tampilkan password')}});
 $('#switchAuth')?.addEventListener('click',()=>authPanel(isSignup?'login':'signup'));
 $('#forgotBtn')?.addEventListener('click',()=>forgotPassword());
 $('#authForm')?.addEventListener('submit',async e=>{
-e.preventDefault();const f=Object.fromEntries(new FormData(e.target));const m=$('#authMsg');m.textContent='Memproses...';
+e.preventDefault();const form=e.target, f=Object.fromEntries(new FormData(form)), m=$('#authMsg'), btn=form.querySelector('button[type="submit"]');
+if(btn){btn.disabled=true;btn.textContent=isSignup?'Mendaftarkan...':'Memeriksa...'}
+m.textContent='Memproses...';
+const withTimeout=(promise,ms=15000)=>Promise.race([promise,new Promise(resolve=>setTimeout(()=>resolve({error:{message:'Koneksi ke layanan akun terlalu lama. Periksa koneksi internet lalu coba lagi.'}}),ms))]);
+try{
 if(isSignup){
-if(!f.identifier.includes('@')){m.textContent='Untuk pendaftaran saat ini gunakan alamat email. Login nomor telepon memerlukan layanan SMS Supabase.';return}
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.identifier||'')){m.textContent='Masukkan alamat email yang valid.';return}
 const birth=f.birth_year+'-'+String(f.birth_month).padStart(2,'0')+'-'+String(f.birth_day).padStart(2,'0');
-const r=await sb.auth.signUp({email:f.identifier,password:f.password,options:{emailRedirectTo:'https://indonesia-punya-masalah.vercel.app/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}});
-if(r.error){m.textContent=r.error.message;return}
-m.textContent=r.data.session?'Akun berhasil dibuat dan langsung aktif.':'Pendaftaran berhasil. Cek inbox/spam email Anda, klik tautan konfirmasi, lalu kembali ke website untuk Login.';
+const r=await withTimeout(sb.auth.signUp({email:f.identifier.trim(),password:f.password,options:{emailRedirectTo:'https://indonesia-punya-masalah.vercel.app/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}}));
+if(r.error){m.textContent='Pendaftaran gagal: '+r.error.message;return}
+m.textContent=r.data.session?'Akun berhasil dibuat dan langsung aktif.':'Akun berhasil dibuat. Cek Inbox/Spam email untuk konfirmasi, lalu kembali dan Login.';
 }else{
-if(f.identifier.includes('@')){
-const r=await sb.auth.signInWithPassword({email:f.identifier,password:f.password});if(r.error){m.textContent=r.error.message;return}
+if(!f.identifier.includes('@')){m.textContent='Untuk Login saat ini gunakan email.';return}
+const r=await withTimeout(sb.auth.signInWithPassword({email:f.identifier.trim(),password:f.password}));
+if(r.error){m.textContent='Login gagal: '+r.error.message;return}
 session=r.data.session;
-try{const ar=await sb.rpc('ad_admin_dashboard');sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch{sessionIsAdmin=false}
+if(sessionIsAdmin===false){try{const ar=await withTimeout(sb.rpc('ad_admin_dashboard'),8000);sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch{sessionIsAdmin=false}}
 if(sessionIsAdmin){location.replace('/admin.html');return}
-if(session?.access_token&&session?.refresh_token){try{await sb.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token})}catch(e){console.warn('[auth-set-session]',e)}}
-try{const u=await sb.auth.getUser(session?.access_token);if(u?.data?.user)session={...session,user:u.data.user}}catch(e){console.warn('[auth-user]',e)}
 renderAuth();closeModal();loadPortal();
-}else{m.textContent='Login nomor telepon memerlukan SMS Auth yang harus diaktifkan di Supabase. Untuk sekarang gunakan email.'}
-}});
 }
+}catch(err){m.textContent='Layanan akun tidak merespons. Coba lagi setelah beberapa saat.';console.warn('[auth-submit]',err)}
+finally{if(btn){btn.disabled=false;btn.textContent=isSignup?'Daftar':'Login / Masuk'}}
+});}
 async function forgotPassword(){
 openModal('Lupa Kata Sandi','<form class="authForm" id="resetForm"><input id="resetEmail" type="email" required placeholder="Email akun Anda"><button class="cta" type="submit">Kirim Tautan Reset</button><p class="authNote" id="resetMsg">Kami akan mengirim tautan untuk membuat kata sandi baru.</p></form>');
 $('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://indonesia-punya-masalah.vercel.app/#reset-password'});m.textContent=r.error?('Gagal mengirim reset: '+r.error.message):'Tautan reset sudah dikirim. Periksa inbox/spam email Anda.'});
