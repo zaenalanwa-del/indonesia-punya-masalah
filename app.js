@@ -663,7 +663,7 @@ initSupabase();
 function goAdminIfNeeded(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.replace('/admin.html');return true}return false}
 if(sb){
   loadSavedPublicTheme();
-  sb.auth.onAuthStateChange(async (_event,s)=>{session=s||null;sessionIsAdmin=false;if(session?.access_token){try{const ar=await sb.rpc('ad_admin_dashboard');sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch{}}if(sessionIsAdmin&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){window.location.replace('/admin.html');return}renderAuth();syncAdminNav(false)});
+  sb.auth.onAuthStateChange((_event,s)=>{session=s||null;sessionIsAdmin=false;renderAuth();syncAdminNav(false);if(session?.access_token){setTimeout(async()=>{try{const ar=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise(resolve=>setTimeout(()=>resolve({error:{message:'admin check timeout'}}),4000))]);sessionIsAdmin=!ar.error&&ar.data?.is_admin===true;if(sessionIsAdmin&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html')window.location.replace('/admin.html');renderAuth();syncAdminNav(false)}catch{sessionIsAdmin=false}},0)}});
   setTimeout(()=>forceAdminRedirect(),250);
   setTimeout(()=>forceAdminRedirect(),1200);
 }
