@@ -90,8 +90,7 @@ if(r.error){m.textContent='Login gagal: '+r.error.message;return}
 session=r.data.session;
 if(sessionIsAdmin===false){try{const ar=await withTimeout(sb.rpc('ad_admin_dashboard'),8000);sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch{sessionIsAdmin=false}}
 if(sessionIsAdmin){location.replace('/admin.html');return}
-renderAuth();closeModal();loadPortal();
-}
+renderAuth();closeModal();
 }catch(err){m.textContent='Layanan akun tidak merespons. Coba lagi setelah beberapa saat.';console.warn('[auth-submit]',err)}
 finally{if(btn){btn.disabled=false;btn.textContent=isSignup?'Daftar':'Login / Masuk'}}
 });}
