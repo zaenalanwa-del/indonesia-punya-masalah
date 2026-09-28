@@ -1,18 +1,5 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
-/* GLOBAL INTERACTION KERNEL */
-(function(){
- if(window.__IPM_INTERACTION_KERNEL__)return;
- window.__IPM_INTERACTION_KERNEL__=true;
- document.addEventListener('click',function(e){
-  const t=e.target?.closest?.('[data-act],#authBtn,.nav .group>button,.nav .group .sub a'); if(!t)return;
-  const api=window.NK_INTERACTIONS||{};
-  if(t.dataset?.act){const fn=api.actions?.[t.dataset.act];if(typeof fn==='function'){e.preventDefault();e.stopImmediatePropagation();try{fn()}catch(err){console.warn('[interaction]',err)}return;}}
-  if(t.id==='authBtn'&&typeof api.authPanel==='function'){e.preventDefault();e.stopImmediatePropagation();try{api.authPanel()}catch(err){console.warn('[auth]',err)}return;}
-  if(t.matches('.nav .group>button')){e.preventDefault();e.stopImmediatePropagation();const g=t.closest('.group');document.querySelectorAll('.nav .group').forEach(x=>{if(x!==g)x.classList.remove('open','sub-open')});g?.classList.toggle('open');g?.classList.toggle('sub-open');return;}
-  if(t.matches('.nav .group .sub a')){e.preventDefault();e.stopImmediatePropagation();const fn=api.handleSubmenu;if(typeof fn==='function'){try{fn(t.dataset.submenu||t.textContent.trim())}catch(err){console.warn('[submenu]',err)}}return;}
- },true);
-})();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('id-ID');
 function applyPublicTheme(theme={}){
@@ -672,6 +659,14 @@ document.addEventListener('click',e=>{
 });
 document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
 /* global interaction kernel handles public actions, auth and submenus */
+/* PUBLIC INTERACTION FALLBACK — bubbling only, never blocks native controls. */
+document.addEventListener('click',e=>{
+ const t=e.target?.closest?.('[data-act]');
+ if(!t||e.defaultPrevented)return;
+ const fn=window.NK_INTERACTIONS?.actions?.[t.dataset.act];
+ if(typeof fn==='function'){e.preventDefault();try{fn()}catch(err){console.warn('[action]',err)}}
+});
+
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
