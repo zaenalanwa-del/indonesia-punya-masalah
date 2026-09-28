@@ -17,7 +17,7 @@ function replaceGrid(grid,items){
 }
 async function load(){
   try{
-    const r=await fetch(API+'?action=news&t='+Date.now(),{cache:'no-store'}); if(!r.ok)throw new Error('feed');
+    const c=new AbortController(),timer=setTimeout(()=>c.abort(),5000);const r=await fetch(API+'?action=news&t='+Date.now(),{cache:'no-store',signal:c.signal}); clearTimeout(timer); if(!r.ok)throw new Error('feed');
     const j=await r.json(); if(!j.ok)return;
     const items=j.items||[];
     const media=items.filter(x=>x.type==='Media Nasional');
