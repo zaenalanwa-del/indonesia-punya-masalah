@@ -638,10 +638,10 @@ async function handleSubmenu(t){
 document.addEventListener('click',e=>{
  const card=e.target.closest('.issue[data-issue-id]');
  if(!card)return;
- e.preventDefault();e.stopImmediatePropagation();
+ e.preventDefault();
  const x=window.publicIssueIndex?.[card.dataset.issueId];
  if(x)openPublicIssue(x);
-},true);
+});
 document.addEventListener('keydown',e=>{
  if((e.key==='Enter'||e.key===' ')&&e.target.closest('.issue[data-issue-id]')){
    e.preventDefault();
@@ -653,11 +653,19 @@ window.addEventListener('hashchange',()=>{
 });
 document.addEventListener('click',e=>{
  const btn=e.target.closest('.nav .group>button');
- if(btn){e.preventDefault();e.stopPropagation();const group=btn.closest('.group');document.querySelectorAll('.nav .group.open').forEach(g=>{if(g!==group)g.classList.remove('open')});group.classList.toggle('open');return false}
+ if(btn){e.preventDefault();const group=btn.closest('.group');document.querySelectorAll('.nav .group.open').forEach(g=>{if(g!==group)g.classList.remove('open')});group.classList.toggle('open');return}
  const sub=e.target.closest('.nav .group .sub a');
- if(sub){e.preventDefault();e.stopPropagation();handleSubmenu(sub.textContent.trim());return false}
-},true);
+ if(sub){e.preventDefault();handleSubmenu(sub.textContent.trim());return}
+});
 document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
+document.addEventListener('click',e=>{
+ const act=e.target.closest('[data-act]');
+ if(act && !e.defaultPrevented){const fn=actions[act.dataset.act];if(typeof fn==='function'){e.preventDefault();fn();return}}
+ const auth=e.target.closest('#authBtn');
+ if(auth && !e.defaultPrevented){e.preventDefault();authPanel();return}
+ const sub=e.target.closest('[data-submenu]');
+ if(sub && !e.defaultPrevented){e.preventDefault();handleSubmenu(sub.dataset.submenu||sub.textContent.trim());return}
+});
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
