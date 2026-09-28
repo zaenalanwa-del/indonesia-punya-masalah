@@ -54,46 +54,46 @@ function isKnownAdmin(){return sessionIsAdmin===true}
 function isKnownAdminRoute(){return isKnownAdmin() && location.pathname!=='/admin.html' && !location.search.includes('admin_preview')}
 async function forceAdminRedirect(){try{if(location.pathname==='/admin.html'||location.search.includes('admin_preview'))return false;initSupabase();if(!sb)return false;const r=await Promise.race([sb.auth.getSession(),new Promise(resolve=>setTimeout(()=>resolve({data:{session:null},error:{message:'session timeout'}}),3000))]);const s=r.data?.session||null;if(!s?.access_token){sessionIsAdmin=false;return false}session=s;const rr=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise(resolve=>setTimeout(()=>resolve({error:{message:'admin check timeout'}}),4000))]);sessionIsAdmin=!rr.error&&rr.data?.is_admin===true;if(sessionIsAdmin){window.location.replace('/admin.html');return true}}catch(e){sessionIsAdmin=false;console.warn('[admin-redirect]',e)}return false}
 function renderAuth(){if(isKnownAdmin()&&!location.search.includes('admin_preview')&&location.pathname!=='/admin.html'){location.replace('/admin.html');return}const a=$('#authArea');if(!a)return;const label=session?.user?.email||'Pengunjung';const admin=isKnownAdmin();const sub=admin?'SUPER ADMIN · Buka Dashboard':(session?'Akun aktif · Laporan Saya':'Masuk / Daftar');a.innerHTML='<span class="bell">♧<b>3</b></span><button class="authBtn'+(admin?' adminAuthBtn':'')+'" id="authBtn" type="button"><span class="avatar">👤</span><span><strong>'+esc(label)+'</strong><small>'+esc(sub)+'</small></span></button>';$('#authBtn')?.addEventListener('click',()=>{if(admin){location.replace('/admin.html');return}authPanel()})}
-function authPanel(mode='login'){ initSupabase();
-if(session){
-openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini. Admin/moderator memproses laporan sesuai kewenangan.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
-$('#logoutBtn')?.addEventListener('click',async()=>{await sb.auth.signOut();session=null;renderAuth();closeModal();loadPortal()});
-$('#myReportsBtn')?.addEventListener('click',()=>{const rows=portal?.tables?.my_citizen_reports||[];openModal('Laporan Saya',rows.length?rows.map(x=>'<div class="rankrow"><span>●</span><span><b>'+esc(x.title||'Tanpa judul')+'</b><br><small>'+esc(x.category||'')+' · '+esc(x.verification_status||'unverified')+'</small></span><strong>'+esc(x.reported_at||'')+'</strong></div>').join(''):'<p>Belum ada laporan dari akun ini.</p>')});
-adFetch('admin_dashboard').then(d=>{if(d?.is_admin){const h=document.querySelector('.authLinks');if(h&&!document.getElementById('openSuperAdmin')){h.insertAdjacentHTML('afterbegin','<button class="cta" id="openSuperAdmin">Super Admin Control Center</button>');$('#openSuperAdmin')?.addEventListener('click',()=>{closeModal();superAdminDashboard(d)})}syncAdminNav(true)}}).catch(()=>syncAdminNav(false));
-return;
+function authPanel(mode='login'){
+ initSupabase();
+ if(session){
+  openModal('Akun Saya','<p><b>'+esc(session.user.email||'')+'</b></p><p class="authNote">Akses data pribadi dibatasi ke akun ini.</p><div class="authLinks"><button class="outline" id="myReportsBtn">Laporan Saya</button><button class="outline" id="logoutBtn">Keluar</button></div>');
+  $('#logoutBtn')?.addEventListener('click',async()=>{try{await sb.auth.signOut()}catch(e){console.warn('[logout]',e)}session=null;sessionIsAdmin=false;renderAuth();closeModal();loadPortal()});
+  $('#myReportsBtn')?.addEventListener('click',()=>{const rows=portal?.tables?.my_citizen_reports||[];openModal('Laporan Saya',rows.length?rows.map(x=>'<div class="rankrow"><span>●</span><span><b>'+esc(x.title||'Tanpa judul')+'</b><br><small>'+esc(x.category||'')+' · '+esc(x.verification_status||'unverified')+'</small></span><strong>'+esc(x.reported_at||'')+'</strong></div>').join(''):'<p>Belum ada laporan dari akun ini.</p>')});
+  return;
+ }
+ const isSignup=mode==='signup';
+ const title=isSignup?'Buat Akun Baru / Sign Up':'Masuk / Sign In';
+ const html=isSignup
+ ? '<form class="authForm" id="authForm"><input name="first_name" required maxlength="80" placeholder="Nama Depan"><input name="last_name" maxlength="80" placeholder="Nama Belakang"><input name="identifier" type="email" required autocomplete="username" placeholder="Email (wajib untuk Daftar)"><input id="authPassword" type="password" name="password" required minlength="6" placeholder="Kata Sandi Baru"><select name="birth_day" required><option value="">Hari</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')+'</select><select name="birth_month" required><option value="">Bulan</option>'+Array.from({length:12},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')+'</select><select name="birth_year" required><option value="">Tahun</option>'+Array.from({length:100},(_,i)=>{const y=new Date().getFullYear()-i;return '<option value="'+y+'">'+y+'</option>'}).join('')+'</select><div class="gender"><label><input type="radio" name="gender" value="female" required> Perempuan</label><label><input type="radio" name="gender" value="male"> Laki-laki</label><label><input type="radio" name="gender" value="custom"> Khusus</label></div><button class="cta" type="submit">Daftar</button><button class="outline" type="button" id="switchAuth">Sudah punya akun? Login / Masuk</button><p class="authNote" id="authMsg">Gunakan email yang aktif.</p></form>'
+ : '<form class="authForm" id="authForm"><input name="identifier" type="email" required autocomplete="username" placeholder="Email"><input id="authPassword" type="password" name="password" required minlength="6" placeholder="Kata Sandi"><button class="cta" type="submit">Login / Masuk</button><button class="outline" type="button" id="forgotBtn">Lupa Kata Sandi?</button><button class="outline" type="button" id="switchAuth">Buat Akun Baru</button><p class="authNote" id="authMsg">Masuk menggunakan email dan kata sandi.</p></form>';
+ openModal(title,html);
+ $('#switchAuth')?.addEventListener('click',()=>authPanel(isSignup?'login':'signup'));
+ $('#forgotBtn')?.addEventListener('click',forgotPassword);
+ $('#authForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const form=e.target,f=Object.fromEntries(new FormData(form)),m=$('#authMsg'),btn=form.querySelector('button[type="submit"]');
+  if(btn){btn.disabled=true;btn.textContent=isSignup?'Mendaftarkan...':'Memeriksa...'}
+  m.textContent='Memproses...';
+  try{
+   if(isSignup){
+    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(f.identifier||'')){m.textContent='Masukkan email yang valid.';return}
+    const birth=f.birth_year+'-'+String(f.birth_month).padStart(2,'0')+'-'+String(f.birth_day).padStart(2,'0');
+    const r=await Promise.race([sb.auth.signUp({email:f.identifier.trim(),password:f.password,options:{emailRedirectTo:'https://indonesia-punya-masalah.vercel.app/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}}),new Promise(resolve=>setTimeout(()=>resolve({error:{message:'Layanan terlalu lama merespons.'}}),15000))]);
+    if(r.error){m.textContent='Pendaftaran gagal: '+r.error.message;return}
+    m.textContent=r.data?.session?'Akun berhasil dibuat.':'Akun dibuat. Cek Inbox/Spam untuk konfirmasi email, lalu Login.';
+   }else{
+    const r=await Promise.race([sb.auth.signInWithPassword({email:f.identifier.trim(),password:f.password}),new Promise(resolve=>setTimeout(()=>resolve({error:{message:'Layanan terlalu lama merespons.'}}),15000))]);
+    if(r.error){m.textContent='Login gagal: '+r.error.message;return}
+    session=r.data?.session||null;
+    try{const ar=await Promise.race([sb.rpc('ad_admin_dashboard'),new Promise(resolve=>setTimeout(()=>resolve({error:{message:'admin check timeout'}}),8000))]);sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch(e){sessionIsAdmin=false}
+    if(sessionIsAdmin){location.replace('/admin.html');return}
+    renderAuth();closeModal();loadPortal();
+   }
+  }catch(err){m.textContent='Layanan akun tidak merespons. Silakan coba lagi.';console.warn('[auth]',err)}
+  finally{if(btn){btn.disabled=false;btn.textContent=isSignup?'Daftar':'Login / Masuk'}}
+ });
 }
-const isSignup=mode==='signup';
-const title=isSignup?'Buat Akun Baru / Sign Up':'Masuk / Sign In';
-const html=isSignup?'<form class="authForm" id="authForm"><div class="authTwo"><input name="first_name" required maxlength="80" placeholder="Nama Depan"><input name="last_name" maxlength="80" placeholder="Nama Belakang"></div><input name="identifier" type="text" required autocomplete="username" placeholder="Email (wajib untuk Daftar)"><div class="passwordWrap"><input id="authPassword" type="password" name="password" required minlength="6" autocomplete="new-password" placeholder="Kata Sandi Baru" style="padding-right:48px"><button type="button" id="togglePassword" aria-label="Tampilkan password" title="Tampilkan password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:20px;line-height:1">👁️</button></div><div class="authThree"><select name="birth_day" required><option value="">Hari</option>'+Array.from({length:31},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+'</option>').join('')+'</select><select name="birth_month" required><option value="">Bulan</option>'+['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'].map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('')+'</select><select name="birth_year" required><option value="">Tahun</option>'+Array.from({length:100},(_,i)=>{const y=new Date().getFullYear()-i;return '<option value="'+y+'">'+y+'</option>'}).join('')+'</select></div><div class="gender"><span>Jenis Kelamin:</span><label><input type="radio" name="gender" value="female" required> Perempuan</label><label><input type="radio" name="gender" value="male"> Laki-laki</label><label><input type="radio" name="gender" value="custom"> Khusus (Custom)</label></div><p class="privacy">Dengan mengklik Daftar, Anda menyetujui Ketentuan, Kebijakan Privasi, dan Kebijakan Cookie kami.</p><button class="cta" type="submit">Daftar</button><button class="outline" type="button" id="switchAuth">Sudah punya akun? Login / Masuk</button><p class="authNote" id="authMsg">Gunakan email untuk pendaftaran agar konfirmasi akun dapat dikirim melalui email.</p></form>'
-:'<form class="authForm" id="authForm"><input name="identifier" type="text" required autocomplete="username" placeholder="Email"><div class="passwordWrap"><input id="authPassword" type="password" name="password" required minlength="6" autocomplete="current-password" placeholder="Kata Sandi" style="padding-right:48px"><button type="button" id="togglePassword" aria-label="Tampilkan password" title="Tampilkan password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:20px;line-height:1">👁️</button></div><button class="cta" type="submit">Login / Masuk</button><button class="outline" type="button" id="forgotBtn">Lupa Kata Sandi?</button><button class="outline" type="button" id="switchAuth">Buat Akun Baru</button><p class="authNote" id="authMsg">Masuk menggunakan email atau nomor telepon yang terdaftar.</p></form>';
-openModal(title,html);
-const pw=$('#authPassword'),tp=$('#togglePassword');
-tp?.addEventListener('click',()=>{const show=pw?.type==='password';if(pw)pw.type=show?'text':'password';if(tp){tp.textContent=show?'🙈':'👁️';tp.setAttribute('aria-label',show?'Sembunyikan password':'Tampilkan password')}});
-$('#switchAuth')?.addEventListener('click',()=>authPanel(isSignup?'login':'signup'));
-$('#forgotBtn')?.addEventListener('click',()=>forgotPassword());
-$('#authForm')?.addEventListener('submit',async e=>{
-e.preventDefault();const form=e.target, f=Object.fromEntries(new FormData(form)), m=$('#authMsg'), btn=form.querySelector('button[type="submit"]');
-if(btn){btn.disabled=true;btn.textContent=isSignup?'Mendaftarkan...':'Memeriksa...'}
-m.textContent='Memproses...';
-const withTimeout=(promise,ms=15000)=>Promise.race([promise,new Promise(resolve=>setTimeout(()=>resolve({error:{message:'Koneksi ke layanan akun terlalu lama. Periksa koneksi internet lalu coba lagi.'}}),ms))]);
-try{
-if(isSignup){
-if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.identifier||'')){m.textContent='Masukkan alamat email yang valid.';return}
-const birth=f.birth_year+'-'+String(f.birth_month).padStart(2,'0')+'-'+String(f.birth_day).padStart(2,'0');
-const r=await withTimeout(sb.auth.signUp({email:f.identifier.trim(),password:f.password,options:{emailRedirectTo:'https://indonesia-punya-masalah.vercel.app/',data:{first_name:f.first_name,last_name:f.last_name,birth_date:birth,gender:f.gender}}}));
-if(r.error){m.textContent='Pendaftaran gagal: '+r.error.message;return}
-m.textContent=r.data.session?'Akun berhasil dibuat dan langsung aktif.':'Akun berhasil dibuat. Cek Inbox/Spam email untuk konfirmasi, lalu kembali dan Login.';
-}else{
-if(!f.identifier.includes('@')){m.textContent='Untuk Login saat ini gunakan email.';return}
-const r=await withTimeout(sb.auth.signInWithPassword({email:f.identifier.trim(),password:f.password}));
-if(r.error){m.textContent='Login gagal: '+r.error.message;return}
-session=r.data.session;
-if(sessionIsAdmin===false){try{const ar=await withTimeout(sb.rpc('ad_admin_dashboard'),8000);sessionIsAdmin=!ar.error&&ar.data?.is_admin===true}catch{sessionIsAdmin=false}}
-if(sessionIsAdmin){location.replace('/admin.html');return}
-renderAuth();closeModal();
-}catch(err){m.textContent='Layanan akun tidak merespons. Coba lagi setelah beberapa saat.';console.warn('[auth-submit]',err)}
-finally{if(btn){btn.disabled=false;btn.textContent=isSignup?'Daftar':'Login / Masuk'}}
-});}
 async function forgotPassword(){
 openModal('Lupa Kata Sandi','<form class="authForm" id="resetForm"><input id="resetEmail" type="email" required placeholder="Email akun Anda"><button class="cta" type="submit">Kirim Tautan Reset</button><p class="authNote" id="resetMsg">Kami akan mengirim tautan untuk membuat kata sandi baru.</p></form>');
 $('#resetForm')?.addEventListener('submit',async e=>{e.preventDefault();const email=$('#resetEmail').value.trim(),m=$('#resetMsg');m.textContent='Mengirim...';const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://indonesia-punya-masalah.vercel.app/#reset-password'});m.textContent=r.error?('Gagal mengirim reset: '+r.error.message):'Tautan reset sudah dikirim. Periksa inbox/spam email Anda.'});
