@@ -1,5 +1,5 @@
 (()=>{'use strict';
-const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
 /* GLOBAL INTERACTION KERNEL */
 (function(){
  if(window.__IPM_INTERACTION_KERNEL__)return;
