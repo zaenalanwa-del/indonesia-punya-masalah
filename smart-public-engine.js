@@ -47,10 +47,10 @@ async function price(){
  try{
   const sb=window.supabase?.createClient(U,K,{auth:{persistSession:false,autoRefreshToken:false}});
   if(!sb)return;
-  const [tr,pt]=await Promise.all([
+  const [tr,pt]=await Promise.race([Promise.all([
    sb.from('ad_traffic_daily').select('unique_visitors,day').order('day',{ascending:false}).limit(30),
    sb.from('ad_price_tiers').select('label,tier_name,factor,min_unique_visitors_30d,max_unique_visitors_30d').eq('active',true).order('priority',{ascending:false})
-  ]);
+  ]),new Promise((_,rej)=>setTimeout(()=>rej(new Error('pricing timeout')),2500))]);
   const v=(tr.data||[]).reduce((n,x)=>Math.max(n,Number(x.unique_visitors||0)),0);
   const tiers=pt.data||[],t=tiers.find(x=>v>=Number(x.min_unique_visitors_30d||0)&&(x.max_unique_visitors_30d==null||v<=Number(x.max_unique_visitors_30d)))||tiers[tiers.length-1];
   el.textContent='Trafik 30 hari: '+v.toLocaleString('id-ID')+' unique · Tier '+(t?.label||t?.tier_name||'Normal')+' · Faktor '+Number(t?.factor||1).toFixed(2)+'×'
@@ -61,7 +61,7 @@ async function boot(){
  try{
   const sb=window.supabase?.createClient(U,K,{auth:{persistSession:false,autoRefreshToken:false}});
   if(sb){
-   const r=await sb.from('cms_settings').select('key,value').eq('key','smart_public_engine').limit(1);
+   const r=await Promise.race([sb.from('cms_settings').select('key,value').eq('key','smart_public_engine').limit(1),new Promise((_,rej)=>setTimeout(()=>rej(new Error('engine timeout')),2500))]);
    if(!r.error&&r.data?.[0]?.value){
     const x=r.data[0].value;
     c={...D,...x,layout:{...D.layout,...x.layout},ads:{...D.ads,...x.ads}};
