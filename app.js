@@ -1,5 +1,18 @@
 (()=>{'use strict';
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
+const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)],modal=$('#modal'),mb=$('#mb');
+/* GLOBAL INTERACTION KERNEL */
+(function(){
+ if(window.__IPM_INTERACTION_KERNEL__)return;
+ window.__IPM_INTERACTION_KERNEL__=true;
+ document.addEventListener('click',function(e){
+  const t=e.target?.closest?.('[data-act],#authBtn,.nav .group>button,.nav .group .sub a'); if(!t)return;
+  const api=window.NK_INTERACTIONS||{};
+  if(t.dataset?.act){const fn=api.actions?.[t.dataset.act];if(typeof fn==='function'){e.preventDefault();e.stopImmediatePropagation();try{fn()}catch(err){console.warn('[interaction]',err)}return;}}
+  if(t.id==='authBtn'&&typeof api.authPanel==='function'){e.preventDefault();e.stopImmediatePropagation();try{api.authPanel()}catch(err){console.warn('[auth]',err)}return;}
+  if(t.matches('.nav .group>button')){e.preventDefault();e.stopImmediatePropagation();const g=t.closest('.group');document.querySelectorAll('.nav .group').forEach(x=>{if(x!==g)x.classList.remove('open','sub-open')});g?.classList.toggle('open');g?.classList.toggle('sub-open');return;}
+  if(t.matches('.nav .group .sub a')){e.preventDefault();e.stopImmediatePropagation();const fn=api.handleSubmenu;if(typeof fn==='function'){try{fn(t.dataset.submenu||t.textContent.trim())}catch(err){console.warn('[submenu]',err)}}return;}
+ },true);
+})();
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Number(n||0).toLocaleString('id-ID');
 function applyPublicTheme(theme={}){
@@ -575,7 +588,7 @@ async function saAI(x){
 }
 const actions={map:()=>show('map'),data:()=>show('data'),report,monitor:()=>show('monitor'),insights:()=>show('insights'),forecast:()=>show('forecast'),solutions:()=>show('solutions'),about:()=>show('about'),advertise,advertiserDashboard,showAdPricing,redcard};
 window.NK_INTERACTIONS={authPanel,show,report,advertise,advertiserDashboard,showAdPricing,redcard,handleSubmenu,actions};
-$$('[data-act]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();actions[el.dataset.act]?.()}));
+/* data-act is handled by the global interaction kernel. */
 function navListHtml(rows){return '<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||'Wilayah')+'</b><br><small>'+esc(r.meta||'')+'</small></span></div>').join('')+'</div>'}
 function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
@@ -658,14 +671,7 @@ document.addEventListener('click',e=>{
  if(sub){e.preventDefault();handleSubmenu(sub.textContent.trim());return}
 });
 document.querySelectorAll('.nav .group').forEach(g=>g.classList.remove('open'));
-document.addEventListener('click',e=>{
- const act=e.target.closest('[data-act]');
- if(act && !e.defaultPrevented){const fn=actions[act.dataset.act];if(typeof fn==='function'){e.preventDefault();fn();return}}
- const auth=e.target.closest('#authBtn');
- if(auth && !e.defaultPrevented){e.preventDefault();authPanel();return}
- const sub=e.target.closest('[data-submenu]');
- if(sub && !e.defaultPrevented){e.preventDefault();handleSubmenu(sub.dataset.submenu||sub.textContent.trim());return}
-});
+/* global interaction kernel handles public actions, auth and submenus */
 $$('.cat').forEach(b=>b.addEventListener('click',()=>show('data')));
 $('#searchForm')?.addEventListener('submit',e=>{e.preventDefault();const q=$('#q').value.trim();if(q)search(q)});
 $$('.map-switch button').forEach(b=>b.addEventListener('click',()=>{$$('.map-switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');const box=$('.mapbox');if(box)box.style.filter=b.textContent.trim()==='Satelit'?'saturate(.65) brightness(.9)':'none'}));
