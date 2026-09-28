@@ -138,7 +138,17 @@ function refreshPublicProblems(){
 let portalLoading=false;let portalRefreshTimer=null;
 async function loadPortal(){if(portalLoading)return portal||null;portalLoading=true;try{await Promise.race([getSession(),new Promise(r=>setTimeout(r,1800))]);if(isKnownAdminRoute()){location.replace('/admin.html');return portal}renderAuth();syncAdminNav(false);const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),5000);let r;try{r=await fetch('/api/portal-data?tables=regions,problems,early_signals,forecasts,solutions,citizen_reports,data_sources&limit=50',{cache:'no-store',headers:authHeaders(),signal:ctl.signal})}finally{clearTimeout(timer)}if(!r.ok)throw Error('Portal data HTTP '+r.status);const data=await r.json();portal=data&&typeof data==='object'?data:{tables:{}};portal.live_incidents=[];refreshPublicProblems();initMainMap();setTimeout(()=>loadLiveIncidents(),50);return portal}catch(e){console.warn('[portal]',e);if(!portal)portal={tables:{regions:[],problems:[],early_signals:[],forecasts:[],solutions:[],citizen_reports:[],data_sources:[]},live_incidents:[]};refreshPublicProblems();initMainMap();return portal}finally{portalLoading=false}}
 function initMainMap(){const mainMap=document.querySelector('#problemMap');if(!mainMap)return;if(window.L){mainMap.__leafletRetries=0;const rows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));initLiveProblemMap(rows,mainMap)}else{mainMap.__leafletRetries=(mainMap.__leafletRetries||0)+1;if(mainMap.__leafletRetries<=4)setTimeout(initMainMap,1800);else{const msg=mainMap.querySelector('.mapLoading');if(msg)msg.innerHTML='<b>Peta interaktif belum tersedia.</b><br><small>Data portal tetap dapat dibuka melalui menu Peta. Silakan muat ulang halaman jika koneksi peta pulih.</small>'}}}
-async function loadLiveIncidents(){try{if(!portal)return;const timedJson=async(url,ms)=>{const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});return r.ok?await r.json():{}}catch{return {}}finally{clearTimeout(t)}};const [lj,bj]=await Promise.all([timedJson('/api/bmkg?mode=incidents',4500),timedJson('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC',4500)]);portal.live_incidents=[...(lj.incidents||[])];(bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{};const lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})});const mainMap=document.querySelector('#problemMap');if(mainMap&&window.L){const mapRows=[...(portal?.tables?.problems||[]),...(portal?.tables?.citizen_reports||[]),...(portal?.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));initLiveProblemMap(mapRows,mainMap);const officialCards=(portal.live_incidents||[]).slice(0,12).map((x,i)=>({id:'official-'+i,title:x.title||'Kejadian resmi',description:x.description||'',category:x.incident_type||'Bencana Alam',status:'Sinyal Resmi',region_name:x.location_text||'Lokasi kejadian',reported_at:x.observed_at||new Date().toISOString(),latitude:x.latitude,longitude:x.longitude,source:x.source_name||'Sumber resmi',source_type:x.source_type||'official',is_official:true}));const existing=(portal.tables?.citizen_reports||[]).filter(x=>x.verification_status==='verified');const cards=existing.length?existing:officialCards;if(cards.length)renderPublicIssueCards(cards)}catch(e){console.warn('[live]',e)}}
+async function loadLiveIncidents(){
+ try{
+  if(!portal)return;
+  const getJson=async(url,ms=4500)=>{const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),ms);try{const res=await fetch(url,{cache:'no-store',signal:ctl.signal});return res.ok?await res.json():{}}catch{return {}}finally{clearTimeout(timer)}};
+  const [lj,bj]=await Promise.all([getJson('/api/bmkg?mode=incidents'),getJson('https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&f=json&resultRecordCount=100&orderByFields=objectid%20DESC')]);
+  portal.live_incidents=[...(lj.incidents||[])];
+  (bj.features||[]).forEach(f=>{const a=f.attributes||{},g=f.geometry||{},lat=Number(g.y),lng=Number(g.x);if(!Number.isFinite(lat)||!Number.isFinite(lng))return;const title=a.kejadian||a.jenis_bencana||a.jenis||a.nama_bencana||'Kejadian bencana';portal.live_incidents.push({source_name:'BNPB',source_type:'official_disaster',source_url:'https://gis.bnpb.go.id/server/rest/services/Kejadian_Bencana_Mingguan/FeatureServer/0',title:String(title),description:String(a.kronologi||a.deskripsi||a.keterangan||a.lokasi||''),incident_type:String(title),status:'official_signal',observed_at:new Date().toISOString(),latitude:lat,longitude:lng,location_text:String(a.lokasi||''),severity:'unknown',confidence_score:.95,location_precision:'exact'})});
+  const mainMap=document.querySelector('#problemMap');
+  if(mainMap&&window.L){const mapRows=[...(portal.tables?.problems||[]),...(portal.tables?.citizen_reports||[]),...(portal.live_incidents||[])].filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));initLiveProblemMap(mapRows,mainMap);const officialCards=(portal.live_incidents||[]).slice(0,12).map((x,i)=>({id:'official-'+i,title:x.title||'Kejadian resmi',description:x.description||'',category:x.incident_type||'Bencana Alam',status:'Sinyal Resmi',region_name:x.location_text||'Lokasi kejadian',reported_at:x.observed_at||new Date().toISOString(),latitude:x.latitude,longitude:x.longitude,source:x.source_name||'Sumber resmi',source_type:x.source_type||'official',is_official:true}));const existing=(portal.tables?.citizen_reports||[]).filter(x=>x.verification_status==='verified');const cards=existing.length?existing:officialCards;if(cards.length)renderPublicIssueCards(cards)}
+ }catch(e){console.warn('[live]',e)}
+}
 function photoProxy(url){return '/api/image?src='+encodeURIComponent(url)}
 const photoRoad=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Ubud-Jalan_Raya-Pothole-2009.jpeg');
 const photoFlood=photoProxy('https://commons.wikimedia.org/wiki/Special:Redirect/file/Flood_affected_village_(a).jpg');
@@ -377,46 +387,26 @@ function advertiserFormHtml(d){
 }
 async function advertise(){
  await getSession();
- if(!session){openModal('Pasang Iklan','<p>Login / daftar dahulu agar kampanye memiliki pemilik dan dapat ditagihkan.</p><button class="cta" id="adLoginBtn">Masuk / Daftar →</button>');$('#adLoginBtn')?.addEventListener('click',()=>authPanel());return}
+ if(!session){openModal('Pasang Iklan','<p>Login / daftar dahulu agar kampanye memiliki pemilik.</p><button class="cta" id="adLoginBtn">Masuk / Daftar →</button>');$('#adLoginBtn')?.addEventListener('click',()=>authPanel());return}
  try{
-   const d=await adFetch('advertiser_dashboard');
-   openModal('Pasang Iklan',advertiserFormHtml(d));
-   syncAdminNav(!!d.is_admin);
-   const form=$('#advertiserForm');const placement=form?.querySelector('[name="placement"]');const days=form?.querySelector('[name="duration_days"]');const quote=$('#adQuote');
-   async function refreshQuote(){
-     try{
-       const q=await adFetch('quote',{params:{placement:placement.value,days:days.value||30}});
-       if(quote)quote.innerHTML='<small>Harga untuk kampanye ini</small><strong>'+money(q.price)+'</strong><small id="adQuoteMeta">'+esc(q.tier_label)+' · '+fmt(q.traffic_unique_30d||0)+' pengunjung unik 30 hari · harga dikunci saat order</small>';
-     }catch(e){if(quote)quote.innerHTML='<small>'+esc(e.message)+'</small>'}
-   }
-   placement?.addEventListener('change',refreshQuote);days?.addEventListener('input',refreshQuote);refreshQuote();
-   form?.addEventListener('submit',async e=>{
-     e.preventDefault();const btn=form.querySelector('button[type="submit"]');btn.disabled=true;btn.textContent='Menyimpan…';
-     try{
-       const fd=new FormData(form);const p=Object.fromEntries(fd.entries());
-       const profile=await adFetch('save_advertiser',{method:'POST',body:{business_name:p.business_name,contact_name:p.contact_name,phone:p.phone,email:p.email,website:p.website}});
-       let mediaUrl=String(p.media_url||'').trim();
-       const file=form.querySelector('[name="media_file"]')?.files?.[0];
-       if(file){
-         if(file.size>10*1024*1024)throw Error('File iklan melebihi 10 MB');
-         const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/ads/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
-         const up=await sb.storage.from('advertiser-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});
-         if(up.error)throw up.error;
-         mediaUrl=sb.storage.from('advertiser-media').getPublicUrl(path).data.publicUrl||mediaUrl;
-       }
-       if(!mediaUrl)throw Error('Isi URL gambar iklan atau pilih file upload');
-       const start=p.start_at?new Date(p.start_at+'T00:00:00').toISOString():null;
-       const created=await adFetch('create_campaign',{method:'POST',body:{
-         advertiser_id:profile.advertiser_id,campaign_name:p.campaign_name,title:p.title,description:p.description,
-         placement:p.placement,duration_days:Number(p.duration_days||30),start_at:start,media_url:mediaUrl,
-         destination_url:p.destination_url,cta_text:p.cta_text||'Lihat Selengkapnya',billing_model:'monthly'
-       }});
-       openModal('Kampanye Terkirim','<p>Kampanye <b>'+esc(p.campaign_name)+'</b> sudah masuk antrean review.</p><div class="adQuote"><small>Quote terkunci</small><strong>'+money(created.quote?.price||0)+'</strong><small>'+esc(created.quote?.tier_label||'')+' · '+fmt(created.quote?.traffic_unique_30d||0)+' pengunjung unik 30 hari</small></div><p class="adHint">Kenaikan tier trafik akan memengaruhi pesanan baru, bukan mengubah quote kampanye ini.</p><button class="cta" id="afterAdDash">Buka Dashboard Pengiklan →</button>');
-       $('#afterAdDash')?.addEventListener('click',advertiserDashboard);
-     }catch(err){openModal('Kampanye Gagal','<p>'+esc(err.message||'Kampanye belum tersimpan')+'</p><button class="outline" id="retryAd">Kembali ke Form</button>');$('#retryAd')?.addEventListener('click',advertise)}
-     finally{btn.disabled=false;btn.textContent='Kirim Kampanye untuk Review →'}
-   });
- }catch(e){openModal('Pasang Iklan','<p>'+esc(e.message)+'</p>')}
+  const d=await adFetch('advertiser_dashboard');openModal('Pasang Iklan',advertiserFormHtml(d));
+  const form=document.getElementById('advertiserForm');if(!form)return;
+  const placement=form.querySelector('[name="placement"]'),days=form.querySelector('[name="duration_days"]'),quote=document.getElementById('adQuote');
+  const refreshQuote=async()=>{try{const q=await adFetch('quote',{params:{placement:placement?.value,days:days?.value||30}});if(quote)quote.innerHTML='<small>Harga kampanye</small><strong>'+money(q.price)+'</strong><small>'+esc(q.tier_label||'')+' · '+fmt(q.traffic_unique_30d||0)+' pengunjung unik 30 hari</small>'}catch(e){if(quote)quote.innerHTML='<small>Quote belum tersedia.</small>'}};
+  placement?.addEventListener('change',refreshQuote);days?.addEventListener('input',refreshQuote);refreshQuote();
+  form.addEventListener('submit',async e=>{
+   e.preventDefault();const btn=form.querySelector('button[type="submit"]');if(btn){btn.disabled=true;btn.textContent='Menyimpan…'}
+   try{
+    const p=Object.fromEntries(new FormData(form));const profile=await adFetch('save_advertiser',{method:'POST',body:{business_name:p.business_name,contact_name:p.contact_name,phone:p.phone,email:p.email,website:p.website}});
+    let mediaUrl=String(p.media_url||'').trim();const file=form.querySelector('[name="media_file"]')?.files?.[0];
+    if(file){if(file.size>10*1024*1024)throw Error('File iklan melebihi 10 MB');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=session.user.id+'/ads/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;const up=await sb.storage.from('advertiser-media').upload(path,file,{cacheControl:'3600',contentType:file.type,upsert:false});if(up.error)throw up.error;mediaUrl=sb.storage.from('advertiser-media').getPublicUrl(path).data.publicUrl||mediaUrl}
+    if(!mediaUrl)throw Error('Isi URL gambar iklan atau pilih file upload');
+    const created=await adFetch('create_campaign',{method:'POST',body:{advertiser_id:profile.advertiser_id,campaign_name:p.campaign_name,title:p.title,description:p.description,placement:p.placement,duration_days:Number(p.duration_days||30),start_at:p.start_at?new Date(p.start_at+'T00:00:00').toISOString():null,media_url:mediaUrl,destination_url:p.destination_url,cta_text:p.cta_text||'Lihat Selengkapnya',billing_model:'monthly'}});
+    openModal('Kampanye Terkirim','<p>Kampanye <b>'+esc(p.campaign_name)+'</b> sudah masuk antrean review.</p><button class="cta" id="afterAdDash">Buka Dashboard Pengiklan →</button>');$('#afterAdDash')?.addEventListener('click',advertiserDashboard);
+   }catch(err){openModal('Kampanye Gagal','<p>'+esc(err.message||'Kampanye belum tersimpan')+'</p><button class="outline" id="retryAd">Kembali ke Form</button>');$('#retryAd')?.addEventListener('click',advertise)}
+   finally{if(btn){btn.disabled=false;btn.textContent='Kirim Kampanye untuk Review →'}}
+  });
+ }catch(e){openModal('Pasang Iklan','<p>'+esc(e.message||'Fitur iklan belum tersedia')+'</p>')}
 }
 async function redcard(){
  await getSession();
