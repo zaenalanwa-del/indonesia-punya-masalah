@@ -8,12 +8,16 @@ export default async function handler(req, res) {
     const allowedHosts = new Set(['commons.wikimedia.org', 'upload.wikimedia.org']);
     if (!allowedHosts.has(target.hostname)) return res.status(403).send('Image source not allowed');
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
     const upstream = await fetch(target.toString(), {
       headers: {
         'User-Agent': 'NuansaKita/1.0 (+https://indonesia-punya-masalah.vercel.app/)'
       },
-      redirect: 'follow'
+      redirect: 'follow',
+      signal: controller.signal
     });
+    clearTimeout(timeout);
 
     if (!upstream.ok) return res.status(upstream.status).send('Image fetch failed');
 
@@ -26,6 +30,6 @@ export default async function handler(req, res) {
     res.setHeader('X-Content-Source', target.hostname);
     return res.status(200).send(body);
   } catch (e) {
-    return res.status(500).send('Image proxy error');
+    return res.status(e?.name === 'AbortError' ? 504 : 500).send(e?.name === 'AbortError' ? 'Image source timeout' : 'Image proxy error');
   }
 }
