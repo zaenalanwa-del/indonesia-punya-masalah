@@ -578,7 +578,8 @@ function submenuAdSlot(){
 }
 function openSubmenuModal(title,html){openModal(title,String(html||'')+submenuAdSlot());}
 async function handleSubmenu(t){
- const tables=portal?.tables||{}, problems=tables.problems||[], reports=tables.citizen_reports||[], signals=tables.early_signals||[], forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
+ const tables=portal?.tables||{}, live=portal?.live_incidents||[], problems=tables.problems||[], reports=(tables.citizen_reports||[]).filter(x=>x.verification_status==='verified'&&x.consent_publication===true&&String(x.public_visibility||'public')==='public'), signals=tables.early_signals?.length?tables.early_signals:live, forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
+ const officialRows=live.map((x,i)=>({id:'official-'+i,title:x.title||'Kejadian resmi',description:x.description||'',category:x.incident_type||'Bencana Alam',status:'Sinyal Resmi',region_name:x.location_text||'Lokasi kejadian',reported_at:x.observed_at||'',source:x.source_name||'Sumber resmi',is_official:true,latitude:x.latitude,longitude:x.longitude}));
  const regionMenus=['Ringkasan Indonesia','Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan','Dusun','Pulau & Kawasan','Wilayah Prioritas'];
  if(regionMenus.includes(t)){
    const counts={province:38,regency:514,district:7282,village:83529};
