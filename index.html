@@ -465,7 +465,18 @@ button,a,[role="button"],input,select,textarea,.issue,.cat,.map-switch button{po
 .sourceAdSlot small{color:#64798d!important}
 .sourceAdSlot a{white-space:nowrap!important}
 @media(max-width:900px){.sourceSupportGrid{grid-template-columns:1fr!important}.sourceAdSlot{display:block!important}.sourceAdSlot a{display:inline-block!important;margin-top:10px!important}}
-</style><style id="public-media-and-ad-layout-final">
+<style id="footer-support-center-v1">
+/* Footer support: rata tengah dan diturunkan sekitar 3x dari posisi sebelumnya. */
+footer .footerSupport{display:flex!important;justify-content:center!important;width:100%!important;box-sizing:border-box!important}
+footer .sourceSupport{width:min(920px,100%)!important;margin:54px auto 24px!important;text-align:center!important}
+footer .sourceSupport h3{margin:0 0 10px!important}
+footer .sourceSupport p{max-width:760px!important;margin:0 auto 16px!important;line-height:1.55!important}
+footer .sourceSupportGrid{justify-content:center!important}
+footer .sourceSupportItem{text-align:center!important}
+@media(max-width:640px){
+  footer .sourceSupport{margin-top:42px!important}
+}
+</style></style><style id="public-media-and-ad-layout-final">
 /* Final public media mapping: setiap menu memakai foto representasi yang berbeda. */
 /* Final iklan/footer layout: section di luar <main> tetap berada di kanan sidebar, tidak tertutup. */
 .sourceHub,.adSection,footer{margin-left:270px!important;width:calc(100% - 270px)!important;box-sizing:border-box!important;max-width:none!important}
