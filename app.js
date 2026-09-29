@@ -571,8 +571,12 @@ window.NK_INTERACTIONS={authPanel,show,report,advertise,advertiserDashboard,show
 function navListHtml(rows){return '<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||'Wilayah')+'</b><br><small>'+esc(r.meta||'')+'</small></span></div>').join('')+'</div>'}
 function navList(title, rows, emptyText){
  const body=rows.length?'<div class="navResultList">'+rows.map(r=>'<div class="rankrow"><span>●</span><span><b>'+esc(r.title||r.name||'Item')+'</b><br><small>'+esc(r.meta||r.category||r.level||'')+'</small></span></div>').join('')+'</div>':'<div class="navEmpty"><b>'+esc(emptyText||'Belum ada data publik.')+'</b><p>Data akan muncul otomatis setelah tersedia dan lolos aturan publikasi/verifikasi.</p></div>';
- openModal(title,body);
+ openSubmenuModal(title,body);
 }
+function submenuAdSlot(){
+ return '<div class="submenuAdSlot" data-ad-placement="submenu"><div><strong>RUANG IKLAN</strong><span>Slot iklan tersedia di halaman ini</span></div><a href="/advertiser.html">Pasang Iklan →</a></div>';
+}
+function openSubmenuModal(title,html){openModal(title,String(html||'')+submenuAdSlot());}
 async function handleSubmenu(t){
  const tables=portal?.tables||{}, problems=tables.problems||[], reports=tables.citizen_reports||[], signals=tables.early_signals||[], forecasts=tables.forecasts||[], solutions=tables.solutions||[], sources=tables.data_sources||[];
  const regionMenus=['Ringkasan Indonesia','Provinsi','Kabupaten/Kota','Kecamatan','Desa/Kelurahan','Dusun','Pulau & Kawasan','Wilayah Prioritas'];
@@ -581,7 +585,7 @@ async function handleSubmenu(t){
    const levelMap={'Provinsi':'province','Kabupaten/Kota':'regency','Kecamatan':'district','Desa/Kelurahan':'village','Dusun':'hamlet'};
    const labels={'province':'Provinsi','regency':'Kabupaten/Kota','district':'Kecamatan','village':'Desa/Kelurahan','hamlet':'Dusun'};
    if(t==='Ringkasan Indonesia'){
-     openModal('Ringkasan Indonesia','<div class="adCard"><p><b>Data wilayah Indonesia</b></p><div class="navResultList">'+[['province','38'],['regency','514'],['district','7.282'],['village','83.529']].map(x=>'<div class="rankrow"><span>●</span><span><b>'+x[1]+' '+labels[x[0]]+'</b><br><small>Data aktif pada database wilayah publik</small></span></div>').join('')+'</div><p class="muted">Pilih submenu wilayah untuk membuka daftar data sebenarnya dari database.</p></div>');
+     openSubmenuModal('Ringkasan Indonesia','<div class="adCard"><p><b>Data wilayah Indonesia</b></p><div class="navResultList">'+[['province','38'],['regency','514'],['district','7.282'],['village','83.529']].map(x=>'<div class="rankrow"><span>●</span><span><b>'+x[1]+' '+labels[x[0]]+'</b><br><small>Data aktif pada database wilayah publik</small></span></div>').join('')+'</div><p class="muted">Pilih submenu wilayah untuk membuka daftar data sebenarnya dari database.</p></div>');
      return;
    }
    if(t==='Wilayah Prioritas'){
@@ -590,8 +594,8 @@ async function handleSubmenu(t){
    let level=levelMap[t];
    if(t==='Pulau & Kawasan') level='province';
    const sbx=initSupabase();
-   if(!sbx){ openModal(t,'<div class="navEmpty"><b>Koneksi data belum siap.</b><p>Silakan coba kembali beberapa detik lagi.</p></div>'); return; }
-   openModal(t,'<div class="navEmpty"><b>Memuat data '+esc(t)+'…</b><p>Mengambil data langsung dari database wilayah publik.</p></div>');
+   if(!sbx){ openSubmenuModal(t,'<div class="navEmpty"><b>Koneksi data belum siap.</b><p>Silakan coba kembali beberapa detik lagi.</p></div>'); return; }
+   openSubmenuModal(t,'<div class="navEmpty"><b>Memuat data '+esc(t)+'…</b><p>Mengambil data langsung dari database wilayah publik.</p></div>');
    try{
      const q=await sbx.from('regions').select('code,parent_code,name,level,official_name,is_active').eq('is_active',true).eq('level',level).order('name',{ascending:true}).limit(200);
      if(q.error) throw q.error;
@@ -601,10 +605,10 @@ async function handleSubmenu(t){
      const body=rows.length
        ? '<div class="adCard"><p><b>'+Number(total).toLocaleString('id-ID')+' data tersedia</b> · menampilkan '+rows.length+' data pertama.</p></div>'+navListHtml(rows)
        : '<div class="navEmpty"><b>Belum ada data '+esc(t)+' yang aktif.</b><p>Database belum memiliki data publik aktif untuk menu ini.</p></div>';
-     openModal(title,body);
+     openSubmenuModal(title,body);
    }catch(e){
      console.warn('[region-menu]',e);
-     openModal(t,'<div class="navEmpty"><b>Data gagal dimuat.</b><p>Silakan coba lagi. Koneksi database tidak mengubah data yang tersimpan.</p></div>');
+     openSubmenuModal(t,'<div class="navEmpty"><b>Data gagal dimuat.</b><p>Silakan coba lagi. Koneksi database tidak mengubah data yang tersimpan.</p></div>');
    }
    return;
  }
@@ -622,9 +626,9 @@ async function handleSubmenu(t){
  if(['Perkiraan','Perbandingan','Skenario','Indikator Risiko','Sinyal Awal'].includes(t)) return navList(t,forecasts.slice(0,10).map(x=>({title:x.title||x.name,meta:x.horizon||x.confidence||'Forecast'})),'Belum ada forecast yang dipublikasikan.');
  if(['Solusi Warga','Solusi Pemerintah','Praktik Baik','Evaluasi Hasil','Solusi Terbaru','Praktik Terbukti'].includes(t)) return navList(t,solutions.slice(0,10).map(x=>({title:x.title||x.name,meta:x.type||x.status||'Solusi'})),'Belum ada solusi yang dipublikasikan.');
  if(t==='Pusat Fitur'){document.querySelector('#fitur')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Sumber & Media'){document.querySelector('#sumber-media')?.scrollIntoView({behavior:'smooth',block:'start'});return} if(t==='Pasang Iklan') return advertise(); if(t==='Paket & Harga') return showAdPricing(); if(t==='Dashboard Pengiklan'||t==='Lokasi Iklan'||t==='Media Kit Iklan') return advertiserDashboard(); if(t==='REDCARD Administrasi') return redcard(); if(t==='Tentang Indonesia Punya Masalah') return show('about');
- if(t==='Bantuan'||t==='Panduan Pengguna') return openModal(t,'<p>Gunakan menu panah untuk membuka submenu. Klik item submenu untuk membuka data atau fitur terkait.</p>');
- if(t==='Kontak') return openModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
- if(t==='Kebijakan & Privasi'||t==='Pusat Keamanan') return openModal(t,'<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
+ if(t==='Bantuan'||t==='Panduan Pengguna') return openSubmenuModal(t,'<p>Gunakan menu panah untuk membuka submenu. Klik item submenu untuk membuka data atau fitur terkait.</p>');
+ if(t==='Kontak') return openSubmenuModal('Kontak','<p>Gunakan kanal kontak yang tersedia di footer untuk kebutuhan informasi dan pengelolaan portal.</p>');
+ if(t==='Kebijakan & Privasi'||t==='Pusat Keamanan') return openSubmenuModal(t,'<p>Data publik ditampilkan sesuai status publikasi dan aturan akses. Data pribadi akun tidak ditampilkan sebagai data publik.</p>');
 }
 
 document.addEventListener('click',e=>{
