@@ -16,7 +16,7 @@ function applyPublicTheme(theme={}){
   }catch(e){console.warn('[theme]',e)}
 }
 window.addEventListener('message',e=>{if(e.data?.type==='NUANSA_THEME_PREVIEW')applyPublicTheme(e.data.theme||{})});
-function themeForToday(base,schedule){const now=new Date();const iso=now.toISOString().slice(0,10);const month=String(now.getMonth()+1);let active={...(base||{})};const monthly=schedule?.monthly||{};if(monthly[month])active={...active,...monthly[month]};for(const x of (schedule?.dates||[])){if(x?.start&&x?.end&&iso>=x.start&&iso<=x.end&&x.theme)active={...active,...x.theme}}return active}
+function themeForToday(base,schedule){const now=new Date();const iso=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');const month=String(now.getMonth()+1);let active={...(base||{})};const monthly=schedule?.monthly||{};if(monthly[month])active={...active,...monthly[month]};for(const x of (schedule?.dates||[])){if(x?.start&&x?.end&&iso>=x.start&&iso<=x.end&&x.theme)active={...active,...x.theme}}return active}
 async function loadSavedPublicTheme(){
   try{const [a,b]=await Promise.race([Promise.all([sb.from('cms_settings').select('value').eq('key','public_theme').maybeSingle(),sb.from('cms_settings').select('value').eq('key','public_theme_schedule').maybeSingle()]),new Promise((_,rej)=>setTimeout(()=>rej(new Error('theme timeout')),2500))]);const base=a.data?.value||{};const schedule=b.data?.value||{};applyPublicTheme(themeForToday(base,schedule))}catch(e){applyPublicTheme({})}
 }
